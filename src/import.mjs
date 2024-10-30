@@ -1,5 +1,5 @@
 import { REQUESTS_PER_SECOND } from "../config/config.js";
-import parseCSV from "./csv/parse.mjs";
+import parseCSV, { parseCSVFile } from "./csv/parse.mjs";
 import chalk from "chalk";
 
 import selectTeam from "./teams/select.mjs";
@@ -38,7 +38,10 @@ const logger = setupLogger(teamName);
 logger.enable();
 
 // PROMPTS
-const { releaseStories, pivotalStories, labels, csvFilename } = await parseCSV();
+const { releaseStories, pivotalStories, labels, csvFilename } = 
+  process.argv[2] 
+    ? await parseCSVFile(process.argv[2],process.argv[2])
+    : await parseCSV();
 const { importFiles } = await importFileAttachments();
 const { importLabels } = await importLabelsFromCSV();
 const { userConfirmedProceed } = await proceedWithImport({ releaseStories, pivotalStories });

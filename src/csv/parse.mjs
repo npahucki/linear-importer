@@ -85,14 +85,18 @@ async function parseCSV() {
   const csvFilename = `${selectedDirectory.replace('-export', '')}.csv`;
   const filePath = path.join(assetsDir, selectedDirectory, csvFilename);
   
+  return parseCSVFile(csvFilename, filePath)
+}
+
+export async function parseCSVFile(csvFilename, filePath) {
   if (!await fs.access(filePath).then(() => true).catch(() => false)) {
     console.log(`CSV file not found: ${csvFilename}`);
-    return;
+    process.exit(1);
   }
 
   const data = await readCSV(filePath);
   return { csvFilename, ...data };
-}
+} 
 
 
 export default parseCSV;
