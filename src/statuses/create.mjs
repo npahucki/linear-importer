@@ -24,7 +24,7 @@ const STATUSES_TO_CREATE = [
 
 async function createStatusForTeam({ teamId }) {  
   try {
-    console.log(chalk.cyan(`✅ Creating Workflow Statuses for team ${teamId}`));
+    console.log(chalk.yellow(`✅ Creating Workflow Statuses for team ${teamId}`));
 
     for (const status of STATUSES_TO_CREATE) {
       const response = await linearClient.createWorkflowState({

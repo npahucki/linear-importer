@@ -17,12 +17,12 @@ const LABELS_TO_CREATE = [
 ];
 
 async function init({ teamId }) {
-  console.log(chalk.yellow('Initializing workspace...'));
+  console.log(chalk.magenta('Setting up...'));
   
   await createLabels({ teamId, labels: LABELS_TO_CREATE });
   await createStatusesForTeam({ teamId });
 
-  console.log(chalk.yellow('Initialization complete.'));
+  console.log(chalk.magenta('Setup complete!'));
 }
 
 export default init;

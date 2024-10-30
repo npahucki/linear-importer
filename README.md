@@ -6,7 +6,9 @@ CLI tool to convert PivotalTracker Stories into Linear Issues using the PivotalT
 - Comments
 - Labels
 - Priority
-- Create Pivotal Releases as parent Issues (See below)
+- Due Date
+- Created Date
+- Convert Pivotal Releases into Linear parent issues, with all associated stories in that release cycle as sub-issues
 - Generates log files
 
 ## Setup
@@ -19,7 +21,9 @@ CLI tool to convert PivotalTracker Stories into Linear Issues using the PivotalT
 1. `cd src`
 2. `node import.mjs`
 
-![alt text](image-1.png)
+![alt text](image-3.png)
+
+<!-- ![alt text](image-1.png) -->
 
 ### Config Options
 - `REQUESTS_PER_SECOND` = 5
@@ -59,7 +63,6 @@ Linear does not allow for Cycles to be created with dates in the past. Instead, 
   - Every PivotalTracker story with type `release` will be created with the label `pivotal - release`
   - Any PivotalTracker story that belong to this release iteration will be added as a sub-issue
 
-
 ## Other Notes
 #### API Rate Limits
 - Linear sets rate limits on their API usage, which you will probably reach. The Linear team was helpful in increasing my rate limits temporarily. https://developers.linear.app/docs/graphql/working-with-the-graphql-api/rate-limiting.
@@ -70,6 +73,6 @@ Linear does not allow for Cycles to be created with dates in the past. Instead, 
 
 
 ## TODO
+- Pivotal Requester -> Linear Owner
 - Pivotal Owner(s) -> Linear Requested By
 - Pivotal Estimate -> Linear Estimate
-- Project History (?)

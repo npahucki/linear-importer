@@ -42,11 +42,11 @@ const { releaseStories, pivotalStories, labels, csvFilename } = await parseCSV()
 const { importFiles } = await importFileAttachments();
 const { importLabels } = await importLabelsFromCSV();
 const { userConfirmedProceed } = await proceedWithImport({ releaseStories, pivotalStories });
-await createEstimates({ teamId });
+// await createEstimates({ teamId }); // TODO: Add prompt to allow choosing issue estimation type
 
 if (userConfirmedProceed) {
   // Delete existing labels
-  await deleteLabels({ teamId })
+  // await deleteLabels({ teamId })
 
   // Creates Team Labels and Workflow Statuses
   await init({ teamId })
