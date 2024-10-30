@@ -22,9 +22,7 @@ CLI tool to convert PivotalTracker Stories into Linear Issues using the PivotalT
 2. `node import.mjs`
 
 ![alt text](image-3.png)
-
-<!-- ![alt text](image-1.png) -->
-
+  
 ### Config Options
 - `REQUESTS_PER_SECOND` = 5
   - (varies based on API endpoint)
