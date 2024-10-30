@@ -13,7 +13,7 @@ CLI tool to convert PivotalTracker Stories into Linear Issues using the PivotalT
 
 ## Setup
 ### Installation
-1. Create `.env` file and add your Linear API key
+1. Create `.env` file and add your Linear API key as `API_KEY`.
 2. `yarn install`
 3. Unzip PivotalTracker export CSV and move entire folder into `src/csv/assets`
 
