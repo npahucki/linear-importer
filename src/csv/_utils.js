@@ -14,6 +14,7 @@ export function buildParams(row) {
     iteration: row['Iteration'],
     state: row['Current State'],
     priority: row['Priority'],
+    labels: row['Labels'],
     comments: [...(comments || []), additionalPivotalData]
   }
 

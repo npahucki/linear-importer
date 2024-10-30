@@ -17,7 +17,7 @@ import importFileAttachments from "./prompts/import_file_attachments.js";
 import importLabelsFromCSV from "./prompts/import_labels_from_csv.js";
 import proceedWithImport from "./prompts/proceed_with_import.js";
 
-import createEstimates from "./estimates/create.mjs";
+// import createEstimates from "./estimates/create.mjs";
 
 import { setupLogger } from '../logger/init.mjs';
 import { RELEASE_LABEL_NAME } from "./init.mjs"
@@ -65,7 +65,13 @@ if (userConfirmedProceed) {
       
       for (const [index, pivotalStory] of releaseStories.entries()) {
         const stateId = teamStatuses.find(state => state.name === `pivotal - ${pivotalStory.state}`)?.id;
-        const labelId = teamLabels.find(label => label.name === `pivotal - ${pivotalStory.type}`)?.id;
+        const pivotalStoryTypeLabelId = teamLabels.find(label => label.name === `pivotal - ${pivotalStory.type}`)?.id;
+        const otherLabelIds = pivotalStory.labels ? pivotalStory.labels.split(',')
+            .map(label => label.trim())
+            .map(label => teamLabels.find(teamLabel => teamLabel.name === label)?.id)
+            .filter(id => id)
+        : [];
+      const labelIds = [pivotalStoryTypeLabelId, ...otherLabelIds].filter(Boolean);
         
         const importNumber = index + 1;
         await new Promise(resolve => setTimeout(resolve, DELAY));
@@ -73,7 +79,7 @@ if (userConfirmedProceed) {
           teamId,
           pivotalStory,
           stateId,
-          labelIds: [labelId],
+          labelIds,
           importNumber,
           csvFilename,
           importFiles
@@ -101,7 +107,13 @@ if (userConfirmedProceed) {
       for (const [index, pivotalStory] of pivotalStories.entries()) {
         const parentIssue = releaseIssues?.find(releaseIssue => releaseIssue.title.includes(`[${pivotalStory.iteration}]`));
         const stateId = teamStatuses.find(state => state.name === `pivotal - ${pivotalStory.state}`)?.id;
-        const labelId = teamLabels.find(label => label.name === `pivotal - ${pivotalStory.type}`)?.id;
+        const pivotalStoryTypeLabelId = teamLabels.find(label => label.name === `pivotal - ${pivotalStory.type}`)?.id;
+        const otherLabelIds = pivotalStory.labels ? pivotalStory.labels.split(',')
+            .map(label => label.trim())
+            .map(label => teamLabels.find(teamLabel => teamLabel.name === label)?.id)
+            .filter(id => id)
+        : [];
+      const labelIds = [pivotalStoryTypeLabelId, ...otherLabelIds].filter(Boolean);
 
         const importNumber = index + 1;
         await new Promise(resolve => setTimeout(resolve, DELAY));
@@ -109,7 +121,7 @@ if (userConfirmedProceed) {
           teamId,
           pivotalStory,
           stateId,
-          labelIds: [labelId],
+          labelIds,
           parentId: parentIssue?.id,
           importNumber,
           csvFilename,
