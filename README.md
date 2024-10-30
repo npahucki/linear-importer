@@ -17,11 +17,15 @@ CLI tool to convert PivotalTracker Stories into Linear Issues using the PivotalT
 2. `yarn install`
 3. Unzip PivotalTracker export CSV and move entire folder into `src/csv/assets`
 
-### Usage
+### Usage by Including CSV in project
 1. `cd src`
 2. `node import.mjs`
 
 ![alt text](image-3.png)
+
+### Usage by passing CSV full path
+
+1. `yarn tracker2linear <full path to csv file>`
   
 ### Config Options
 - `REQUESTS_PER_SECOND` = 5
