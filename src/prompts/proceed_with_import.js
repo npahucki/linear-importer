@@ -3,12 +3,20 @@ import inquirer from 'inquirer';
 import { ENABLE_IMPORTING } from "../../config/config.js";
 
 
-async function proceedWithImport({ pivotalStories, releaseStories }) {
+async function proceedWithImport({ pivotalStories, releaseStories, selectedStatusTypes }) {
+  const filteredReleaseStories = releaseStories.filter(story => 
+    selectedStatusTypes.includes(story.type)
+  );
+  const filteredPivotalStories = pivotalStories.filter(story => 
+    selectedStatusTypes.includes(story.type)
+  );
+
   const confirmProceedPrompt = chalk.blue.bold(`
     📊 Import Summary:`) + chalk.white(`
-       Total Stories: ${chalk.yellow.bold(pivotalStories.length + releaseStories.length)}
-       Releases: ${chalk.green(releaseStories.length)}
-       All Others: ${chalk.cyan(pivotalStories.length)}
+       Total Stories: ${chalk.yellow.bold(filteredPivotalStories.length + filteredReleaseStories.length)}
+       Releases: ${chalk.green(filteredReleaseStories.length)}
+       All Others: ${chalk.cyan(filteredPivotalStories.length)}
+       Selected Types: ${chalk.magenta(selectedStatusTypes.join(', '))}
     
     ${chalk.magenta.bold('Proceed with importing?')}`);
   

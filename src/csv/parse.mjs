@@ -1,5 +1,4 @@
 import { fileURLToPath } from 'url';
-
 import { createReadStream } from 'fs';
 import { parse } from 'csv-parse';
 import fs from 'fs/promises';
@@ -20,45 +19,51 @@ async function listDirectories(directory) {
 function readCSV(filePath) {
   return new Promise((resolve, reject) => {
     const pivotalStories = [];
-    const releaseStories = []; // New array for release stories
-    const labels = new Set(); // Add Set to collect unique labels
+    const releaseStories = [];
+    const labels = new Set();
+    const statusTypes = new Set();
     
     createReadStream(filePath)
-    .pipe(parse({ columns: true, group_columns_by_name: true, trim: true, relax_column_count: true }))
-    .on('data', (row) => {
-      const params = buildParams(row);
+      .pipe(parse({ columns: true, group_columns_by_name: true, trim: true, relax_column_count: true }))
+      .on('data', (row) => {
+        const params = buildParams(row);
 
-      // Add labels to Set if they exist
-      if (row['Labels']) {
-        // Split labels on comma and trim whitespace
-        row['Labels'].split(',')
-          .map(label => label.trim())
-          .filter(label => label) // Remove empty strings
-          .forEach(label => labels.add(label));
-      }
-
-      // Separate release stories so that we can attach sub-issues to them, since we cannot make Cycles in the past.
-      if (row['Type'] == 'release') {
-        const releaseRowFormatted = {
-          ...params,
-          name: row['Iteration'] ? `[${row['Iteration']}] ${row['Title']}` : row['Title'],
-          dueDate: row['Iteration End'],
+        // Add status type to Set if it exists
+        if (row['Type']) {
+          statusTypes.add(row['Type']);
         }
 
-        releaseStories.push(releaseRowFormatted);
-      } else {
-        const rowFormatted = {
-          ...params,
-          dueDate: row['Accepted at'] || row['Iteration End'],
+        // Collect labels
+        if (row['Labels']) {
+          row['Labels'].split(',')
+            .map(label => label.trim())
+            .filter(label => label)
+            .forEach(label => labels.add(label));
         }
 
-        pivotalStories.push(rowFormatted);
-      }
-    }).on('end', () => resolve({
-      releaseStories,
-      pivotalStories,
-      labels: buildLabelsArray(labels)
-    })).on('error', reject);
+        // Sort stories into release and regular stories
+        if (row['Type'] === 'release') {
+          const releaseRowFormatted = {
+            ...params,
+            name: row['Iteration'] ? `[${row['Iteration']}] ${row['Title']}` : row['Title'],
+            dueDate: row['Iteration End'],
+          }
+          releaseStories.push(releaseRowFormatted);
+        } else {
+          const rowFormatted = {
+            ...params,
+            dueDate: row['Accepted at'] || row['Iteration End'],
+          }
+          pivotalStories.push(rowFormatted);
+        }
+      })
+      .on('end', () => resolve({
+        releaseStories,
+        pivotalStories,
+        labels: buildLabelsArray(labels),
+        statusTypes: Array.from(statusTypes)
+      }))
+      .on('error', reject);
   });
 }
 
@@ -85,7 +90,7 @@ async function parseCSV() {
   const csvFilename = `${selectedDirectory.replace('-export', '')}.csv`;
   const filePath = path.join(assetsDir, selectedDirectory, csvFilename);
   
-  return parseCSVFile(csvFilename, filePath)
+  return parseCSVFile(csvFilename, filePath);
 }
 
 export async function parseCSVFile(csvFilename, filePath) {
@@ -97,6 +102,5 @@ export async function parseCSVFile(csvFilename, filePath) {
   const data = await readCSV(filePath);
   return { csvFilename, ...data };
 } 
-
 
 export default parseCSV;

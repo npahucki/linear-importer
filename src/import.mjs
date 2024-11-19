@@ -15,6 +15,7 @@ import createIssue from "./issues/create.mjs";
 
 import importFileAttachments from "./prompts/import_file_attachments.js";
 import importLabelsFromCSV from "./prompts/import_labels_from_csv.js";
+import selectStatusTypes from "./prompts/select_status_types.js";
 import proceedWithImport from "./prompts/proceed_with_import.js";
 
 // import createEstimates from "./estimates/create.mjs";
@@ -38,13 +39,14 @@ const logger = setupLogger(teamName);
 logger.enable();
 
 // PROMPTS
-const { releaseStories, pivotalStories, labels, csvFilename } = 
+const { releaseStories, pivotalStories, labels, statusTypes, csvFilename } = 
   process.argv[2] 
-    ? await parseCSVFile(process.argv[2],process.argv[2])
+    ? await parseCSVFile(process.argv[2], process.argv[2])
     : await parseCSV();
 const { importFiles } = await importFileAttachments();
 const { importLabels } = await importLabelsFromCSV();
-const { userConfirmedProceed } = await proceedWithImport({ releaseStories, pivotalStories });
+const { selectedStatusTypes } = await selectStatusTypes(statusTypes);
+const { userConfirmedProceed } = await proceedWithImport({ releaseStories, pivotalStories, selectedStatusTypes });
 // await createEstimates({ teamId }); // TODO: Add prompt to allow choosing issue estimation type
 
 if (userConfirmedProceed) {
