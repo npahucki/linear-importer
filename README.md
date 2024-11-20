@@ -63,11 +63,11 @@ Linear does not allow for Cycles to be created with dates in the past. Instead, 
 - The `REQUESTS_PER_SECOND` ENV var can be adjusted to throttle request frequency
 
 #### Logger
-- Each import attempt will create a logfile in the `log` directory
-- Each logfile contains a record of successfully imported Pivotal story IDs and their corresponding Linear issue IDs
-- During subsequent imports, the tool checks these logs to prevent duplicate imports of the same Pivotal story
-- This makes the import process idempotent - you can safely run the import multiple times without creating duplicate issues
-- If an import fails partway through, you can resume by running the import again, and only the remaining stories will be processed
+- Import logs are stored in team-specific folders (`log/<team-name>`)
+- Each log tracks which Pivotal stories have been imported
+- The tool checks these logs to avoid creating duplicate issues
+- If an import fails partway through, you can safely restart it
+- Different teams can run imports independently
 
 ## TODO
 - Pivotal Requester -> Linear Owner
