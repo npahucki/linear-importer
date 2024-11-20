@@ -11,7 +11,7 @@ CLI tool to convert Pivotal Tracker Stories into Linear Issues using the Pivotal
 - Import desired story types
 - Convert Pivotal Releases into Linear parent issues, with all associated stories in that release cycle as sub-issues
 - Generates log files
-- Idempotent importing - safely handles multiple imports by preventing Pivotal stories from being imported twice
+- Idempotent importing - safely handles multiple import attempts by skipping duplicates
 
 ## Setup
 ### Installation
@@ -22,8 +22,6 @@ CLI tool to convert Pivotal Tracker Stories into Linear Issues using the Pivotal
 ### Usage
 1. `cd src`
 2. `node import.mjs`
-
-![alt text](image-4.png)
 
 ## Details
 ### Workflow Statuses
