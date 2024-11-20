@@ -23,6 +23,8 @@ CLI tool to convert Pivotal Tracker Stories into Linear Issues using the Pivotal
 1. `cd src`
 2. `node import.mjs`
 
+![alt text](image.png)
+
 ## Details
 ### Workflow Statuses
 - The following Workflow Statuses will be created in the selected Team. This allows each Team to modify statuses at their own pace without affecting other Teams, and will avoid any naming conflicts with existing statuses.
