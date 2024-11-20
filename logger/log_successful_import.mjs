@@ -3,8 +3,8 @@ import Logger from './logger.mjs';
 
 const logSuccessfulImport = async (pivotalStoryId, teamName) => {
   try {
-    const logger = new Logger('temp.txt', teamName); // The filename doesn't matter here
-    const filePath = logger.getTeamLogPath(teamName, 'successful_imports.csv');
+    // Use getTeamLogPath as a static method instead
+    const filePath = Logger.getTeamLogPath(teamName, 'successful_imports.csv');
     
     // Check if file exists, if not create it with headers
     try {

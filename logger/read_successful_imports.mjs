@@ -3,8 +3,7 @@ import Logger from './logger.mjs';
 
 const readSuccessfulImports = async (teamName) => {
   try {
-    const logger = new Logger('temp.txt', teamName); // The filename doesn't matter here
-    const filePath = logger.getTeamLogPath(teamName, 'successful_imports.csv');
+    const filePath = Logger.getTeamLogPath(teamName, 'successful_imports.csv');
     
     try {
       await fs.access(filePath);

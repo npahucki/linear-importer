@@ -3,10 +3,14 @@ import path from 'path';
 import util from 'util';
 
 class Logger {
-  getTeamLogPath(teamName, filename) {
-    return path.join(this.baseLogDir, teamName, filename);
+  static getTeamLogPath(teamName, filename) {
+    const baseLogDir = '../log';
+    return path.join(baseLogDir, teamName, filename);
   }
+
   constructor(logFilePath, teamName) {
+    if (!logFilePath) return; // Early return if no logFilePath provided
+    
     this.teamName = teamName;
     this.baseLogDir = '../log';
     this.teamLogDir = path.join(this.baseLogDir, teamName);
