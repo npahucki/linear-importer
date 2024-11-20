@@ -156,7 +156,7 @@ async function init({ teamId, teamName, pivotalUsers }) {
       console.log(chalk.yellow('🔄 Continuing with existing User mapping...'));
     }
   } catch (error) {
-    console.log(chalk.yellow('No existing user mapping file found. Starting with empty mapping...'));
+    console.log('🔄 No existing user mapping file found. Starting with empty mapping...');
     isNewMapping = true;  // Set flag for new mapping
   }
 
@@ -185,8 +185,8 @@ async function init({ teamId, teamName, pivotalUsers }) {
 
   // Prompt for manual matching if there are unmatched users
   if (unmatchedUsers.length > 0) {
-    console.log(chalk.yellow('\nThe following Pivotal users could not be automatically matched:'));
-    console.log(chalk.green(unmatchedUsers.join(', ')));
+    console.log(chalk.yellow('\n⚠️ The following Pivotal users could not be automatically matched:'));
+    console.log(chalk.green(unmatchedUsers.join('\n')));
     
     const { shouldManuallyMatch } = await inquirer.prompt([
       {
