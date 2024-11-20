@@ -42,8 +42,16 @@ const logger = setupLogger(teamName);
 logger.enable();
 
 // PROMPTS
-const { releaseStories, pivotalStories, statusTypes, labels, csvFilename, requestedBy, ownedBy, pivotalUsers } =
-  await parseCSV();
+const {
+  releaseStories,
+  pivotalStories,
+  statusTypes,
+  labels,
+  csvFilename,
+  requestedBy,
+  ownedBy,
+  pivotalUsers,
+} = await parseCSV();
 const { importFiles } = await importFileAttachments();
 const { importLabels } = await importLabelsFromCSV();
 const { selectedStatusTypes } = await selectStatusTypes(statusTypes);
@@ -130,7 +138,7 @@ if (userConfirmedProceed) {
             labelIds,
             importNumber,
             csvFilename,
-            importFiles
+            importFiles,
           });
           await logSuccessfulImport(pivotalStory.id, teamName);
         } catch (error) {
@@ -207,7 +215,7 @@ if (userConfirmedProceed) {
             parentId: parentIssue?.id,
             importNumber,
             csvFilename,
-            importFiles
+            importFiles,
           });
           await logSuccessfulImport(pivotalStory.id, teamName);
         } catch (error) {
