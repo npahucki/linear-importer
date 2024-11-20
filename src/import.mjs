@@ -124,14 +124,13 @@ if (userConfirmedProceed) {
         try {
           await createIssue({
             teamId,
+            teamName,
             pivotalStory,
             stateId,
             labelIds,
             importNumber,
             csvFilename,
-            importFiles,
-            assigneeId: NICK,
-            creatorId: SAV
+            importFiles
           });
           await logSuccessfulImport(pivotalStory.id, teamName);
         } catch (error) {
@@ -201,14 +200,14 @@ if (userConfirmedProceed) {
         try {
           await createIssue({
             teamId,
+            teamName,
             pivotalStory,
             stateId,
             labelIds,
             parentId: parentIssue?.id,
             importNumber,
             csvFilename,
-            importFiles,
-            assigneeId: NICK
+            importFiles
           });
           await logSuccessfulImport(pivotalStory.id, teamName);
         } catch (error) {

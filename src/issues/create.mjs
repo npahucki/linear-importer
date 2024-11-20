@@ -2,14 +2,38 @@ import linearClient from "../../config/client.mjs";
 import chalk from "chalk";
 import createComment from "../comments/create.mjs";
 
+import { promises as fs } from 'fs';
+
 import findAttachmentsInFolder from "../files/find_attachments_in_folder.mjs";
 import upload from '../files/upload.mjs';
 
 import { ENABLE_DETAILED_LOGGING } from "../../config/config.js";
 import { exitProcess } from "../../config/config.js";
 
+import path from 'path';
+
+async function getUserMapping(teamName) {
+  try {
+    // Move up one directory from 'src' to the project root
+    const projectRoot = path.join(process.cwd(), '..');
+    const mappingPath = path.join(projectRoot, 'log', teamName, 'user-mapping.json');
+    
+    if (ENABLE_DETAILED_LOGGING) {
+      console.log('Looking for mapping file at:', mappingPath);
+    }
+    
+    const mappingFile = await fs.readFile(mappingPath, 'utf8');
+    const mappingData = JSON.parse(mappingFile);
+    return mappingData.mapping;
+  } catch (error) {
+    console.warn(chalk.yellow(`Warning: Could not load user mapping file: ${error.message}`));
+    return {};
+  }
+}
+
 async function createIssue({
   teamId,
+  teamName,
   pivotalStory,
   importNumber,
   parentId,
@@ -17,12 +41,44 @@ async function createIssue({
   csvFilename, 
   importFiles,
   labelIds,
-  assigneeId,
-  creatorId,
 }) {
   try {
-    // const assigneeId = mapUser(pivotalStory['Owned By'], userMapping);
-    // const creatorId = mapUser(pivotalStory['Requested By'], userMapping);
+    const userMapping = await getUserMapping(teamName);
+    
+    // Get assigneeId from mapping if it exists
+    let assigneeId;
+    if (pivotalStory.ownedBy) {
+      // Ensure ownedBy is a string and split by comma
+      const ownedByString = String(pivotalStory.ownedBy);
+      const owners = ownedByString.split(',').map(owner => owner.trim());
+      
+      // Find first owner that has a mapping
+      for (const owner of owners) {
+        const mappedUser = userMapping[owner];
+        if (mappedUser?.linearId) {
+          assigneeId = mappedUser.linearId;
+          if (ENABLE_DETAILED_LOGGING) {
+            console.log(chalk.blue(`Mapped Pivotal user "${owner}" to Linear ID: ${assigneeId}`));
+          }
+          break; // Exit loop once we find a valid mapping
+        }
+      }
+      
+      if (!assigneeId && ENABLE_DETAILED_LOGGING) {
+        console.log(chalk.yellow(`No Linear user mapping found for any Pivotal users: ${owners.join(', ')}`));
+      }
+    }
+    
+    // If no owner was found, try to use the requestedBy user as the assignee
+    if (!assigneeId && pivotalStory.requestedBy) {
+      const mappedRequester = userMapping[pivotalStory.requestedBy];
+      if (mappedRequester?.linearId) {
+        assigneeId = mappedRequester.linearId;
+        if (ENABLE_DETAILED_LOGGING) {
+          console.log(chalk.blue(`No owner found. Mapped requester "${pivotalStory.requestedBy}" to Linear ID: ${assigneeId}`));
+        }
+      }
+    }
 
     const newIssue = await linearClient.createIssue({
       teamId,
@@ -35,7 +91,6 @@ async function createIssue({
       createdAt: pivotalStory.createdAt ? new Date(pivotalStory.createdAt).toISOString() : undefined,
       priority: formatPriority(pivotalStory.priority),
       assigneeId
-      // creatorId
       // estimate: [0, 1, 2, 4, 8, 16][Math.floor(Math.random() * 6)]
     });
 
