@@ -1,8 +1,10 @@
 import fs from 'fs/promises';
+import Logger from './logger.mjs';
 
 const readSuccessfulImports = async (teamName) => {
   try {
-    const filePath = `../log/${teamName}_successful_imports.csv`;
+    const logger = new Logger('temp.txt', teamName); // The filename doesn't matter here
+    const filePath = logger.getTeamLogPath(teamName, 'successful_imports.csv');
     
     try {
       await fs.access(filePath);
@@ -14,7 +16,6 @@ const readSuccessfulImports = async (teamName) => {
     const content = await fs.readFile(filePath, 'utf-8');
     const lines = content.split('\n').slice(1); // Skip header row
     
-    // Create Set of successfully imported IDs
     return new Set(
       lines
         .filter(line => line.trim()) // Remove empty lines
