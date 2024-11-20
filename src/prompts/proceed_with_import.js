@@ -2,24 +2,45 @@ import chalk from 'chalk';
 import inquirer from 'inquirer';
 import { ENABLE_IMPORTING } from "../../config/config.js";
 
+async function proceedWithImport({ pivotalStories, releaseStories, selectedStatusTypes }) {
+  const filteredReleaseStories = releaseStories.filter(story => 
+    selectedStatusTypes.includes(story.type)
+  );
+  const filteredPivotalStories = pivotalStories.filter(story => 
+    selectedStatusTypes.includes(story.type)
+  );
 
-async function proceedWithImport({ pivotalStories, releaseStories }) {
+  const typeBreakdown = selectedStatusTypes.map(type => {
+    const pivotalCount = pivotalStories.filter(story => story.type === type).length;
+    const releaseCount = releaseStories.filter(story => story.type === type).length;
+    const totalCount = pivotalCount + releaseCount;
+    const color = {
+      chore: 'gray',
+      bug: 'red',
+      feature: 'yellow',
+      epic: 'magenta', 
+      release: 'green'
+    }[type] || 'white'; // fallback to white if type not found
+    
+    return `\n       ${type}: ${chalk[color].bold(totalCount)}`;
+  }).join('');
+
   const confirmProceedPrompt = chalk.blue.bold(`
     📊 Import Summary:`) + chalk.white(`
-       Total Stories: ${chalk.yellow.bold(pivotalStories.length + releaseStories.length)}
-       Releases: ${chalk.green(releaseStories.length)}
-       All Others: ${chalk.cyan(pivotalStories.length)}
-    
+      ${typeBreakdown}
+
+      Total Stories: ${chalk.green.bold(filteredPivotalStories.length + filteredReleaseStories.length)}
+
     ${chalk.magenta.bold('Proceed with importing?')}`);
   
-    if (!ENABLE_IMPORTING) {
-      console.log(chalk.red.bold('\n╔═══════════════════════════════════════════════════════════════════════════╗'));
-      console.log(chalk.red.bold('║                              IMPORTING DISABLED                           ║'));
-      console.log(chalk.red.bold('╠═══════════════════════════════════════════════════════════════════════════╣'));
-      console.log(chalk.red.bold('║  Set ENABLE_IMPORTING to true in the .env file to proceed with importing. ║'));
-      console.log(chalk.red.bold('╚═══════════════════════════════════════════════════════════════════════════╝\n'));
-      process.exit(1);
-    }
+  if (!ENABLE_IMPORTING) {
+    console.log(chalk.red.bold('\n╔═══════════════════════════════════════════════════════════════════════════╗'));
+    console.log(chalk.red.bold('║                              IMPORTING DISABLED                           ║'));
+    console.log(chalk.red.bold('╠═══════════════════════════════════════════════════════════════════════════╣'));
+    console.log(chalk.red.bold('║  Set ENABLE_IMPORTING to true in the .env file to proceed with importing. ║'));
+    console.log(chalk.red.bold('╚═══════════════════════════════════════════════════════════════════════════╝\n'));
+    process.exit(1);
+  }
 
   const { userConfirmedProceed } = await inquirer.prompt([
     {
@@ -32,7 +53,6 @@ async function proceedWithImport({ pivotalStories, releaseStories }) {
     },
   ]);
   
-
   return { userConfirmedProceed };
 }
 

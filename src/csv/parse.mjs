@@ -20,13 +20,19 @@ async function listDirectories(directory) {
 function readCSV(filePath) {
   return new Promise((resolve, reject) => {
     const pivotalStories = [];
-    const releaseStories = []; // New array for release stories
-    const labels = new Set(); // Add Set to collect unique labels
+    const releaseStories = [];
+    const labels = new Set();
+    const statusTypes = new Set();
     
     createReadStream(filePath)
     .pipe(parse({ columns: true, group_columns_by_name: true, trim: true, relax_column_count: true }))
     .on('data', (row) => {
       const params = buildParams(row);
+
+      // Add status type to Set if it exists
+      if (row['Type']) {
+        statusTypes.add(row['Type']);
+      }
 
       // Add labels to Set if they exist
       if (row['Labels']) {
@@ -57,7 +63,8 @@ function readCSV(filePath) {
     }).on('end', () => resolve({
       releaseStories,
       pivotalStories,
-      labels: buildLabelsArray(labels)
+      labels: buildLabelsArray(labels),
+      statusTypes: Array.from(statusTypes)
     })).on('error', reject);
   });
 }
@@ -85,7 +92,7 @@ async function parseCSV() {
   const csvFilename = `${selectedDirectory.replace('-export', '')}.csv`;
   const filePath = path.join(assetsDir, selectedDirectory, csvFilename);
   
-  return parseCSVFile(csvFilename, filePath)
+  return parseCSVFile(csvFilename, filePath);
 }
 
 export async function parseCSVFile(csvFilename, filePath) {
@@ -97,6 +104,5 @@ export async function parseCSVFile(csvFilename, filePath) {
   const data = await readCSV(filePath);
   return { csvFilename, ...data };
 } 
-
 
 export default parseCSV;
