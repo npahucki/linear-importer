@@ -70,6 +70,7 @@ Linear does not allow for Cycles to be created with dates in the past. Instead, 
 - Different teams can run imports independently
 
 ## TODO
+- Pivotal Creator -> Linear Creator
 - Pivotal Requester -> Linear Owner
 - Pivotal Owner(s) -> Linear Requested By
 - Pivotal Estimate -> Linear Estimate

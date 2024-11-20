@@ -17,9 +17,13 @@ async function createIssue({
   csvFilename, 
   importFiles,
   labelIds,
-  assigneeId
+  assigneeId,
+  creatorId,
 }) {
   try {
+    // const assigneeId = mapUser(pivotalStory['Owned By'], userMapping);
+    // const creatorId = mapUser(pivotalStory['Requested By'], userMapping);
+
     const newIssue = await linearClient.createIssue({
       teamId,
       labelIds,
@@ -31,6 +35,7 @@ async function createIssue({
       createdAt: pivotalStory.createdAt ? new Date(pivotalStory.createdAt).toISOString() : undefined,
       priority: formatPriority(pivotalStory.priority),
       assigneeId
+      // creatorId
       // estimate: [0, 1, 2, 4, 8, 16][Math.floor(Math.random() * 6)]
     });
 

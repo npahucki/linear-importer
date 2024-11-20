@@ -23,7 +23,9 @@ function readCSV(filePath) {
     const releaseStories = [];
     const labels = new Set();
     const statusTypes = new Set();
-    
+    const requestedBy = new Set();
+    const ownedBy = new Set();
+
     createReadStream(filePath)
     .pipe(parse({ columns: true, group_columns_by_name: true, trim: true, relax_column_count: true }))
     .on('data', (row) => {
@@ -32,6 +34,17 @@ function readCSV(filePath) {
       // Add status type to Set if it exists
       if (row['Type']) {
         statusTypes.add(row['Type']);
+      }
+
+      if (row['Requested By']) {
+        requestedBy.add(row['Requested By']);
+      }
+
+      if (row['Owned By']) {
+        // If Owned By is already an array, add each owner to the Set
+        (Array.isArray(row['Owned By']) ? row['Owned By'] : [row['Owned By']])
+          .filter(owner => owner) // Remove empty values
+          .forEach(owner => ownedBy.add(owner));
       }
 
       // Add labels to Set if they exist
@@ -64,7 +77,9 @@ function readCSV(filePath) {
       releaseStories,
       pivotalStories,
       labels: buildLabelsArray(labels),
-      statusTypes: Array.from(statusTypes)
+      statusTypes: Array.from(statusTypes),
+      requestedBy: Array.from(requestedBy),
+      ownedBy: Array.from(ownedBy)
     })).on('error', reject);
   });
 }

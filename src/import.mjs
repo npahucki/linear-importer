@@ -131,7 +131,8 @@ if (userConfirmedProceed) {
             importNumber,
             csvFilename,
             importFiles,
-            assigneeId: SAV
+            assigneeId: NICK,
+            creatorId: SAV
           });
           await logSuccessfulImport(pivotalStory.id, teamName);
         } catch (error) {
