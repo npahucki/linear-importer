@@ -2,7 +2,7 @@ import chalk from 'chalk';
 import inquirer from 'inquirer';
 import { ENABLE_IMPORTING } from "../../config/config.js";
 
-async function proceedWithImport({ pivotalStories, releaseStories, selectedStatusTypes }) {
+async function proceedWithImport({ pivotalStories, releaseStories, selectedStatusTypes, successfulImportsLength }) {
   const filteredReleaseStories = releaseStories.filter(story => 
     selectedStatusTypes.includes(story.type)
   );
@@ -15,21 +15,22 @@ async function proceedWithImport({ pivotalStories, releaseStories, selectedStatu
     const releaseCount = releaseStories.filter(story => story.type === type).length;
     const totalCount = pivotalCount + releaseCount;
     const color = {
-      chore: 'gray',
+      chore: 'white',
       bug: 'red',
       feature: 'yellow',
       epic: 'magenta', 
       release: 'green'
-    }[type] || 'white'; // fallback to white if type not found
+    }[type] || 'white';
     
     return `\n       ${type}: ${chalk[color].bold(totalCount)}`;
   }).join('');
 
   const confirmProceedPrompt = chalk.blue.bold(`
     📊 Import Summary:`) + chalk.white(`
+       Already imported: ${chalk.green.bold(successfulImportsLength)}
       ${typeBreakdown}
 
-      Total Stories: ${chalk.green.bold(filteredPivotalStories.length + filteredReleaseStories.length)}
+      Total Remaining Stories: ${chalk.green.bold(filteredPivotalStories.length + filteredReleaseStories.length)}
 
     ${chalk.magenta.bold('Proceed with importing?')}`);
   
