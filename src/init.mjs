@@ -138,7 +138,7 @@ async function init({ teamId, teamName, pivotalUsers }) {
     const mappingFile = await fs.readFile(mappingPath, 'utf8');
     const mappingData = JSON.parse(mappingFile);
     existingMapping = mappingData.mapping || {};
-    console.log(chalk.blue('Found existing user mapping file'));
+    // console.log(chalk.blue('Found existing user mapping file'));
     
     // Prompt user about remapping
     const { confirmRemap } = await inquirer.prompt([
@@ -156,6 +156,7 @@ async function init({ teamId, teamName, pivotalUsers }) {
     }
   } catch (error) {
     // File doesn't exist or is invalid, continue with empty mapping
+    console.log(chalk.yellow('No existing user mapping file found. Starting with empty mapping...'));
   }
 
   // Create user mapping
@@ -233,8 +234,9 @@ async function init({ teamId, teamName, pivotalUsers }) {
     }, null, 2)
   );
 
-  console.log(chalk.green(`\nUser mapping saved to ${mappingPath}`));
-  console.log(chalk.magenta('Setup complete!'));
+  console.log(chalk.green(`User mapping saved to ${mappingPath}`));
+  console.log(chalk.blue('Setup complete!'));
+  console.log(chalk.magenta('=== Starting Pivotal to Linear Import Process ==='));
 
   await createLabels({ teamId, labels: LABELS_TO_CREATE });
   await createStatusesForTeam({ teamId });
