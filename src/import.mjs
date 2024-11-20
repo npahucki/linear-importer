@@ -39,10 +39,7 @@ const logger = setupLogger(teamName);
 logger.enable();
 
 // PROMPTS
-const { releaseStories, pivotalStories, labels, statusTypes, csvFilename } = 
-  process.argv[2] 
-    ? await parseCSVFile(process.argv[2], process.argv[2])
-    : await parseCSV();
+const { releaseStories, pivotalStories, statusTypes,labels, csvFilename } = await parseCSV();
 const { importFiles } = await importFileAttachments();
 const { importLabels } = await importLabelsFromCSV();
 const { selectedStatusTypes } = await selectStatusTypes(statusTypes);
@@ -94,22 +91,33 @@ if (userConfirmedProceed) {
   };
 
   // Process Release Stories first
-  if (CREATE_ISSUES) await processReleaseStories();
+  if (CREATE_ISSUES) {
+    if (selectedStatusTypes.includes('release')) {
+      await processReleaseStories()
+    }
+  }
 
   // Add delay to ensure synchronicity
   await new Promise(resolve => setTimeout(resolve, DELAY * 2));
   
   // Process Pivotal Stories
   const processPivotalStories = async () => {
-    if (pivotalStories?.length === 0) {
+    console.log(pivotalStories[0]);
+
+    // Filter pivotal stories based on selectedStatusTypes
+    const filteredPivotalStories = pivotalStories.filter(story => {
+      return selectedStatusTypes.includes(story.type.toLowerCase())
+    });
+
+    if (filteredPivotalStories?.length === 0) {
       console.log("No Pivotal Stories found in the CSV file.");
-    } else { 
-      console.log(chalk.cyan(`Converting ${pivotalStories.length} Pivotal Stories into Linear Issues for Team ${teamId}`));
+    } else {
+      console.log(chalk.cyan(`Converting ${filteredPivotalStories.length} Pivotal Stories into Linear Issues for Team ${teamId}`));
 
       // Fetch all release issues
       const releaseIssues = await fetchIssuesForTeam({ teamId, filters: { labels: { some: { name: { eq: RELEASE_LABEL_NAME } } } } });
 
-      for (const [index, pivotalStory] of pivotalStories.entries()) {
+      for (const [index, pivotalStory] of filteredPivotalStories.entries()) {
         const parentIssue = releaseIssues?.find(releaseIssue => releaseIssue.title.includes(`[${pivotalStory.iteration}]`));
         const stateId = teamStatuses.find(state => state.name === `pivotal - ${pivotalStory.state}`)?.id;
         const pivotalStoryTypeLabelId = teamLabels.find(label => label.name === `pivotal - ${pivotalStory.type}`)?.id;
@@ -118,7 +126,7 @@ if (userConfirmedProceed) {
             .map(label => teamLabels.find(teamLabel => teamLabel.name === label)?.id)
             .filter(id => id)
         : [];
-      const labelIds = [pivotalStoryTypeLabelId, ...otherLabelIds].filter(Boolean);
+        const labelIds = [pivotalStoryTypeLabelId, ...otherLabelIds].filter(Boolean);
 
         const importNumber = index + 1;
         await new Promise(resolve => setTimeout(resolve, DELAY));

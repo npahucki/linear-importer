@@ -1,4 +1,5 @@
 import { fileURLToPath } from 'url';
+
 import { createReadStream } from 'fs';
 import { parse } from 'csv-parse';
 import fs from 'fs/promises';
@@ -24,46 +25,47 @@ function readCSV(filePath) {
     const statusTypes = new Set();
     
     createReadStream(filePath)
-      .pipe(parse({ columns: true, group_columns_by_name: true, trim: true, relax_column_count: true }))
-      .on('data', (row) => {
-        const params = buildParams(row);
+    .pipe(parse({ columns: true, group_columns_by_name: true, trim: true, relax_column_count: true }))
+    .on('data', (row) => {
+      const params = buildParams(row);
 
-        // Add status type to Set if it exists
-        if (row['Type']) {
-          statusTypes.add(row['Type']);
+      // Add status type to Set if it exists
+      if (row['Type']) {
+        statusTypes.add(row['Type']);
+      }
+
+      // Add labels to Set if they exist
+      if (row['Labels']) {
+        // Split labels on comma and trim whitespace
+        row['Labels'].split(',')
+          .map(label => label.trim())
+          .filter(label => label) // Remove empty strings
+          .forEach(label => labels.add(label));
+      }
+
+      // Separate release stories so that we can attach sub-issues to them, since we cannot make Cycles in the past.
+      if (row['Type'] == 'release') {
+        const releaseRowFormatted = {
+          ...params,
+          name: row['Iteration'] ? `[${row['Iteration']}] ${row['Title']}` : row['Title'],
+          dueDate: row['Iteration End'],
         }
 
-        // Collect labels
-        if (row['Labels']) {
-          row['Labels'].split(',')
-            .map(label => label.trim())
-            .filter(label => label)
-            .forEach(label => labels.add(label));
+        releaseStories.push(releaseRowFormatted);
+      } else {
+        const rowFormatted = {
+          ...params,
+          dueDate: row['Accepted at'] || row['Iteration End'],
         }
 
-        // Sort stories into release and regular stories
-        if (row['Type'] === 'release') {
-          const releaseRowFormatted = {
-            ...params,
-            name: row['Iteration'] ? `[${row['Iteration']}] ${row['Title']}` : row['Title'],
-            dueDate: row['Iteration End'],
-          }
-          releaseStories.push(releaseRowFormatted);
-        } else {
-          const rowFormatted = {
-            ...params,
-            dueDate: row['Accepted at'] || row['Iteration End'],
-          }
-          pivotalStories.push(rowFormatted);
-        }
-      })
-      .on('end', () => resolve({
-        releaseStories,
-        pivotalStories,
-        labels: buildLabelsArray(labels),
-        statusTypes: Array.from(statusTypes)
-      }))
-      .on('error', reject);
+        pivotalStories.push(rowFormatted);
+      }
+    }).on('end', () => resolve({
+      releaseStories,
+      pivotalStories,
+      labels: buildLabelsArray(labels),
+      statusTypes: Array.from(statusTypes)
+    })).on('error', reject);
   });
 }
 
