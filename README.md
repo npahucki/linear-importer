@@ -64,6 +64,7 @@ Built with the [Linear SDK](https://github.com/linear/linear/tree/master/package
 #### Comments
 
 - Comments are imported with original author, timestamp, and content preserved.
+- A Comment titled `Raw Pivotal Tracker Data` will be created for each issue that contains all CSV data for that issue (except Description and Comments, which are populated directly on the Issue)
 
 #### Labels
 
