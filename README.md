@@ -23,6 +23,14 @@ Built with the [Linear SDK](https://github.com/linear/linear/tree/master/package
 - [Safe to retry](#logger) (Skips already imported stories to prevent duplicates)
 - [Logger](#logger)
 
+
+#### Other
+- [API Rate Limits](#api-rate-limits)
+- [Considerations](#considerations)
+- [Issues](#issues)
+- [TODO](#todo)
+
+
 ## Setup
 
 ### Installation
@@ -37,6 +45,15 @@ Built with the [Linear SDK](https://github.com/linear/linear/tree/master/package
 2. `node import.mjs`
 
 ![alt text](image.png)
+
+#### ENV Options
+
+- `REQUESTS_PER_SECOND` = 5
+  - (varies based on API endpoint)
+- `ENABLE_IMPORTING` = true
+  - `false` to halt execution before any requests; allows testing CLI
+- `ENABLE_DETAILED_LOGGING` = false
+  - `true` to show additional logging output for user mapping and file attachments
 
 ## Details
 
@@ -95,6 +112,13 @@ Built with the [Linear SDK](https://github.com/linear/linear/tree/master/package
 ### Assignee / Smart User Mapping
 
 - Users are automatically mapped between Pivotal and Linear using Levenshtein Distance matching
+ *Multiple Owners Handling:*
+  - When a Pivotal Story has multiple owners:
+    - Only the first owner will be assigned in Linear (sorted alphabetically)
+    - Other owners will be added as subscribers to the issue
+  - When a Pivotal Story has no owner:
+    - The story creator becomes the assignee
+    - This maintains contextual ownership rather than defaulting to the import user
 - Options for handling user mapping:
   - Auto-generated on first import (can be regenerated if needed)
   - Manual mapping for specific users
@@ -144,26 +168,21 @@ Built with the [Linear SDK](https://github.com/linear/linear/tree/master/package
     - **\*Warning**: Deleting this file will cause the importer to lose track of previously imported stories, which could result in duplicate issues being created in Linear\*
   - `user-mapping.json` - Maps Pivotal Tracker usernames to Linear user accounts (see [Assignee / Smart User Mapping](#assignee--smart-user-mapping))
 
-#### ENV Options
+## Other
 
-- `REQUESTS_PER_SECOND` = 5
-  - (varies based on API endpoint)
-- `ENABLE_IMPORTING` = true
-  - `false` to halt execution before any requests; allows testing CLI
-- `ENABLE_DETAILED_LOGGING` = false
-  - `true` to show additional logging output for user mapping and file attachments
+#### Considerations
+
+- It is not possible to override the "Creator" on a Linear Issue. This information will be preserved in the `Raw Pivotal Data` comment on each Issue.
+- Add Team Members in Linear before beginning import to take advantage of Smart User matching. However, users can be manually mapped.
+- Be mindful of notification preferences for members. This can get noisy while importing 😬
 
 #### API Rate Limits
 
 - Linear sets rate limits on their API usage, which you will probably reach. The Linear team was helpful in increasing my rate limits temporarily. https://developers.linear.app/docs/graphql/working-with-the-graphql-api/rate-limiting.
 - The `REQUESTS_PER_SECOND` ENV var can be adjusted to throttle request frequency
 
-#### Other Notes
+#### Issues
+- Label creation can only be run 1 time https://github.com/nverges/pivotal-linear-importer/issues/13
 
-- It is not possible to override the "Creator" on a Linear Issue. This information will be preserved in the `Raw Pivotal Data` comment on each Issue.
-- Add Team Members in Linear before beginning import
-- Be mindful of notification preferences for members. This can get noisy while importing 😬
-
-## TODO
-
+#### TODO
 - Pivotal Estimate -> Linear Estimate. https://github.com/nverges/pivotal-linear-importer/issues/4
