@@ -4,6 +4,7 @@ import chalk from 'chalk';
 import getTeamMembers from './teams/members.mjs';
 import fs from 'fs/promises';
 import path from 'path';
+import inquirer from 'inquirer';
 
 export const RELEASE_LABEL_NAME = "pivotal - release";
 const FEATURE_LABEL_NAME = "pivotal - feature";
@@ -20,8 +21,8 @@ const LABELS_TO_CREATE = [
 ];
 
 async function findBestUserMatch(pivotalName, linearMembers) {
-  // Convert both names to lowercase for better matching
-  const normalizedPivotalName = pivotalName.toLowerCase();
+  // Convert pivotal name to lowercase and clean it
+  const normalizedPivotalName = pivotalName.toLowerCase().trim();
   
   let bestMatch = {
     linearMember: null,
@@ -29,21 +30,49 @@ async function findBestUserMatch(pivotalName, linearMembers) {
   };
 
   for (const member of linearMembers) {
-    // Check against both display name and full name
-    const displayNameScore = calculateSimilarity(normalizedPivotalName, member.displayName.toLowerCase());
-    const fullNameScore = calculateSimilarity(normalizedPivotalName, member.name.toLowerCase());
+    let highestScore = 0;
     
-    const score = Math.max(displayNameScore, fullNameScore);
+    // Check against all available fields
+    const fieldsToCheck = [
+      { value: member.displayName, weight: 1.0 },
+      { value: member.name, weight: 1.0 },
+      { value: member.email?.split('@')[0], weight: 0.8 }, // Username part of email
+      { value: member.initials, weight: 0.3 }
+    ];
+
+    for (const field of fieldsToCheck) {
+      if (field.value) {
+        const normalizedField = field.value.toLowerCase().trim();
+        
+        // Exact match gives highest score
+        if (normalizedField === normalizedPivotalName) {
+          highestScore = Math.max(highestScore, 1.0 * field.weight);
+          continue;
+        }
+
+        // Check if pivotal name contains or is contained in the field
+        if (normalizedField.includes(normalizedPivotalName) || 
+            normalizedPivotalName.includes(normalizedField)) {
+          highestScore = Math.max(highestScore, 0.9 * field.weight);
+          continue;
+        }
+
+        // Calculate similarity score
+        const similarityScore = calculateSimilarity(normalizedPivotalName, normalizedField) * field.weight;
+        highestScore = Math.max(highestScore, similarityScore);
+      }
+    }
     
-    if (score > bestMatch.score) {
+    if (highestScore > bestMatch.score) {
       bestMatch = {
         linearMember: member,
-        score: score
+        score: highestScore
       };
     }
   }
 
-  return bestMatch.score > 0.5 ? bestMatch.linearMember : null;
+  // Require a minimum score of 0.4 for a match
+  return bestMatch.score > 0.4 ? bestMatch.linearMember : null;
 }
 
 function calculateSimilarity(str1, str2) {
@@ -73,19 +102,37 @@ function levenshteinDistance(str1, str2) {
   return matrix[str2.length][str1.length];
 }
 
+async function promptForManualMatch(pivotalUser, linearMembers) {
+  const choices = linearMembers.map(member => ({
+    name: `${member.name} (${member.email})`,
+    value: member
+  }));
+  
+  choices.push({ name: 'Skip this user', value: null });
+
+  const { selectedMember } = await inquirer.prompt([
+    {
+      type: 'list',
+      name: 'selectedMember',
+      message: `Choose Linear team member for ${chalk.green(pivotalUser)}:`,
+      choices: choices,
+      pageSize: choices.length
+    }
+  ]);
+
+  return selectedMember;
+}
+
 async function init({ teamId, teamName, pivotalUsers }) {
   console.log(chalk.magenta('Setting up...'));
   
-  await createLabels({ teamId, labels: LABELS_TO_CREATE });
-  await createStatusesForTeam({ teamId });
-
   const { teamMembers } = await getTeamMembers({ teamId, teamName });
-
-  console.log('pivotalUsers here! ', pivotalUsers);
-  console.log('teamMembers here! ', teamMembers);
   
   // Create user mapping
   const userMapping = {};
+  const unmatchedUsers = [];
+
+  // First pass: automatic matching
   for (const pivotalUser of pivotalUsers) {
     const matchedMember = await findBestUserMatch(pivotalUser, teamMembers.nodes);
     if (matchedMember) {
@@ -94,6 +141,50 @@ async function init({ teamId, teamName, pivotalUsers }) {
         linearName: matchedMember.name,
         linearEmail: matchedMember.email
       };
+    } else {
+      unmatchedUsers.push(pivotalUser);
+    }
+  }
+
+  // Prompt for manual matching if there are unmatched users
+  if (unmatchedUsers.length > 0) {
+    console.log(chalk.yellow('\nThe following Pivotal users could not be automatically matched:'));
+    console.log(chalk.yellow(unmatchedUsers.join(', ')));
+    
+    const { shouldManuallyMatch } = await inquirer.prompt([
+      {
+        type: 'confirm',
+        name: 'shouldManuallyMatch',
+        message: 'Would you like to manually match these users?',
+        default: true
+      }
+    ]);
+
+    if (shouldManuallyMatch) {
+      for (const unmatchedUser of unmatchedUsers) {
+        const manualMatch = await promptForManualMatch(unmatchedUser, teamMembers.nodes);
+        
+        userMapping[unmatchedUser] = manualMatch ? {
+          linearId: manualMatch.id,
+          linearName: manualMatch.name,
+          linearEmail: manualMatch.email
+        } : {
+          linearId: null,
+          linearName: null,
+          linearEmail: null,
+          note: "No matching Linear user found (manual skip)"
+        };
+      }
+    } else {
+      // Add unmatched users to mapping with null values
+      for (const unmatchedUser of unmatchedUsers) {
+        userMapping[unmatchedUser] = {
+          linearId: null,
+          linearName: null,
+          linearEmail: null,
+          note: "No matching Linear user found (automatic)"
+        };
+      }
     }
   }
 
@@ -104,11 +195,17 @@ async function init({ teamId, teamName, pivotalUsers }) {
   const mappingPath = path.join(logDir, 'user-mapping.json');
   await fs.writeFile(
     mappingPath, 
-    JSON.stringify(userMapping, null, 2)
+    JSON.stringify({
+      generated: new Date().toISOString(),
+      mapping: userMapping
+    }, null, 2)
   );
 
-  console.log(chalk.green(`User mapping saved to ${mappingPath}`));
+  console.log(chalk.green(`\nUser mapping saved to ${mappingPath}`));
   console.log(chalk.magenta('Setup complete!'));
+
+  await createLabels({ teamId, labels: LABELS_TO_CREATE });
+  await createStatusesForTeam({ teamId });
   
   return userMapping;
 }
