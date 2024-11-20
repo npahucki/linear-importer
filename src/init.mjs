@@ -114,9 +114,9 @@ async function promptForManualMatch(pivotalUser, linearMembers) {
     {
       type: 'list',
       name: 'selectedMember',
-      message: `Choose Linear team member for ${chalk.green(pivotalUser)}:`,
+      message: `Choose Linear team member for ${chalk.green(pivotalUser)}":`,
       choices: choices,
-      pageSize: choices.length
+      pageSize: choices.length // Show all choices at once
     }
   ]);
 
@@ -126,14 +126,36 @@ async function promptForManualMatch(pivotalUser, linearMembers) {
 async function init({ teamId, teamName, pivotalUsers }) {
   console.log(chalk.magenta('Setting up...'));
   
+  await createLabels({ teamId, labels: LABELS_TO_CREATE });
+  await createStatusesForTeam({ teamId });
+
   const { teamMembers } = await getTeamMembers({ teamId, teamName });
   
+  // Check for existing mapping file
+  const logDir = path.join(process.cwd(), '..', 'log', teamName);
+  const mappingPath = path.join(logDir, 'user-mapping.json');
+  let existingMapping = {};
+  
+  try {
+    const mappingFile = await fs.readFile(mappingPath, 'utf8');
+    const mappingData = JSON.parse(mappingFile);
+    existingMapping = mappingData.mapping || {};
+    console.log(chalk.blue('Found existing user mapping file'));
+  } catch (error) {
+    // File doesn't exist or is invalid, continue with empty mapping
+  }
+
   // Create user mapping
-  const userMapping = {};
+  const userMapping = { ...existingMapping };
   const unmatchedUsers = [];
 
-  // First pass: automatic matching
+  // First pass: automatic matching for users not in existing mapping
   for (const pivotalUser of pivotalUsers) {
+    // Skip if user already has a mapping
+    if (userMapping[pivotalUser]) {
+      continue;
+    }
+
     const matchedMember = await findBestUserMatch(pivotalUser, teamMembers.nodes);
     if (matchedMember) {
       userMapping[pivotalUser] = {
@@ -149,7 +171,7 @@ async function init({ teamId, teamName, pivotalUsers }) {
   // Prompt for manual matching if there are unmatched users
   if (unmatchedUsers.length > 0) {
     console.log(chalk.yellow('\nThe following Pivotal users could not be automatically matched:'));
-    console.log(chalk.yellow(unmatchedUsers.join(', ')));
+    console.log(chalk.green(unmatchedUsers.join(', ')));
     
     const { shouldManuallyMatch } = await inquirer.prompt([
       {
@@ -189,10 +211,7 @@ async function init({ teamId, teamName, pivotalUsers }) {
   }
 
   // Save mapping to log file
-  const logDir = path.join(process.cwd(), '..', 'log', teamName);
   await fs.mkdir(logDir, { recursive: true });
-  
-  const mappingPath = path.join(logDir, 'user-mapping.json');
   await fs.writeFile(
     mappingPath, 
     JSON.stringify({
@@ -203,9 +222,6 @@ async function init({ teamId, teamName, pivotalUsers }) {
 
   console.log(chalk.green(`\nUser mapping saved to ${mappingPath}`));
   console.log(chalk.magenta('Setup complete!'));
-
-  await createLabels({ teamId, labels: LABELS_TO_CREATE });
-  await createStatusesForTeam({ teamId });
   
   return userMapping;
 }
