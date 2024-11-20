@@ -208,7 +208,7 @@ function formatPriority(pivotalStoryPriority) {
     "p1 - High": 2,
   };
 
-  return pivotalPriorities[pivotalStoryPriority] || 2;
+  return pivotalPriorities[pivotalStoryPriority] || 4;
 }
 
 export default createIssue;
