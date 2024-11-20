@@ -125,9 +125,6 @@ async function promptForManualMatch(pivotalUser, linearMembers) {
 
 async function init({ teamId, teamName, pivotalUsers }) {
   console.log(chalk.magenta('Setting up...'));
-  
-  await createLabels({ teamId, labels: LABELS_TO_CREATE });
-  await createStatusesForTeam({ teamId });
 
   const { teamMembers } = await getTeamMembers({ teamId, teamName });
   
@@ -135,18 +132,34 @@ async function init({ teamId, teamName, pivotalUsers }) {
   const logDir = path.join(process.cwd(), '..', 'log', teamName);
   const mappingPath = path.join(logDir, 'user-mapping.json');
   let existingMapping = {};
+  let shouldRemap = false;
   
   try {
     const mappingFile = await fs.readFile(mappingPath, 'utf8');
     const mappingData = JSON.parse(mappingFile);
     existingMapping = mappingData.mapping || {};
     console.log(chalk.blue('Found existing user mapping file'));
+    
+    // Prompt user about remapping
+    const { confirmRemap } = await inquirer.prompt([
+      {
+        type: 'confirm',
+        name: 'confirmRemap',
+        message: 'An existing user mapping file was found. Would you like to start fresh and remap all users?',
+        default: false
+      }
+    ]);
+    
+    shouldRemap = confirmRemap;
+    if (!shouldRemap) {
+      console.log(chalk.blue('Continuing with existing mapping...'));
+    }
   } catch (error) {
     // File doesn't exist or is invalid, continue with empty mapping
   }
 
   // Create user mapping
-  const userMapping = { ...existingMapping };
+  const userMapping = shouldRemap ? {} : { ...existingMapping };
   const unmatchedUsers = [];
 
   // First pass: automatic matching for users not in existing mapping
@@ -222,6 +235,9 @@ async function init({ teamId, teamName, pivotalUsers }) {
 
   console.log(chalk.green(`\nUser mapping saved to ${mappingPath}`));
   console.log(chalk.magenta('Setup complete!'));
+
+  await createLabels({ teamId, labels: LABELS_TO_CREATE });
+  await createStatusesForTeam({ teamId });
   
   return userMapping;
 }
