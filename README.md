@@ -18,7 +18,7 @@ Built with the [Linear SDK](https://github.com/linear/linear/tree/master/package
 - [Priority](#priority)
 - [Created Date](#created-date)
 - [Due Date](#due-date)
-- [Assignee](#assignee--smart-user-mapping) (Automatically matches Pivotal users to Linear accounts)
+- [Assignee](#assignee--smart-user-mapping) (Automatically matches Pivotal Users to Linear Member accounts)
 - [Releases](#releases) (Pivotal Releases → Linear parent issues with associated stories as sub-issues)
 - [Safe to retry](#logger) (Skips already imported stories to prevent duplicates)
 - [Logger](#logger)
@@ -57,15 +57,15 @@ Built with the [Linear SDK](https://github.com/linear/linear/tree/master/package
 
 ## Details
 
-### File Attachments
+#### File Attachments
 
 - File attachments can be optionally imported via the provided prompt
 
-### Comments
+#### Comments
 
 - Comments are imported with original author, timestamp, and content preserved.
 
-### Labels
+#### Labels
 
 - The following Labels will be created in the selected Team. This allows each Team to modify labels at their own pace without affecting other Teams, and will avoid any naming conflicts with existing labels.
 
@@ -77,7 +77,7 @@ Built with the [Linear SDK](https://github.com/linear/linear/tree/master/package
 
 - Additionally, you will be prompted with the option to import labels created in Pivotal Tracker. These will be added to the imported Linear Issues.
 
-### Statuses
+#### Statuses
 
 - The following Workflow Statuses will be created in the selected Team. This allows each Team to modify statuses at their own pace without affecting other Teams, and will avoid any naming conflicts with existing statuses.
   - `pivotal - accepted`
@@ -86,30 +86,32 @@ Built with the [Linear SDK](https://github.com/linear/linear/tree/master/package
   - `pivotal - planned`
   - `pivotal - started`
 
-### Story Types
+#### Story Types
 
 - Configure your import by selecting specific story types via the CLI prompt:
 
 ![alt text](image-1.png)
 
-### Priority
+Linear Issues will be assigned a label with the corresponding Story Type (See [Labels](#labels))
+
+#### Priority
 
 - Priority levels are mapped from Pivotal to Linear as follows:
   - P1 (Pivotal) → High (Linear)
   - P2 → Medium
   - P3 → Low
 
-### Created Date
+#### Created Date
 
 - ⏰ Created Date of Pivotal Story will be preserved on the imported Linear Issue
 - 📅 Original timestamps are maintained for historical accuracy
 
-### Due Date
+#### Due Date
 
 - ✅ Due dates from Pivotal Tracker are copied exactly to Linear
 - ❌ Stories without due dates in Pivotal will have no due date in Linear
 
-### Assignee / Smart User Mapping
+#### Assignee / Smart User Mapping
 
 - Users are automatically mapped between Pivotal and Linear using Levenshtein Distance matching
  *Multiple Owners Handling:*
@@ -144,7 +146,7 @@ Built with the [Linear SDK](https://github.com/linear/linear/tree/master/package
   }
   ```
 
-### Releases
+#### Releases
 
 - Linear does not allow for Cycles to be created with dates in the past. Instead, we use a parent-child issue structure:
   - Each Pivotal Release becomes a parent issue in Linear with:
@@ -160,7 +162,7 @@ Built with the [Linear SDK](https://github.com/linear/linear/tree/master/package
     - Grouped view of release-related work
     - Ability to track completion status
 
-### Logger
+#### Logger
 
 - Unique Team data is stored in team-specific folders (`log/<team-name>`). Each folder contains:
   - `output_<timestamp>`: Complete console output for each import attempt
