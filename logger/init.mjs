@@ -5,12 +5,12 @@ export function setupLogger(teamName) {
   const generateLogFilename = () => {
     const now = new Date();
     const timestamp = now.toISOString().replace(/[:.]/g, '-');
-    return `${teamName}_${timestamp}.txt`;
+    return `output_${timestamp}.txt`;
   };
 
   // Initialize and enable the logger
   const logFilename = generateLogFilename();
-  const logger = new Logger(`../log/${logFilename}`);
+  const logger = new Logger(logFilename, teamName);
   logger.enable();
 
   return logger;

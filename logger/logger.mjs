@@ -3,10 +3,22 @@ import path from 'path';
 import util from 'util';
 
 class Logger {
-  constructor(logFilePath) {
-    this.logFilePath = logFilePath;
-    this.ensureDirectoryExistence(logFilePath);
-    this.logFile = fs.createWriteStream(logFilePath, { flags: 'a' });
+  static getTeamLogPath(teamName, filename) {
+    const baseLogDir = '../log';
+    return path.join(baseLogDir, teamName, filename);
+  }
+
+  constructor(logFilePath, teamName) {
+    if (!logFilePath) return; // Early return if no logFilePath provided
+    
+    this.teamName = teamName;
+    this.baseLogDir = '../log';
+    this.teamLogDir = path.join(this.baseLogDir, teamName);
+    this.logFilePath = path.join(this.teamLogDir, logFilePath);
+    
+    this.ensureDirectoryExistence(this.logFilePath);
+    this.logFile = fs.createWriteStream(this.logFilePath, { flags: 'a' });
+    
     this.originalConsoleLog = console.log;
     this.originalConsoleError = console.error;
     this.originalConsoleWarn = console.warn;
