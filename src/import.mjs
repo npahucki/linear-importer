@@ -1,15 +1,13 @@
 import { REQUESTS_PER_SECOND } from "../config/config.js";
 import parseCSV, { parseCSVFile } from "./csv/parse.mjs";
 import chalk from "chalk";
+import fs from 'fs/promises';
 
 import selectTeam from "./teams/select.mjs";
-
 import fetchStatuses from "./statuses/list.mjs";
-
-import deleteLabels from "./labels/delete.mjs"
+import deleteLabels from "./labels/delete.mjs";
 import createLabels from "./labels/create.mjs";
 import fetchLabels from "./labels/list.mjs";
-
 import fetchIssuesForTeam from "./issues/list.mjs";
 import createIssue from "./issues/create.mjs";
 
@@ -21,8 +19,10 @@ import proceedWithImport from "./prompts/proceed_with_import.js";
 // import createEstimates from "./estimates/create.mjs";
 
 import { setupLogger } from '../logger/init.mjs';
-import { RELEASE_LABEL_NAME } from "./init.mjs"
-import init from "./init.mjs"
+import { RELEASE_LABEL_NAME } from "./init.mjs";
+import init from "./init.mjs";
+
+import logSuccessfulImport from '../logger/log_successful_import.mjs';
 
 const CREATE_ISSUES = true;
 
@@ -39,7 +39,7 @@ const logger = setupLogger(teamName);
 logger.enable();
 
 // PROMPTS
-const { releaseStories, pivotalStories, statusTypes,labels, csvFilename } = await parseCSV();
+const { releaseStories, pivotalStories, statusTypes, labels, csvFilename } = await parseCSV();
 const { importFiles } = await importFileAttachments();
 const { importLabels } = await importLabelsFromCSV();
 const { selectedStatusTypes } = await selectStatusTypes(statusTypes);
@@ -51,41 +51,47 @@ if (userConfirmedProceed) {
   // await deleteLabels({ teamId })
 
   // Creates Team Labels and Workflow Statuses
-  await init({ teamId })
+  await init({ teamId });
 
   // Create Labels from CSV
   if (importLabels) await createLabels({ teamId, labels });
-  
+
   const teamStatuses = await fetchStatuses({ teamId });
   const teamLabels = await fetchLabels({ teamId });
 
   const processReleaseStories = async () => {
     if (releaseStories?.length === 0) {
       console.log(chalk.yellow("No Release Stories found in the CSV file."));
-    } else { 
+    } else {
       console.log(chalk.cyan(`Converting ${releaseStories.length} Release Stories into Linear Cycles for Team ${teamName} -${teamId}`));
-      
+
       for (const [index, pivotalStory] of releaseStories.entries()) {
         const stateId = teamStatuses.find(state => state.name === `pivotal - ${pivotalStory.state}`)?.id;
         const pivotalStoryTypeLabelId = teamLabels.find(label => label.name === `pivotal - ${pivotalStory.type}`)?.id;
         const otherLabelIds = pivotalStory.labels ? pivotalStory.labels.split(',')
-            .map(label => label.trim())
-            .map(label => teamLabels.find(teamLabel => teamLabel.name === label)?.id)
-            .filter(id => id)
-        : [];
-      const labelIds = [pivotalStoryTypeLabelId, ...otherLabelIds].filter(Boolean);
-        
+          .map(label => label.trim())
+          .map(label => teamLabels.find(teamLabel => teamLabel.name === label)?.id)
+          .filter(id => id)
+          : [];
+        const labelIds = [pivotalStoryTypeLabelId, ...otherLabelIds].filter(Boolean);
+
         const importNumber = index + 1;
         await new Promise(resolve => setTimeout(resolve, DELAY));
-        await createIssue({
-          teamId,
-          pivotalStory,
-          stateId,
-          labelIds,
-          importNumber,
-          csvFilename,
-          importFiles
-        });
+        
+        try {
+          await createIssue({
+            teamId,
+            pivotalStory,
+            stateId,
+            labelIds,
+            importNumber,
+            csvFilename,
+            importFiles
+          });
+          await logSuccessfulImport(pivotalStory.id, teamName);
+        } catch (error) {
+          console.error(`Failed to import release story ${pivotalStory.id}:`, error);
+        }
       }
     }
   };
@@ -93,18 +99,18 @@ if (userConfirmedProceed) {
   // Process Release Stories first
   if (CREATE_ISSUES) {
     if (selectedStatusTypes.includes('release')) {
-      await processReleaseStories()
+      await processReleaseStories();
     }
   }
 
   // Add delay to ensure synchronicity
   await new Promise(resolve => setTimeout(resolve, DELAY * 2));
-  
+
   // Process Pivotal Stories
   const processPivotalStories = async () => {
     // Filter pivotal stories based on selectedStatusTypes
     const filteredPivotalStories = pivotalStories.filter(story => {
-      return selectedStatusTypes.includes(story.type.toLowerCase())
+      return selectedStatusTypes.includes(story.type.toLowerCase());
     });
 
     if (filteredPivotalStories?.length === 0) {
@@ -120,24 +126,30 @@ if (userConfirmedProceed) {
         const stateId = teamStatuses.find(state => state.name === `pivotal - ${pivotalStory.state}`)?.id;
         const pivotalStoryTypeLabelId = teamLabels.find(label => label.name === `pivotal - ${pivotalStory.type}`)?.id;
         const otherLabelIds = pivotalStory.labels ? pivotalStory.labels.split(',')
-            .map(label => label.trim())
-            .map(label => teamLabels.find(teamLabel => teamLabel.name === label)?.id)
-            .filter(id => id)
-        : [];
+          .map(label => label.trim())
+          .map(label => teamLabels.find(teamLabel => teamLabel.name === label)?.id)
+          .filter(id => id)
+          : [];
         const labelIds = [pivotalStoryTypeLabelId, ...otherLabelIds].filter(Boolean);
 
         const importNumber = index + 1;
         await new Promise(resolve => setTimeout(resolve, DELAY));
-        await createIssue({
-          teamId,
-          pivotalStory,
-          stateId,
-          labelIds,
-          parentId: parentIssue?.id,
-          importNumber,
-          csvFilename,
-          importFiles
-        });
+        
+        try {
+          await createIssue({
+            teamId,
+            pivotalStory,
+            stateId,
+            labelIds,
+            parentId: parentIssue?.id,
+            importNumber,
+            csvFilename,
+            importFiles
+          });
+          await logSuccessfulImport(pivotalStory.id, teamName);
+        } catch (error) {
+          console.error(`Failed to import story ${pivotalStory.id}:`, error);
+        }
       }
     }
   };
