@@ -102,8 +102,6 @@ if (userConfirmedProceed) {
   
   // Process Pivotal Stories
   const processPivotalStories = async () => {
-    console.log(pivotalStories[0]);
-
     // Filter pivotal stories based on selectedStatusTypes
     const filteredPivotalStories = pivotalStories.filter(story => {
       return selectedStatusTypes.includes(story.type.toLowerCase())
