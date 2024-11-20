@@ -15,7 +15,7 @@ async function proceedWithImport({ pivotalStories, releaseStories, selectedStatu
     const releaseCount = releaseStories.filter(story => story.type === type).length;
     const totalCount = pivotalCount + releaseCount;
     const color = {
-      chore: 'gray',
+      chore: 'white',
       bug: 'red',
       feature: 'yellow',
       epic: 'magenta', 
@@ -28,7 +28,6 @@ async function proceedWithImport({ pivotalStories, releaseStories, selectedStatu
   const confirmProceedPrompt = chalk.blue.bold(`
     📊 Import Summary:`) + chalk.white(`
        Already imported: ${chalk.green.bold(successfulImportsLength)}
-
       ${typeBreakdown}
 
       Total Remaining Stories: ${chalk.green.bold(filteredPivotalStories.length + filteredReleaseStories.length)}
