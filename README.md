@@ -11,6 +11,7 @@ CLI tool to convert Pivotal Tracker Stories into Linear Issues using the Pivotal
 - Import desired story types
 - Convert Pivotal Releases into Linear parent issues, with all associated stories in that release cycle as sub-issues
 - Generates log files
+- Idempotent importing - safely handles multiple imports by preventing Pivotal stories from being imported twice
 
 ## Setup
 ### Installation
@@ -63,10 +64,12 @@ Linear does not allow for Cycles to be created with dates in the past. Instead, 
 
 #### Logger
 - Each import attempt will create a logfile in the `log` directory
-
+- Each logfile contains a record of successfully imported Pivotal story IDs and their corresponding Linear issue IDs
+- During subsequent imports, the tool checks these logs to prevent duplicate imports of the same Pivotal story
+- This makes the import process idempotent - you can safely run the import multiple times without creating duplicate issues
+- If an import fails partway through, you can resume by running the import again, and only the remaining stories will be processed
 
 ## TODO
-- Write log file to track successfully imported Pivotal stories to handle failures and prevent duplicate imports
 - Pivotal Requester -> Linear Owner
 - Pivotal Owner(s) -> Linear Requested By
 - Pivotal Estimate -> Linear Estimate
