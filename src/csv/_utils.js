@@ -15,6 +15,8 @@ export function buildParams(row) {
     state: row['Current State'],
     priority: row['Priority'],
     labels: row['Labels'],
+    requestedBy: row['Requested By'],
+    ownedBy: row['Owned By'],
     comments: [...(comments || []), additionalPivotalData]
   }
 

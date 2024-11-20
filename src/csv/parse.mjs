@@ -78,6 +78,7 @@ function readCSV(filePath) {
       pivotalStories,
       labels: buildLabelsArray(labels),
       statusTypes: Array.from(statusTypes),
+      pivotalUsers: Array.from(new Set([...ownedBy, ...requestedBy])),
       requestedBy: Array.from(requestedBy),
       ownedBy: Array.from(ownedBy)
     })).on('error', reject);

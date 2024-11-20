@@ -18,7 +18,7 @@ import proceedWithImport from "./prompts/proceed_with_import.js";
 
 // import createEstimates from "./estimates/create.mjs";
 
-import getTeamMembers from "./teams/members.mjs";
+// import getTeamMembers from "./teams/members.mjs";
 
 import { setupLogger } from "../logger/init.mjs";
 import { RELEASE_LABEL_NAME } from "./init.mjs";
@@ -42,12 +42,11 @@ const logger = setupLogger(teamName);
 logger.enable();
 
 // PROMPTS
-const { releaseStories, pivotalStories, statusTypes, labels, csvFilename } =
+const { releaseStories, pivotalStories, statusTypes, labels, csvFilename, requestedBy, ownedBy, pivotalUsers } =
   await parseCSV();
 const { importFiles } = await importFileAttachments();
 const { importLabels } = await importLabelsFromCSV();
 const { selectedStatusTypes } = await selectStatusTypes(statusTypes);
-const { teamMembers } = await getTeamMembers({ teamId });  // 
 const successfulImports = await readSuccessfulImports(teamName);
 
 const newReleaseStories = releaseStories.filter(
@@ -80,7 +79,7 @@ if (userConfirmedProceed) {
   // await deleteLabels({ teamId })
 
   // Creates Team Labels and Workflow Statuses
-  await init({ teamId });
+  await init({ teamId, teamName, pivotalUsers });
 
   // Create Labels from CSV
   if (importLabels) await createLabels({ teamId, labels });
