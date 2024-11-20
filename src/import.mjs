@@ -18,6 +18,8 @@ import proceedWithImport from "./prompts/proceed_with_import.js";
 
 // import createEstimates from "./estimates/create.mjs";
 
+import getTeamMembers from "./teams/members.mjs";
+
 import { setupLogger } from "../logger/init.mjs";
 import { RELEASE_LABEL_NAME } from "./init.mjs";
 import init from "./init.mjs";
@@ -45,6 +47,7 @@ const { releaseStories, pivotalStories, statusTypes, labels, csvFilename } =
 const { importFiles } = await importFileAttachments();
 const { importLabels } = await importLabelsFromCSV();
 const { selectedStatusTypes } = await selectStatusTypes(statusTypes);
+const { teamMembers } = await getTeamMembers({ teamId });  // 
 const successfulImports = await readSuccessfulImports(teamName);
 
 const newReleaseStories = releaseStories.filter(
@@ -128,6 +131,7 @@ if (userConfirmedProceed) {
             importNumber,
             csvFilename,
             importFiles,
+            assigneeId: SAV
           });
           await logSuccessfulImport(pivotalStory.id, teamName);
         } catch (error) {
@@ -204,6 +208,7 @@ if (userConfirmedProceed) {
             importNumber,
             csvFilename,
             importFiles,
+            assigneeId: NICK
           });
           await logSuccessfulImport(pivotalStory.id, teamName);
         } catch (error) {

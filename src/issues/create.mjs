@@ -16,7 +16,8 @@ async function createIssue({
   stateId,
   csvFilename, 
   importFiles,
-  labelIds
+  labelIds,
+  assigneeId
 }) {
   try {
     const newIssue = await linearClient.createIssue({
@@ -28,7 +29,8 @@ async function createIssue({
       parentId: parentId ? parentId : undefined,
       dueDate: pivotalStory.dueDate ? new Date(pivotalStory.dueDate).toISOString() : undefined,
       createdAt: pivotalStory.createdAt ? new Date(pivotalStory.createdAt).toISOString() : undefined,
-      priority: formatPriority(pivotalStory.priority)
+      priority: formatPriority(pivotalStory.priority),
+      assigneeId
       // estimate: [0, 1, 2, 4, 8, 16][Math.floor(Math.random() * 6)]
     });
 
