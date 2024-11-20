@@ -22,9 +22,9 @@ const STATUSES_TO_CREATE = [
   { name: FINISHED, color: "#17A2B8", type: COMPLETED_TYPE }, 
 ];
 
-async function createStatusForTeam({ teamId }) {  
+async function createStatusForTeam({ teamName, teamId }) {  
   try {
-    console.log(chalk.yellow(`✅ Creating Workflow Statuses for team ${teamId}`));
+    console.log(chalk.yellow(`🔄 Creating Workflow Statuses...`));
 
     for (const status of STATUSES_TO_CREATE) {
       const response = await linearClient.createWorkflowState({

@@ -18,6 +18,8 @@ import proceedWithImport from "./prompts/proceed_with_import.js";
 
 // import createEstimates from "./estimates/create.mjs";
 
+// import getTeamMembers from "./teams/members.mjs";
+
 import { setupLogger } from "../logger/init.mjs";
 import { RELEASE_LABEL_NAME } from "./init.mjs";
 import init from "./init.mjs";
@@ -40,8 +42,16 @@ const logger = setupLogger(teamName);
 logger.enable();
 
 // PROMPTS
-const { releaseStories, pivotalStories, statusTypes, labels, csvFilename } =
-  await parseCSV();
+const {
+  releaseStories,
+  pivotalStories,
+  statusTypes,
+  labels,
+  csvFilename,
+  requestedBy,
+  ownedBy,
+  pivotalUsers,
+} = await parseCSV();
 const { importFiles } = await importFileAttachments();
 const { importLabels } = await importLabelsFromCSV();
 const { selectedStatusTypes } = await selectStatusTypes(statusTypes);
@@ -77,7 +87,7 @@ if (userConfirmedProceed) {
   // await deleteLabels({ teamId })
 
   // Creates Team Labels and Workflow Statuses
-  await init({ teamId });
+  await init({ teamId, teamName, pivotalUsers });
 
   // Create Labels from CSV
   if (importLabels) await createLabels({ teamId, labels });
@@ -87,7 +97,7 @@ if (userConfirmedProceed) {
 
   const processReleaseStories = async () => {
     if (newReleaseStories?.length === 0) {
-      console.log(chalk.yellow("No Release Stories found in the CSV file."));
+      console.log("No Release Stories found in the CSV file.");
     } else {
       console.log(
         chalk.cyan(
@@ -122,6 +132,7 @@ if (userConfirmedProceed) {
         try {
           await createIssue({
             teamId,
+            teamName,
             pivotalStory,
             stateId,
             labelIds,
@@ -197,6 +208,7 @@ if (userConfirmedProceed) {
         try {
           await createIssue({
             teamId,
+            teamName,
             pivotalStory,
             stateId,
             labelIds,

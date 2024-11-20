@@ -3,7 +3,7 @@ import chalk from "chalk";
 
 async function createLabels({ teamId, labels }) {  
   try {
-    console.log(chalk.yellow(`🔄 Creating Labels ${teamId}`));
+    console.log(chalk.yellow(`🔄 Creating Labels...`));
 
     for (const label of labels) {
       const response = await linearClient.createIssueLabel({
