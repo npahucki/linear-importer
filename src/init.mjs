@@ -124,7 +124,7 @@ async function promptForManualMatch(pivotalUser, linearMembers) {
 }
 
 async function init({ teamId, teamName, pivotalUsers }) {
-  console.log(chalk.magenta('Setting up...'));
+  console.log(chalk.yellow('\n🔄 Matching Pivotal users to Linear members...'));
 
   const { teamMembers } = await getTeamMembers({ teamId, teamName });
   
@@ -133,30 +133,31 @@ async function init({ teamId, teamName, pivotalUsers }) {
   const mappingPath = path.join(logDir, 'user-mapping.json');
   let existingMapping = {};
   let shouldRemap = false;
+  let isNewMapping = false;  // New flag to track if we're creating a new mapping
   
   try {
     const mappingFile = await fs.readFile(mappingPath, 'utf8');
     const mappingData = JSON.parse(mappingFile);
     existingMapping = mappingData.mapping || {};
-    // console.log(chalk.blue('Found existing user mapping file'));
     
-    // Prompt user about remapping
     const { confirmRemap } = await inquirer.prompt([
       {
-        type: 'confirm',
+        type: 'list',
         name: 'confirmRemap',
         message: 'An existing user mapping file was found. Would you like to start fresh and remap all users?',
-        default: false
+        choices: [{ name: "Yes", value: true }, { name: "No", value: false }],
+        default: false,
       }
     ]);
     
     shouldRemap = confirmRemap;
+    isNewMapping = shouldRemap;  // Set flag if user chooses to remap
     if (!shouldRemap) {
-      console.log(chalk.blue('Continuing with existing mapping...'));
+      console.log(chalk.yellow('🔄 Continuing with existing User mapping...'));
     }
   } catch (error) {
-    // File doesn't exist or is invalid, continue with empty mapping
     console.log(chalk.yellow('No existing user mapping file found. Starting with empty mapping...'));
+    isNewMapping = true;  // Set flag for new mapping
   }
 
   // Create user mapping
@@ -189,10 +190,11 @@ async function init({ teamId, teamName, pivotalUsers }) {
     
     const { shouldManuallyMatch } = await inquirer.prompt([
       {
-        type: 'confirm',
+        type: 'list',
         name: 'shouldManuallyMatch',
         message: 'Would you like to manually match these users?',
-        default: true
+        choices: [{ name: "Yes", value: true }, { name: "No", value: false }],
+        default: true,
       }
     ]);
 
@@ -224,19 +226,21 @@ async function init({ teamId, teamName, pivotalUsers }) {
     }
   }
 
-  // Save mapping to log file
-  await fs.mkdir(logDir, { recursive: true });
-  await fs.writeFile(
-    mappingPath, 
-    JSON.stringify({
-      generated: new Date().toISOString(),
-      mapping: userMapping
-    }, null, 2)
-  );
+  // Only save mapping if it's new or was remapped
+  if (isNewMapping) {
+    await fs.mkdir(logDir, { recursive: true });
+    await fs.writeFile(
+      mappingPath, 
+      JSON.stringify({
+        generated: new Date().toISOString(),
+        mapping: userMapping
+      }, null, 2)
+    );
+    console.log(chalk.green(`User mapping saved to ${mappingPath}`));
+  }
 
-  console.log(chalk.green(`User mapping saved to ${mappingPath}`));
-  console.log(chalk.blue('Setup complete!'));
-  console.log(chalk.magenta('=== Starting Pivotal to Linear Import Process ==='));
+  console.log(chalk.bold.green('✅ Setup complete!'));
+  console.log(chalk.bold.magenta('\n🚀 Starting import process...\n'));
 
   await createLabels({ teamId, labels: LABELS_TO_CREATE });
   await createStatusesForTeam({ teamId });

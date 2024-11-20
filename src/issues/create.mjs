@@ -125,7 +125,7 @@ async function createIssue({
       const issueId = newIssue._issue.id;
       console.log(
         chalk.green(
-          `✅ ${importNumber} - Linear Issue ${issueId} created from Pivotal Story ${
+          `✅ ${importNumber} - Linear Issue ${issueId} created from Pivotal story ${
             pivotalStory.id
           } - ${chalk.magenta(pivotalStory.name)}`,
         ),

@@ -97,7 +97,7 @@ if (userConfirmedProceed) {
 
   const processReleaseStories = async () => {
     if (newReleaseStories?.length === 0) {
-      console.log(chalk.yellow("No Release Stories found in the CSV file."));
+      console.log("No Release Stories found in the CSV file.");
     } else {
       console.log(
         chalk.cyan(
