@@ -21,6 +21,7 @@ import proceedWithImport from "./prompts/proceed_with_import.js";
 import { setupLogger } from '../logger/init.mjs';
 import { RELEASE_LABEL_NAME } from "./init.mjs";
 import init from "./init.mjs";
+import readSuccessfulImports from '../logger/read_successful_imports.mjs';
 
 import logSuccessfulImport from '../logger/log_successful_import.mjs';
 
@@ -43,7 +44,16 @@ const { releaseStories, pivotalStories, statusTypes, labels, csvFilename } = awa
 const { importFiles } = await importFileAttachments();
 const { importLabels } = await importLabelsFromCSV();
 const { selectedStatusTypes } = await selectStatusTypes(statusTypes);
-const { userConfirmedProceed } = await proceedWithImport({ releaseStories, pivotalStories, selectedStatusTypes });
+const successfulImports = await readSuccessfulImports(teamName);
+
+const newReleaseStories = releaseStories.filter(story => !successfulImports.has(story.id));
+    // Filter pivotal stories based on selectedStatusTypes
+  const newPivotalStories = pivotalStories.filter(story => 
+    selectedStatusTypes.includes(story.type.toLowerCase()) && 
+    !successfulImports.has(story.id)
+  );
+
+const { userConfirmedProceed } = await proceedWithImport({ releaseStories: newReleaseStories, pivotalStories: newPivotalStories, successfulImportsLength: successfulImports.size, selectedStatusTypes });
 // await createEstimates({ teamId }); // TODO: Add prompt to allow choosing issue estimation type
 
 if (userConfirmedProceed) {
@@ -60,12 +70,12 @@ if (userConfirmedProceed) {
   const teamLabels = await fetchLabels({ teamId });
 
   const processReleaseStories = async () => {
-    if (releaseStories?.length === 0) {
+    if (newReleaseStories?.length === 0) {
       console.log(chalk.yellow("No Release Stories found in the CSV file."));
     } else {
-      console.log(chalk.cyan(`Converting ${releaseStories.length} Release Stories into Linear Cycles for Team ${teamName} -${teamId}`));
+      console.log(chalk.cyan(`Converting ${newReleaseStories.length} Release Stories into Linear Cycles for Team ${teamName} -${teamId}`));
 
-      for (const [index, pivotalStory] of releaseStories.entries()) {
+      for (const [index, pivotalStory] of newReleaseStories.entries()) {
         const stateId = teamStatuses.find(state => state.name === `pivotal - ${pivotalStory.state}`)?.id;
         const pivotalStoryTypeLabelId = teamLabels.find(label => label.name === `pivotal - ${pivotalStory.type}`)?.id;
         const otherLabelIds = pivotalStory.labels ? pivotalStory.labels.split(',')
@@ -108,20 +118,15 @@ if (userConfirmedProceed) {
 
   // Process Pivotal Stories
   const processPivotalStories = async () => {
-    // Filter pivotal stories based on selectedStatusTypes
-    const filteredPivotalStories = pivotalStories.filter(story => {
-      return selectedStatusTypes.includes(story.type.toLowerCase());
-    });
-
-    if (filteredPivotalStories?.length === 0) {
+    if (newPivotalStories?.length === 0) {
       console.log("No Pivotal Stories found in the CSV file.");
     } else {
-      console.log(chalk.cyan(`Converting ${filteredPivotalStories.length} Pivotal Stories into Linear Issues for Team ${teamId}`));
+      console.log(chalk.cyan(`Converting ${newPivotalStories.length} Pivotal Stories into Linear Issues for Team ${teamId}`));
 
       // Fetch all release issues
       const releaseIssues = await fetchIssuesForTeam({ teamId, filters: { labels: { some: { name: { eq: RELEASE_LABEL_NAME } } } } });
 
-      for (const [index, pivotalStory] of filteredPivotalStories.entries()) {
+      for (const [index, pivotalStory] of newPivotalStories.entries()) {
         const parentIssue = releaseIssues?.find(releaseIssue => releaseIssue.title.includes(`[${pivotalStory.iteration}]`));
         const stateId = teamStatuses.find(state => state.name === `pivotal - ${pivotalStory.state}`)?.id;
         const pivotalStoryTypeLabelId = teamLabels.find(label => label.name === `pivotal - ${pivotalStory.type}`)?.id;

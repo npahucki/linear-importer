@@ -5,7 +5,7 @@ async function selectStatusTypes(statusTypes) {
     {
       type: 'checkbox',
       name: 'selectedStatusTypes',
-      message: 'Which Pivotal Story Types would you like to include?',
+      message: 'Which Pivotal Story types would you like to include?',
       choices: statusTypes.map(status => ({
         name: status,
         value: status,
