@@ -130,7 +130,7 @@ async function init({ teamId, teamName, pivotalUsers }) {
   
   // Check for existing mapping file
   const logDir = path.join(process.cwd(), '..', 'log', teamName);
-  const mappingPath = path.join(logDir, 'user-mapping.json');
+  const mappingPath = path.join(logDir, 'user_mapping.json');
   let existingMapping = {};
   let shouldRemap = false;
   let isNewMapping = false;  // New flag to track if we're creating a new mapping

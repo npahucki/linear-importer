@@ -22,26 +22,33 @@ const STATUSES_TO_CREATE = [
   { name: FINISHED, color: "#17A2B8", type: COMPLETED_TYPE }, 
 ];
 
-async function createStatusForTeam({ teamName, teamId }) {  
+async function createStatusForTeam({ teamId }) {
   try {
-    console.log(chalk.yellow(`🔄 Creating Workflow Statuses...`));
-
+    console.log(chalk.cyan(`🔄 Creating Workflow Statuses...`));
+    
     for (const status of STATUSES_TO_CREATE) {
-      const response = await linearClient.createWorkflowState({
-        teamId,
-        name: status.name,
-        color: status.color,
-        type: status.type
-      });
+      try {
+        const response = await linearClient.createWorkflowState({
+          teamId,
+          name: status.name,
+          color: status.color,
+          type: status.type
+        });
 
-      if (response.success) {
-        console.log(chalk.green(`✅ Workflow Status "${status.name}" created`));
-      } else {
-        console.error(chalk.red(`Error creating workflow Status "${status.name}":`, response.errors));
+        if (response.success) {
+          console.log(chalk.green(`✅ Workflow Status "${status.name}" created`));
+        } else {
+          console.error(chalk.dim.yellow(`Failed to create "${status.name}": ${response.errors}. Continuing...`));
+        }
+      } catch (statusError) {
+        console.error(chalk.dim.yellow(`Error creating status "${status.name}":`, statusError.message));
       }
     }
+    
+    console.log(chalk.cyan('✨ Workflow Status creation completed'));
   } catch (error) {
-    console.error(chalk.red("Error creating workflow Status:"), error.message);
+    console.error(chalk.redBright("Fatal error in workflow Status creation:"), error.message);
+    throw error; // Re-throw fatal errors
   }
 }
 

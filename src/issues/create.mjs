@@ -20,7 +20,7 @@ async function getUserMapping(teamName) {
       projectRoot,
       "log",
       teamName,
-      "user-mapping.json",
+      "user_mapping.json",
     );
 
     if (ENABLE_DETAILED_LOGGING) {

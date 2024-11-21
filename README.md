@@ -17,7 +17,7 @@ Built with the [Linear SDK](https://github.com/linear/linear/tree/master/package
 - [Story Types](#story-types)
 - [Releases](#releases) (Pivotal Releases → Linear parent issues with associated stories as sub-issues)
 - [Priority](#priority)
-- [Assignee](#assignee--smart-user-mapping) (Automatically matches Pivotal Users to Linear Member accounts)
+- [Assignee](#assignee--smart-user_mapping) (Automatically matches Pivotal Users to Linear Member accounts)
 - [Subscribers](#subscribers)
 - [Created Date](#created-date)
 - [Due Date](#due-date)
@@ -114,7 +114,7 @@ Linear Issues will be assigned a label with the corresponding Story Type (See [L
 - For stories without owners:
   - Story creator becomes the assignee
 
-- User Map data is stored in `log/<team>/user-mapping.json`:
+- User Map data is stored in `log/<team>/user_mapping.json`:
   ```json
   {
     "generated": "2024-01-01T00:00:00.000Z",
@@ -166,7 +166,7 @@ Linear Issues will be assigned a label with the corresponding Story Type (See [L
 
 - Unique Team data is stored in team-specific folders (`log/<team-name>`). Each folder contains:
   - `output_<timestamp>.txt`: Complete console output for each import attempt
-  - `user-mapping.json` - Maps Pivotal Tracker usernames to Linear user accounts (see [Assignee / Smart User Mapping](#assignee--smart-user-mapping))
+  - `user_mapping.json` - Maps Pivotal Tracker usernames to Linear user accounts (see [Assignee / Smart User Mapping](#assignee--smart-user_mapping))
   - `successful_imports.csv` - Logs successfully imported Pivotal Stories. These will be skipped on subsequent import attempts, preventing duplicates.
 
 > ⚠️ **WARNING**  

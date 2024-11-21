@@ -94,7 +94,11 @@ if (userConfirmedProceed) {
 
   const processReleaseStories = async () => {
     if (newReleaseStories?.length === 0) {
-      console.log("No Release Stories found in the CSV file.");
+      console.log(
+        chalk.cyan(
+          `Converting ${newReleaseStories.length} Release Stories into Linear Cycles for Team ${teamName}`,
+        ),
+      );
     } else {
       console.log(
         chalk.cyan(
