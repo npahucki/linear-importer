@@ -53,8 +53,9 @@ async function createStatusForTeam({ teamId }) {
     }
 
     console.log(chalk.green(`\nStatuses created: ${successCount}/${totalCount}`));
-    console.log(chalk.yellow(`Failed to create: ${failedCount}`));
-    
+    if (failedCount > 0) {
+      console.log(chalk.yellow(`Failed to create: ${failedCount}`));
+    }
   } catch (error) {
     console.error(chalk.redBright("Error creating workflow Status:"), error.message);
   }

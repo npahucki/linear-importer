@@ -18,6 +18,7 @@ async function createLabels({ teamId, labels }) {
 
         if (response.success) {
           successful++;
+          console.log(chalk.green(`✅ Label "${label.name}" created`));
         } else {
           failed++;
           console.error(chalk.dim.yellow(`${response.errors}. Skipping...`));
