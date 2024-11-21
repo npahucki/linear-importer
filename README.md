@@ -28,7 +28,6 @@ Built with the [Linear SDK](https://github.com/linear/linear/tree/master/package
 - [Considerations](#considerations)
 - [API Rate Limits](#api-rate-limits)
 - [Issues](#issues)
-- [TODO](#todo)
 
 
 ## Setup
@@ -186,7 +185,4 @@ Linear Issues will be assigned a label with the corresponding Story Type (See [L
 - The `MAX_REQUESTS_PER_SECOND` ENV var can be adjusted to throttle request frequency
 
 #### Issues
-- Label creation can only be run 1 time https://github.com/nverges/pivotal-linear-importer/issues/13
-
-#### TODO
 - Pivotal Estimate -> Linear Estimate https://github.com/nverges/pivotal-linear-importer/issues/4
