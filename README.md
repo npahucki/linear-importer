@@ -25,9 +25,9 @@ Built with the [Linear SDK](https://github.com/linear/linear/tree/master/package
 - [Logger](#logger)
 
 #### Other
-- [Considerations](#considerations)
+- [Notes](#notes)
 - [API Rate Limits](#api-rate-limits)
-- [Issues](#issues)
+- [TODO](#todo)
 
 
 ## Setup
@@ -184,5 +184,5 @@ Linear Issues will be assigned a label with the corresponding Story Type (See [L
 - Linear sets rate limits on their API usage, which you will probably reach. The Linear team was helpful in increasing my rate limits temporarily. https://developers.linear.app/docs/graphql/working-with-the-graphql-api/rate-limiting.
 - The `MAX_REQUESTS_PER_SECOND` ENV var can be adjusted to throttle request frequency
 
-#### Issues
+#### TODO
 - Pivotal Estimate -> Linear Estimate https://github.com/nverges/pivotal-linear-importer/issues/4
