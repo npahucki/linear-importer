@@ -26,6 +26,10 @@ async function createStatusForTeam({ teamId }) {
   try {
     console.log(chalk.cyan(`🔄 Creating Workflow Statuses...`));
     
+    let successCount = 0;
+    let failedCount = 0;
+    const totalCount = STATUSES_TO_CREATE.length;
+
     for (const status of STATUSES_TO_CREATE) {
       try {
         const response = await linearClient.createWorkflowState({
@@ -36,19 +40,23 @@ async function createStatusForTeam({ teamId }) {
         });
 
         if (response.success) {
+          successCount++;
           console.log(chalk.green(`✅ Workflow Status "${status.name}" created`));
         } else {
-          console.error(chalk.dim.yellow(`Failed to create "${status.name}": ${response.errors}. Continuing...`));
+          failedCount++;
+          console.error(chalk.dim.yellow(`${response.errors}. Skipping...`));
         }
-      } catch (statusError) {
-        console.error(chalk.dim.yellow(`Error creating status "${status.name}":`, statusError.message));
+      } catch (error) {
+        failedCount++;
+        console.error(chalk.dim.yellow(`Failed to create "${status.name}": ${error.message}`));
       }
     }
+
+    console.log(chalk.green(`\nStatuses created: ${successCount}/${totalCount}`));
+    console.log(chalk.yellow(`Failed to create: ${failedCount}`));
     
-    console.log(chalk.cyan('✨ Workflow Status creation completed'));
   } catch (error) {
-    console.error(chalk.redBright("Fatal error in workflow Status creation:"), error.message);
-    throw error; // Re-throw fatal errors
+    console.error(chalk.redBright("Error creating workflow Status:"), error.message);
   }
 }
 
