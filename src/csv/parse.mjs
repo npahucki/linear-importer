@@ -62,7 +62,7 @@ function readCSV(filePath) {
             .forEach((label) => labels.add(label));
         }
 
-        // Separate release stories so that we can attach sub-issues to them, since we cannot make Cycles in the past.
+        // Separate release stories so that we can attach sub-issues to them
         if (row["Type"] == "release") {
           const releaseRowFormatted = {
             ...params,
@@ -107,7 +107,7 @@ function buildLabelsArray(labels) {
 // Main function to run the script
 async function parseCSV() {
   const __dirname = path.dirname(fileURLToPath(import.meta.url));
-  const assetsDir = path.join(__dirname, "assets");
+  const assetsDir = path.join(__dirname, "..", "..", "assets");
 
   const directories = await listDirectories(assetsDir);
 

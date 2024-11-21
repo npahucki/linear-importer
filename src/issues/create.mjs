@@ -52,28 +52,40 @@ async function createIssue({
   labelIds,
 }) {
   try {
-    const userMapping = await getUserMapping(teamName);
+  const userMapping = await getUserMapping(teamName);
 
-    // Get assigneeId from mapping if it exists
+    // Get assigneeId and subscriberIds from mapping if they exist
     let assigneeId;
+    const subscriberIds = [];
     if (pivotalStory.ownedBy) {
       // Ensure ownedBy is a string and split by comma
       const ownedByString = String(pivotalStory.ownedBy);
       const owners = ownedByString.split(",").map((owner) => owner.trim());
 
-      // Find first owner that has a mapping
+      // Find all owners that have a mapping
       for (const owner of owners) {
         const mappedUser = userMapping[owner];
         if (mappedUser?.linearId) {
-          assigneeId = mappedUser.linearId;
+          // First valid user becomes assignee
+          if (!assigneeId) {
+            assigneeId = mappedUser.linearId;
+            if (ENABLE_DETAILED_LOGGING) {
+              console.log(
+                chalk.blue(
+                  `Mapped Pivotal user "${owner}" to Linear ID: ${assigneeId} as assignee`,
+                ),
+              );
+            }
+          }
+          // Add all valid users as subscribers
+          subscriberIds.push(mappedUser.linearId);
           if (ENABLE_DETAILED_LOGGING) {
             console.log(
               chalk.blue(
-                `Mapped Pivotal user "${owner}" to Linear ID: ${assigneeId}`,
+                `Added Pivotal user "${owner}" to subscribers`,
               ),
             );
           }
-          break; // Exit loop once we find a valid mapping
         }
       }
 
@@ -118,6 +130,8 @@ async function createIssue({
         : undefined,
       priority: formatPriority(pivotalStory.priority),
       assigneeId,
+      subscriberIds,
+      cycleId: null,
       // estimate: [0, 1, 2, 4, 8, 16][Math.floor(Math.random() * 6)]
     });
 
@@ -203,9 +217,9 @@ async function createIssue({
 
 function formatPriority(pivotalStoryPriority) {
   const pivotalPriorities = {
-    "p3 - Low": 4,
-    "p2 - Medium": 3,
     "p1 - High": 2,
+    "p2 - Medium": 3,
+    "p3 - Low": 4,
   };
 
   return pivotalPriorities[pivotalStoryPriority] || 4;

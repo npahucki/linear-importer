@@ -1,11 +1,10 @@
-import { REQUESTS_PER_SECOND } from "../config/config.js";
-import parseCSV, { parseCSVFile } from "./csv/parse.mjs";
+import { MAX_REQUESTS_PER_SECOND } from "../config/config.js";
+import parseCSV from "./csv/parse.mjs";
 import chalk from "chalk";
-import fs from "fs/promises";
 
 import selectTeam from "./teams/select.mjs";
 import fetchStatuses from "./statuses/list.mjs";
-import deleteLabels from "./labels/delete.mjs";
+// import deleteLabels from "./labels/delete.mjs";
 import createLabels from "./labels/create.mjs";
 import fetchLabels from "./labels/list.mjs";
 import fetchIssuesForTeam from "./issues/list.mjs";
@@ -20,17 +19,17 @@ import proceedWithImport from "./prompts/proceed_with_import.js";
 
 // import getTeamMembers from "./teams/members.mjs";
 
-import { setupLogger } from "../logger/init.mjs";
+import { setupLogger } from "./logger/init.mjs";
 import { RELEASE_LABEL_NAME } from "./init.mjs";
 import init from "./init.mjs";
-import readSuccessfulImports from "../logger/read_successful_imports.mjs";
+import readSuccessfulImports from "./logger/read_successful_imports.mjs";
 
-import logSuccessfulImport from "../logger/log_successful_import.mjs";
+import logSuccessfulImport from "./logger/log_successful_import.mjs";
 
 const CREATE_ISSUES = true;
 
 // const DELAY = 0
-const DELAY = Math.ceil(500 / REQUESTS_PER_SECOND);
+const DELAY = Math.ceil(500 / MAX_REQUESTS_PER_SECOND);
 
 const { teamId, teamName } = await selectTeam();
 if (!teamId) {
@@ -48,8 +47,6 @@ const {
   statusTypes,
   labels,
   csvFilename,
-  requestedBy,
-  ownedBy,
   pivotalUsers,
 } = await parseCSV();
 const { importFiles } = await importFileAttachments();
@@ -101,7 +98,7 @@ if (userConfirmedProceed) {
     } else {
       console.log(
         chalk.cyan(
-          `Converting ${newReleaseStories.length} Release Stories into Linear Cycles for Team ${teamName} -${teamId}`,
+          `Converting ${newReleaseStories.length} Release Stories into Linear Cycles for Team ${teamName}`,
         ),
       );
 
@@ -168,7 +165,7 @@ if (userConfirmedProceed) {
     } else {
       console.log(
         chalk.cyan(
-          `Converting ${newPivotalStories.length} Pivotal Stories into Linear Issues for Team ${teamId}`,
+          `Converting ${newPivotalStories.length} Pivotal Stories into Linear Issues for Team ${teamName}`,
         ),
       );
 

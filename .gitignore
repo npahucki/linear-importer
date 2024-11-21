@@ -1,6 +1,6 @@
+_backup
 .DS_Store
 .env
-node_modules
-src/csv/assets
-src/csv/_backup
+assets
 log/*
+node_modules
