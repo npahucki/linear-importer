@@ -2,5 +2,4 @@ _backup
 .DS_Store
 .env
 assets
-log/*
 node_modules
