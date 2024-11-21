@@ -15,12 +15,12 @@ Built with the [Linear SDK](https://github.com/linear/linear/tree/master/package
 - [Labels](#labels)
 - [Statuses](#statuses)
 - [Story Types](#story-types)
+- [Releases](#releases) (Pivotal Releases → Linear parent issues with associated stories as sub-issues)
 - [Priority](#priority)
-- [Created Date](#created-date)
-- [Due Date](#due-date)
 - [Assignee](#assignee--smart-user-mapping) (Automatically matches Pivotal Users to Linear Member accounts)
 - [Subscribers](#subscribers)
-- [Releases](#releases) (Pivotal Releases → Linear parent issues with associated stories as sub-issues)
+- [Created Date](#created-date)
+- [Due Date](#due-date)
 - [Safe to retry](#logger) (Skips already imported stories to prevent duplicates)
 - [Logger](#logger)
 
@@ -96,22 +96,12 @@ Built with the [Linear SDK](https://github.com/linear/linear/tree/master/package
 
 Linear Issues will be assigned a label with the corresponding Story Type (See [Labels](#labels))
 
-#### Priority
 
-- Priority levels are mapped from Pivotal to Linear as follows:
-  - P1 (Pivotal) → High (Linear)
-  - P2 → Medium
-  - P3 → Low
+#### Releases
 
-#### Created Date
-
-- ⏰ Created Date of Pivotal Story will be preserved on the imported Linear Issue
-- 📅 Original timestamps are maintained for historical accuracy
-
-#### Due Date
-
-- ✅ Due dates from Pivotal are copied exactly to Linear
-- ❌ Stories without due dates in Pivotal will have no due date in Linear
+- Pivotal Releases → Linear parent issues with:
+  - Label: `pivotal - release`
+  - Associated stories as sub-issues
 
 #### Assignee / Smart User Mapping
 
@@ -145,30 +135,48 @@ Linear Issues will be assigned a label with the corresponding Story Type (See [L
   }
   ```
 
-#### Releases
+#### Subscribers
 
-- Pivotal Releases → Linear parent issues with:
-  - Label: `pivotal - release`
-  - Original release date and notes in description
-  - Associated stories as sub-issues
-  - Preserves all story attributes and relationships
+- Pivotal story owners become Linear subscribers
+- Pivotal `Requested By` -> Linear `Creator` is not possible because the Linear API prevents this value from being changed
+  - `Requested By` becomes either the owner (based on ABC order) or a subscriber
+  - `Creator` will be set to the user who created the Personal API Key
+  - See **Raw Pivotal Tracker Data** comment for original value
+
+#### Priority
+
+- Priority levels are mapped from Pivotal to Linear as follows:
+  - P1 (Pivotal) → High (Linear)
+  - P2 → Medium
+  - P3 → Low
+
+#### Created Date
+
+- ⏰ Created Date of Pivotal Story will be preserved on the imported Linear Issue
+- 📅 Original timestamps are maintained for historical accuracy
+
+#### Due Date
+
+- ✅ Due dates from Pivotal are copied exactly to Linear
+- ❌ Stories without due dates in Pivotal will have no due date in Linear
+
+#### Estimates
+- [TODO](#todo)
 
 #### Logger
 
 - Unique Team data is stored in team-specific folders (`log/<team-name>`). Each folder contains:
-  - `output_<timestamp>`: Complete console output for each import attempt
-  - `successful_imports.csv` - Logs successfully imported Pivotal Stories. These will be skipped on subsequent import attempts, preventing duplicates.
-    - **\*Warning**: Deleting this file will cause the importer to lose track of previously imported stories, which could result in duplicate issues being created in Linear\*
+  - `output_<timestamp>.txt`: Complete console output for each import attempt
   - `user-mapping.json` - Maps Pivotal Tracker usernames to Linear user accounts (see [Assignee / Smart User Mapping](#assignee--smart-user-mapping))
+  - `successful_imports.csv` - Logs successfully imported Pivotal Stories. These will be skipped on subsequent import attempts, preventing duplicates.
+
+> ⚠️ **WARNING**  
+> Deleting `successful_imports.csv` file will cause the importer to lose track of previously imported stories. Only delete this file if you want to start over.
 
 ## Other
 
-#### Considerations
+#### Notes
 
-- `Creator`: The Linear API prevents this value from being changed. It will be set to the currently authenticated user which created the Personal API Key
-  - See `Raw Pivotal Data` comment for original value
-
-It is not possible to override the `Creator` on a Linear Issue. 
 - Add Team Members in Linear before beginning import to take advantage of Smart User matching. However, users can be manually mapped.
 - Be mindful of notification preferences for members. This can get noisy while importing 😬
 
