@@ -6,20 +6,25 @@ async function createLabels({ teamId, labels }) {
     console.log(chalk.yellow(`🔄 Creating Labels...`));
 
     for (const label of labels) {
-      const response = await linearClient.createIssueLabel({
-        teamId,
-        name: label.name,
-        color: label.color,
-      });
+      try {
+        const response = await linearClient.createIssueLabel({
+          teamId,
+          name: label.name,
+          color: label.color,
+        });
 
-      if (response.success) {
-        console.log(chalk.green(`✅ Label "${label.name}" created`));
-      } else {
-        console.error(chalk.red(`Error creating label "${label.name}":`, response.errors));
+        if (response.success) {
+          console.log(chalk.green(`✅ Label "${label.name}" created`));
+        } else {
+          console.error(chalk.red(`Error creating label "${label.name}":`, response.errors));
+        }
+      } catch (labelError) {
+        console.error(chalk.red(`Failed to create label "${label.name}":`, labelError.message));
+        // Continue with next label
       }
     }
   } catch (error) {
-    console.error(chalk.red("Error creating labels:"), error.message);
+    console.error(chalk.red("Fatal error in label creation process:"), error.message);
   }
 }
 
