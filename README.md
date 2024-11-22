@@ -39,7 +39,8 @@ Built with the [Linear SDK](https://github.com/linear/linear/tree/master/package
 2. Create a `.env` file and and populate `API_KEY`
 3. `yarn install`
 4. Unzip Pivotal Tracker export zip file into `assets`
-5. Create Team Members in Linear
+5. Add Team Members in Linear
+6. Consider using a burner account before continuing (See [Notes](#notes))
 
 ### Usage
 
@@ -180,8 +181,9 @@ Linear Issues will be assigned a label with the corresponding Story Type (See [L
 
 #### Notes
 
-- Add Team Members in Linear before beginning import to take advantage of Automatic matching. However, users can be manually mapped.
-- Be mindful of notification preferences for members. This can get noisy while importing 😬
+- Add Team Members in Linear before beginning import to take advantage of Automatic User mapping. However, users can be manually mapped.
+- You will become a subscriber on every Issue that's created with this importer. Adjust your subscription preferences accordingly, or consider using a burner account.
+- Be mindful of notification preferences for your team members. This can get noisy while importing 😬
 
 #### API Rate Limits
 
