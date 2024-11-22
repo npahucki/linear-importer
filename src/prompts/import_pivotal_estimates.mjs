@@ -9,7 +9,7 @@ async function importPivotalEstimates({ teamId }) {
     {
       type: "list",
       name: "importEstimates",
-      message: "Do you want to import Estimates?",
+      message: "Do you want to import estimates?",
       choices: [
         { name: "Yes", value: true },
         { name: "No", value: false },
@@ -28,7 +28,7 @@ async function importPivotalEstimates({ teamId }) {
           { name: "Yes", value: true },
           { name: "No", value: false },
         ],
-        message: `Your Estimation Scale is already set to ${estimateData.type} (${ESTIMATION_SCALES[estimateData.type]}). Change it?`,
+        message: `Your estimation scale is already set to ${estimateData.type} (${ESTIMATION_SCALES[estimateData.type]}).\n  Pivotal estimates will be rounded to the nearest value. Change it?`, 
         default: false,
       },
     ]);
@@ -41,7 +41,7 @@ async function importPivotalEstimates({ teamId }) {
       {
         type: "list",
         name: "estimationScale",
-        message: "Select an estimation scale. Pivotal estimates will be rounded to the closest matching value:",
+        message: "Select an estimation scale:",
         choices: [
           { name: "Exponential (0,1,2,4,8,16)", value: "exponential" },
           { name: "Fibonacci (0,1,2,3,5,8)", value: "fibonacci" },

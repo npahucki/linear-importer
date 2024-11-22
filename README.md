@@ -4,7 +4,7 @@ A command-line tool that migrates your Pivotal Tracker projects to Linear. Using
 
 - Pivotal Stories → Linear Issues
 - Pivotal Releases → Linear Parent Issues (with associated stories as sub-issues)
-- Preserves attachments, comments, labels, assignees, priorities, and dates
+- Preserves file attachments, comments, labels, statuses, priorities, estimates, assignees, subscribers and dates
 
 Built with the [Linear SDK](https://github.com/linear/linear/tree/master/packages/sdk).
 
@@ -17,6 +17,7 @@ Built with the [Linear SDK](https://github.com/linear/linear/tree/master/package
 - [Story Types](#story-types)
 - [Releases](#releases) (Pivotal Releases → Linear parent issues with associated stories as sub-issues)
 - [Priority](#priority)
+- [Estimate](#estimate)
 - [Assignee](#assignee) (Automatically matches Pivotal Users to Linear Member accounts)
 - [Subscribers](#subscribers)
 - [Created Date](#created-date)
@@ -102,6 +103,19 @@ Linear Issues will be assigned a label with the corresponding Story Type (See [L
   - Label: `pivotal - release`
   - Associated stories as sub-issues
 
+
+#### Priority
+
+- Priority levels are mapped from Pivotal to Linear as follows:
+  - P1 (Pivotal) → High (Linear)
+  - P2 → Medium
+  - P3 → Low
+
+### Estimate
+
+- Prompts user to choose a new Estimate Scale
+- Rounds pivotal estimate to nearest Linear value
+
 #### Assignee
 
 - Automatically matches Pivotal users to Linear team members by comparing names and emails
@@ -142,13 +156,6 @@ Linear Issues will be assigned a label with the corresponding Story Type (See [L
   - `Creator` will be set to the user who created the Personal API Key
   - See **Raw Pivotal Tracker Data** comment for original value
 
-#### Priority
-
-- Priority levels are mapped from Pivotal to Linear as follows:
-  - P1 (Pivotal) → High (Linear)
-  - P2 → Medium
-  - P3 → Low
-
 #### Created Date
 
 - ⏰ Created Date of Pivotal Story will be preserved on the imported Linear Issue
@@ -158,9 +165,6 @@ Linear Issues will be assigned a label with the corresponding Story Type (See [L
 
 - ✅ Due dates from Pivotal are copied exactly to Linear
 - ❌ Stories without due dates in Pivotal will have no due date in Linear
-
-#### Estimates
-- [TODO](#todo)
 
 #### Logger
 
@@ -183,6 +187,3 @@ Linear Issues will be assigned a label with the corresponding Story Type (See [L
 
 - Linear sets rate limits on their API usage, which you will probably reach. The Linear team was helpful in increasing my rate limits temporarily. https://developers.linear.app/docs/graphql/working-with-the-graphql-api/rate-limiting.
 - The `MAX_REQUESTS_PER_SECOND` ENV var can be adjusted to throttle request frequency
-
-#### TODO
-- Pivotal Estimate -> Linear Estimate https://github.com/nverges/pivotal-linear-importer/issues/4

@@ -11,7 +11,6 @@ import fetchLabels from "./labels/list.mjs";
 import fetchIssuesForTeam from "./issues/list.mjs";
 import createIssue from "./issues/create.mjs";
 
-
 import importPivotalEstimates from "./prompts/import_pivotal_estimates.mjs";
 import importFileAttachments from "./prompts/import_file_attachments.js";
 import importLabelsFromCSV from "./prompts/import_labels_from_csv.js";
@@ -57,7 +56,6 @@ const { importFiles } = await importFileAttachments();
 const { importLabels } = await importLabelsFromCSV();
 const { selectedStatusTypes } = await selectStatusTypes(statusTypes);
 const successfulImports = await readSuccessfulImports(teamName);
-
 
 const newReleaseStories = releaseStories.filter(
   (story) => !successfulImports.has(story.id),
@@ -221,7 +219,7 @@ if (userConfirmedProceed) {
             labelIds,
             csvFilename,
             importFiles,
-            estimationScale
+            estimationScale,
           });
           await logSuccessfulImport(pivotalStory.id, teamName);
         } catch (error) {

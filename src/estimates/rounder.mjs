@@ -4,16 +4,23 @@ import chalk from "chalk";
 
 export function findClosestEstimate(value, estimationScale) {
   if (!estimationScale || !value) return null;
-  
+
   const scale = ESTIMATION_SCALES[estimationScale];
   const numericValue = Number(value);
-  
+
   if (isNaN(numericValue)) return null;
 
   if (ENABLE_DETAILED_LOGGING) {
     console.log("value", value);
-    console.log(chalk.magenta('estimationScale'), estimationScale);
-    console.log(chalk.magenta('scale'), scale);
+    console.log(chalk.magenta("estimationScale"), estimationScale);
+    console.log(chalk.magenta("scale"), scale);
+  }
+
+  if (scale.includes(numericValue)) {
+    if (ENABLE_DETAILED_LOGGING) {
+      console.log(chalk.magenta("exact match found:"), numericValue);
+    }
+    return numericValue;
   }
 
   let closest = scale[0];
@@ -28,8 +35,8 @@ export function findClosestEstimate(value, estimationScale) {
   }
 
   if (ENABLE_DETAILED_LOGGING) {
-    console.log(chalk.magenta('closest'), closest);
+    console.log(chalk.magenta("closest"), closest);
   }
-  
+
   return closest;
 }
