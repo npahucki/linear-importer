@@ -53,9 +53,9 @@ const {
 } = await parseCSV();
 
 // Optional Import params
-const estimationScale = await importPivotalEstimates({ teamId });
 const { importFiles } = await importFileAttachments();
 const { importLabels } = await importLabelsFromCSV();
+const estimationScale = await importPivotalEstimates({ teamId });
 const { selectedStatusTypes } = await selectStatusTypes(statusTypes);
 const successfulImports = await readSuccessfulImports(teamName);
 const uniquePivotalStories = [

@@ -6,6 +6,8 @@ export function findClosestEstimate(value, estimationScale) {
   if (!estimationScale || !value) return null;
 
   const scale = ESTIMATION_SCALES[estimationScale];
+
+  if (!scale) return null;
   const numericValue = Number(value);
 
   if (isNaN(numericValue)) return null;
