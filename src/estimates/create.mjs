@@ -15,7 +15,7 @@ async function createEstimates({ teamId }) {
         issueEstimationExtended: false,
         issueEstimationAllowZero: true,
       });
-    }    
+    }
 
     // console.log(chalk.green('✅ Issue Estimation enabled:') chalk.cyan(`${issueEstimationType}`));
     console.log(chalk.green('✅ Issue Estimation enabled:'), chalk.cyan(`${issueEstimationType}`));

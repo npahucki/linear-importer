@@ -1,11 +1,16 @@
 import linearClient from "../../config/client.mjs";
+import { ESTIMATION_SCALES } from "./estimation_scales.js";
 
-const ESTIMATION_SCALES = {
-  not_in_use: null,
-  exponential: [0, 1, 2, 4, 8, 16, 32, 64],
-  fibonacci: [0, 1, 2, 3, 5, 8, 13, 21],
-  linear: [0, 1, 2, 3, 4, 5, 6, 7],
-};
+export function findClosestEstimate(value, scale) {
+  if (!scale || !value) return null;
+  
+  const numericValue = Number(value);
+  if (isNaN(numericValue)) return null;
+
+  return scale.reduce((closest, current) => {
+    return Math.abs(current - numericValue) < Math.abs(closest - numericValue) ? current : closest;
+  });
+}
 
 async function fetchEstimatesForTeam({ teamId }) {
   if (!teamId) {
@@ -23,7 +28,6 @@ async function fetchEstimatesForTeam({ teamId }) {
       scale: estimationScale,
     };
 
-    console.log("DATA!!! ", data);
     return data;
   } catch (error) {
     console.error("Error fetching estimates:", error);

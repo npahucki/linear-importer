@@ -17,7 +17,7 @@ Built with the [Linear SDK](https://github.com/linear/linear/tree/master/package
 - [Story Types](#story-types)
 - [Releases](#releases) (Pivotal Releases → Linear parent issues with associated stories as sub-issues)
 - [Priority](#priority)
-- [Assignee](#assignee--smart-user_mapping) (Automatically matches Pivotal Users to Linear Member accounts)
+- [Assignee](#assignee) (Automatically matches Pivotal Users to Linear Member accounts)
 - [Subscribers](#subscribers)
 - [Created Date](#created-date)
 - [Due Date](#due-date)
@@ -102,7 +102,7 @@ Linear Issues will be assigned a label with the corresponding Story Type (See [L
   - Label: `pivotal - release`
   - Associated stories as sub-issues
 
-#### Assignee / Smart User Mapping
+#### Assignee
 
 - Automatically matches Pivotal users to Linear team members by comparing names and emails
   - Prompts for manual matching when automatic matching fails
@@ -166,7 +166,7 @@ Linear Issues will be assigned a label with the corresponding Story Type (See [L
 
 - Unique Team data is stored in team-specific folders (`log/<team-name>`). Each folder contains:
   - `output_<timestamp>.txt`: Complete console output for each import attempt
-  - `user_mapping.json` - Maps Pivotal Tracker usernames to Linear user accounts (see [Assignee / Smart User Mapping](#assignee--smart-user_mapping))
+  - `user_mapping.json` - Maps Pivotal Tracker usernames to Linear user accounts (see [Assignee](#Assignee))
   - `successful_imports.csv` - Logs successfully imported Pivotal Stories. These will be skipped on subsequent import attempts, preventing duplicates.
 
 > ⚠️ **WARNING**  
@@ -176,7 +176,7 @@ Linear Issues will be assigned a label with the corresponding Story Type (See [L
 
 #### Notes
 
-- Add Team Members in Linear before beginning import to take advantage of Smart User matching. However, users can be manually mapped.
+- Add Team Members in Linear before beginning import to take advantage of Automatic matching. However, users can be manually mapped.
 - Be mindful of notification preferences for members. This can get noisy while importing 😬
 
 #### API Rate Limits
