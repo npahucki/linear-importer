@@ -182,7 +182,7 @@ Linear Issues will be assigned a label with the corresponding Story Type (See [L
 #### Notes
 
 - Add Team Members in Linear before beginning import to take advantage of Automatic User mapping. However, users can be manually mapped.
-- You will become a subscriber on every Issue that's created with this importer. Adjust your subscription preferences accordingly, or consider using a burner account.
+- You will become a subscriber on every Issue that's created with this importer. Adjust your notification preferences accordingly, or consider using a burner account.
 - Be mindful of notification preferences for your team members. This can get noisy while importing 😬
 
 #### API Rate Limits
