@@ -112,7 +112,7 @@ Linear Issues will be assigned a label with the corresponding Story Type (See [L
   - P2 → Medium
   - P3 → Low
 
-### Estimate
+#### Estimate
 
 - Prompts user to choose a new Estimate Scale
 - Rounds pivotal estimate to nearest Linear value
