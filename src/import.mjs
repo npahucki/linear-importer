@@ -1,4 +1,7 @@
-import { MAX_REQUESTS_PER_SECOND } from "../config/config.js";
+import {
+  ENABLE_DETAILED_LOGGING,
+  MAX_REQUESTS_PER_SECOND,
+} from "../config/config.js";
 import parseCSV from "./csv/parse.mjs";
 import chalk from "chalk";
 
@@ -25,12 +28,9 @@ import { setupLogger } from "./logger/init.mjs";
 import { RELEASE_LABEL_NAME } from "./init.mjs";
 import init from "./init.mjs";
 import readSuccessfulImports from "./logger/read_successful_imports.mjs";
-
 import logSuccessfulImport from "./logger/log_successful_import.mjs";
 
 const CREATE_ISSUES = true;
-
-// const DELAY = 0
 const DELAY = Math.ceil(500 / MAX_REQUESTS_PER_SECOND);
 
 const { teamId, teamName } = await selectTeam();
@@ -51,21 +51,62 @@ const {
   csvFilename,
   pivotalUsers,
 } = await parseCSV();
+
+// Optional Import params
 const estimationScale = await importPivotalEstimates({ teamId });
 const { importFiles } = await importFileAttachments();
 const { importLabels } = await importLabelsFromCSV();
 const { selectedStatusTypes } = await selectStatusTypes(statusTypes);
 const successfulImports = await readSuccessfulImports(teamName);
+const uniquePivotalStories = [
+  ...new Map(pivotalStories.map((story) => [story.id, story])).values(),
+];
+
+// Logs
+if (ENABLE_DETAILED_LOGGING) {
+  console.log("\nImport Status:");
+  console.log("Successful imports from CSV:", successfulImports.size);
+  console.log(
+    "Sample of successful imports:",
+    Array.from(successfulImports).slice(0, 5),
+  );
+  console.log("\nPivotal Stories:");
+  console.log("Total stories from Pivotal (raw):", pivotalStories.length);
+  console.log(
+    "Total unique stories from Pivotal:",
+    uniquePivotalStories.length,
+  );
+  console.log(
+    "Sample of unique Pivotal story IDs:",
+    uniquePivotalStories.slice(0, 5).map((story) => story.id),
+  );
+}
 
 const newReleaseStories = releaseStories.filter(
   (story) => !successfulImports.has(story.id),
 );
+
 // Filter pivotal stories based on selectedStatusTypes
-const newPivotalStories = pivotalStories.filter(
+const newPivotalStories = uniquePivotalStories.filter(
   (story) =>
     selectedStatusTypes.includes(story.type.toLowerCase()) &&
     !successfulImports.has(story.id),
 );
+
+if (ENABLE_DETAILED_LOGGING) {
+  console.log("\nFiltering results:");
+  console.log("- Total stories before filtering:", uniquePivotalStories.length);
+  console.log(
+    "- Stories matching selected type(s):",
+    uniquePivotalStories.filter((story) =>
+      selectedStatusTypes.includes(story.type.toLowerCase()),
+    ).length,
+  );
+  console.log(
+    "- Stories remaining after excluding imports:",
+    newPivotalStories.length,
+  );
+}
 
 const { userConfirmedProceed } = await proceedWithImport({
   releaseStories: newReleaseStories,
@@ -82,9 +123,6 @@ if (userConfirmedProceed) {
     process.exit(0);
   }
 
-  // Delete existing labels
-  // await deleteLabels({ teamId })
-
   // Creates Team Labels and Workflow Statuses
   await init({ teamId, teamName, pivotalUsers });
 
@@ -97,9 +135,7 @@ if (userConfirmedProceed) {
   const processReleaseStories = async () => {
     if (newReleaseStories?.length === 0) {
       console.log(
-        chalk.cyan(
-          `Converting ${newReleaseStories.length} Release Stories into Linear Cycles for Team ${teamName}`,
-        ),
+        chalk.cyan(`No release stories to convert for Team ${teamName}`),
       );
     } else {
       console.log(
@@ -168,7 +204,7 @@ if (userConfirmedProceed) {
   // Process Pivotal Stories
   const processPivotalStories = async () => {
     if (newPivotalStories?.length === 0) {
-      console.log("No Pivotal Stories found in the CSV file.");
+      console.log("No Pivotal Stories found to import.");
     } else {
       console.log(
         chalk.cyan(
