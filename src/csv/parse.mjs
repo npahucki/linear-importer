@@ -8,6 +8,8 @@ import path from "path";
 import { buildParams } from "./_utils.js";
 import selectDirectory from "../prompts/select_csv_directory.js";
 
+import { findClosestEstimate } from "../estimates/list.mjs";
+
 // Function to list directories in the assets directory
 async function listDirectories(directory) {
   const items = await fs.readdir(directory, { withFileTypes: true });
@@ -20,6 +22,7 @@ function readCSV(filePath) {
     const pivotalStories = [];
     const releaseStories = [];
     const labels = new Set();
+    const estimates = new Set();
     const statusTypes = new Set();
     const requestedBy = new Set();
     const ownedBy = new Set();
@@ -39,6 +42,10 @@ function readCSV(filePath) {
         // Add status type to Set if it exists
         if (row["Type"]) {
           statusTypes.add(row["Type"]);
+        }
+
+        if (row["Estimate"] && !isNaN(Number(row["Estimate"]))) {
+          estimates.add(Number(row["Estimate"]));
         }
 
         if (row["Requested By"]) {
@@ -91,6 +98,7 @@ function readCSV(filePath) {
           pivotalUsers: Array.from(new Set([...ownedBy, ...requestedBy])),
           requestedBy: Array.from(requestedBy),
           ownedBy: Array.from(ownedBy),
+          estimates: Array.from(estimates).sort((a, b) => a - b),
         }),
       )
       .on("error", reject);

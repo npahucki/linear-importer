@@ -10,6 +10,9 @@ import fetchLabels from "./labels/list.mjs";
 import fetchIssuesForTeam from "./issues/list.mjs";
 import createIssue from "./issues/create.mjs";
 
+import fetchEstimatesForTeam from "./estimates/list.mjs";
+
+import importPivotalEstimates from "./prompts/import_pivotal_estimates.js";
 import importFileAttachments from "./prompts/import_file_attachments.js";
 import importLabelsFromCSV from "./prompts/import_labels_from_csv.js";
 import selectStatusTypes from "./prompts/select_status_types.js";
@@ -49,6 +52,7 @@ const {
   csvFilename,
   pivotalUsers,
 } = await parseCSV();
+const { importEstimates } = await importPivotalEstimates();
 const { importFiles } = await importFileAttachments();
 const { importLabels } = await importLabelsFromCSV();
 const { selectedStatusTypes } = await selectStatusTypes(statusTypes);
@@ -87,8 +91,9 @@ if (userConfirmedProceed) {
   await init({ teamId, teamName, pivotalUsers });
 
   // Create Labels from CSV
-  if (importLabels) await createLabels({ teamId, labels });
+  // if (importLabels) await createLabels({ teamId, labels });
 
+  const estimateData = await fetchEstimatesForTeam({ teamId });
   const teamStatuses = await fetchStatuses({ teamId });
   const teamLabels = await fetchLabels({ teamId });
 
@@ -140,6 +145,7 @@ if (userConfirmedProceed) {
             importNumber,
             csvFilename,
             importFiles,
+            estimateData,
           });
           await logSuccessfulImport(pivotalStory.id, teamName);
         } catch (error) {
@@ -217,6 +223,7 @@ if (userConfirmedProceed) {
             importNumber,
             csvFilename,
             importFiles,
+            estimateData,
           });
           await logSuccessfulImport(pivotalStory.id, teamName);
         } catch (error) {
