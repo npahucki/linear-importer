@@ -4,7 +4,7 @@ A command-line tool that migrates your Pivotal Tracker projects to Linear. Using
 
 - Pivotal Stories → Linear Issues
 - Pivotal Releases → Linear Parent Issues (with associated stories as sub-issues)
-- Preserves attachments, comments, labels, assignees, priorities, and dates
+- Preserves file attachments, comments, labels, statuses, priorities, estimates, assignees, subscribers and dates
 
 Built with the [Linear SDK](https://github.com/linear/linear/tree/master/packages/sdk).
 
@@ -17,7 +17,8 @@ Built with the [Linear SDK](https://github.com/linear/linear/tree/master/package
 - [Story Types](#story-types)
 - [Releases](#releases) (Pivotal Releases → Linear parent issues with associated stories as sub-issues)
 - [Priority](#priority)
-- [Assignee](#assignee--smart-user_mapping) (Automatically matches Pivotal Users to Linear Member accounts)
+- [Estimate](#estimate)
+- [Assignee](#assignee) (Automatically matches Pivotal Users to Linear Member accounts)
 - [Subscribers](#subscribers)
 - [Created Date](#created-date)
 - [Due Date](#due-date)
@@ -103,7 +104,20 @@ Linear Issues will be assigned a label with the corresponding Story Type (See [L
   - Label: `pivotal - release`
   - Associated stories as sub-issues
 
-#### Assignee / Smart User Mapping
+
+#### Priority
+
+- Priority levels are mapped from Pivotal to Linear as follows:
+  - P1 (Pivotal) → High (Linear)
+  - P2 → Medium
+  - P3 → Low
+
+### Estimate
+
+- Prompts user to choose a new Estimate Scale
+- Rounds pivotal estimate to nearest Linear value
+
+#### Assignee
 
 - Automatically matches Pivotal users to Linear team members by comparing names and emails
   - Prompts for manual matching when automatic matching fails
@@ -143,13 +157,6 @@ Linear Issues will be assigned a label with the corresponding Story Type (See [L
   - `Creator` will be set to the user who created the Personal API Key
   - See **Raw Pivotal Tracker Data** comment for original value
 
-#### Priority
-
-- Priority levels are mapped from Pivotal to Linear as follows:
-  - P1 (Pivotal) → High (Linear)
-  - P2 → Medium
-  - P3 → Low
-
 #### Created Date
 
 - ⏰ Created Date of Pivotal Story will be preserved on the imported Linear Issue
@@ -160,14 +167,11 @@ Linear Issues will be assigned a label with the corresponding Story Type (See [L
 - ✅ Due dates from Pivotal are copied exactly to Linear
 - ❌ Stories without due dates in Pivotal will have no due date in Linear
 
-#### Estimates
-- [TODO](#todo)
-
 #### Logger
 
 - Unique Team data is stored in team-specific folders (`log/<team-name>`). Each folder contains:
   - `output_<timestamp>.txt`: Complete console output for each import attempt
-  - `user_mapping.json` - Maps Pivotal Tracker usernames to Linear user accounts (see [Assignee / Smart User Mapping](#assignee--smart-user_mapping))
+  - `user_mapping.json` - Maps Pivotal Tracker usernames to Linear user accounts (see [Assignee](#Assignee))
   - `successful_imports.csv` - Logs successfully imported Pivotal Stories. These will be skipped on subsequent import attempts, preventing duplicates.
 
 > ⚠️ **WARNING**  
@@ -177,14 +181,11 @@ Linear Issues will be assigned a label with the corresponding Story Type (See [L
 
 #### Notes
 
-- Add Team Members in Linear before beginning import to take advantage of Smart User matching. However, users can be manually mapped.
-- Since your user account will be the Creator on every imported Issue, you will become a subscriber on every single Issue. You may want to consider using a burner account to perform these imports to avoid unwanted notifications.
-- Be mindful of notification preferences for members. This can get noisy while importing 😬
+- Add Team Members in Linear before beginning import to take advantage of Automatic User mapping. However, users can be manually mapped.
+- You will become a subscriber on every Issue that's created with this importer. Adjust your subscription preferences accordingly, or consider using a burner account.
+- Be mindful of notification preferences for your team members. This can get noisy while importing 😬
 
 #### API Rate Limits
 
 - Linear sets rate limits on their API usage, which you will probably reach. The Linear team was helpful in increasing my rate limits temporarily. https://developers.linear.app/docs/graphql/working-with-the-graphql-api/rate-limiting.
 - The `MAX_REQUESTS_PER_SECOND` ENV var can be adjusted to throttle request frequency
-
-#### TODO
-- Pivotal Estimate -> Linear Estimate https://github.com/nverges/pivotal-linear-importer/issues/4

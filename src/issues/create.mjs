@@ -10,6 +10,8 @@ import upload from "../files/upload.mjs";
 import { ENABLE_DETAILED_LOGGING } from "../../config/config.js";
 import { exitProcess } from "../../config/config.js";
 
+import { findClosestEstimate } from "../estimates/rounder.mjs";
+
 import path from "path";
 
 async function getUserMapping(teamName) {
@@ -41,15 +43,16 @@ async function getUserMapping(teamName) {
 }
 
 async function createIssue({
+  importNumber,
   teamId,
   teamName,
   pivotalStory,
-  importNumber,
   parentId,
   stateId,
   csvFilename,
   importFiles,
   labelIds,
+  estimationScale
 }) {
   try {
     const userMapping = await getUserMapping(teamName);
@@ -150,7 +153,7 @@ async function createIssue({
       assigneeId,
       subscriberIds,
       cycleId: null,
-      // estimate: [0, 1, 2, 4, 8, 16][Math.floor(Math.random() * 6)]
+      estimate: pivotalStory.estimate ? findClosestEstimate(pivotalStory.estimate, estimationScale) : undefined,
     });
 
     if (newIssue.success) {

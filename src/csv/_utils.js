@@ -16,6 +16,7 @@ export function buildParams(row) {
     labels: row["Labels"],
     requestedBy: row["Requested By"],
     ownedBy: row["Owned By"],
+    estimate: row["Estimate"],
     comments: [...(comments || []), additionalPivotalData],
   };
 

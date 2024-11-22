@@ -4,19 +4,21 @@ import chalk from "chalk";
 
 import selectTeam from "./teams/select.mjs";
 import fetchStatuses from "./statuses/list.mjs";
+
 // import deleteLabels from "./labels/delete.mjs";
 import createLabels from "./labels/create.mjs";
 import fetchLabels from "./labels/list.mjs";
 import fetchIssuesForTeam from "./issues/list.mjs";
 import createIssue from "./issues/create.mjs";
 
+import importPivotalEstimates from "./prompts/import_pivotal_estimates.mjs";
 import importFileAttachments from "./prompts/import_file_attachments.js";
 import importLabelsFromCSV from "./prompts/import_labels_from_csv.js";
 import selectStatusTypes from "./prompts/select_status_types.js";
 import proceedWithImport from "./prompts/proceed_with_import.js";
 
+// import fetchEstimatesForTeam from "./estimates/list.mjs";
 // import createEstimates from "./estimates/create.mjs";
-
 // import getTeamMembers from "./teams/members.mjs";
 
 import { setupLogger } from "./logger/init.mjs";
@@ -49,6 +51,7 @@ const {
   csvFilename,
   pivotalUsers,
 } = await parseCSV();
+const estimationScale = await importPivotalEstimates({ teamId });
 const { importFiles } = await importFileAttachments();
 const { importLabels } = await importLabelsFromCSV();
 const { selectedStatusTypes } = await selectStatusTypes(statusTypes);
@@ -70,7 +73,6 @@ const { userConfirmedProceed } = await proceedWithImport({
   successfulImportsLength: successfulImports.size,
   selectedStatusTypes,
 });
-// await createEstimates({ teamId }); // TODO: Add prompt to allow choosing issue estimation type
 
 if (userConfirmedProceed) {
   if (newReleaseStories.length + newPivotalStories.length === 0) {
@@ -132,14 +134,15 @@ if (userConfirmedProceed) {
 
         try {
           await createIssue({
+            importNumber,
             teamId,
             teamName,
             pivotalStory,
             stateId,
             labelIds,
-            importNumber,
             csvFilename,
             importFiles,
+            estimationScale,
           });
           await logSuccessfulImport(pivotalStory.id, teamName);
         } catch (error) {
@@ -208,15 +211,15 @@ if (userConfirmedProceed) {
 
         try {
           await createIssue({
+            importNumber,
             teamId,
             teamName,
             pivotalStory,
             stateId,
             labelIds,
-            parentId: parentIssue?.id,
-            importNumber,
             csvFilename,
             importFiles,
+            estimationScale,
           });
           await logSuccessfulImport(pivotalStory.id, teamName);
         } catch (error) {
