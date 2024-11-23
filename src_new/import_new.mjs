@@ -1,5 +1,6 @@
 // import { initializeLogger, setupLogger } from "../logger/init.mjs";
 import { initializeLogger } from "../logger/logger.js";
+import createStatusesForTeam from "./statuses/create.mjs";
 import DetailedLogger from "../logger/detailed_logger.mjs";
 import importLabels from "./prompts/import_labels_new.js";
 import importEstimates from "./prompts/import_estimates_new.mjs";
@@ -8,6 +9,10 @@ import importFileAttachments from "./prompts/import_file_attachments_new.js";
 import importController from "./importer/import_controller.mjs";
 import proceedWithImport from "./prompts/proceed_with_import_new.js";
 import selectImportSource from "./prompts/select_import_source.js";
+
+import createLabels from "./labels/create.mjs";
+import createUserMapping from "./create_user_mapping.mjs";
+import { DEFAULT_LABELS } from "./labels/create.mjs";
 
 import selectDirectory from "./prompts/select_csv_directory_new.js";
 
@@ -53,17 +58,15 @@ const { shouldImportEstimates, estimationScale } = await importEstimates(
   team.id,
 );
 
-const options = {
-  shouldImportFileAttachments,
-  shouldImportLabels,
-  shouldImportEstimates,
-};
-
 const payload = {
-  options,
   team: {
     ...team,
     estimationScale,
+  },
+  options: {
+    shouldImportFileAttachments,
+    shouldImportLabels,
+    shouldImportEstimates,
   },
   meta: {
     directory,
@@ -71,17 +74,30 @@ const payload = {
   },
 };
 
-importController(payload);
+//=============================================================================
+// Format Data for Import Type
+//=============================================================================
+const sanitizedData = await importController(payload);
 
-// const sanitizedData = importController(payload);
-
+//=============================================================================
+// Initialize Team Data
+//=============================================================================
 await createUserMapping({
   team,
-  teamId: team.id,
-  teamName: team.name,
-  pivotalUsers: data.pivotalUsers,
-  foo: "bar",
+  pivotalUsers: sanitizedData.pivotalUsers,
 });
 
 await createLabels({ teamId: team.id, labels: DEFAULT_LABELS });
 await createStatusesForTeam({ teamId: team.id });
+
+const { userConfirmedProceed } = await proceedWithImport({
+  releaseStories: newReleaseStories,
+  pivotalStories: newPivotalStories,
+  successfulImportsLength: successfulImports.size,
+  selectedStatusTypes,
+});
+
+// function initializeTeamData({ team, data }) {
+//   await createLabels({ teamId, labels: LABELS_TO_CREATE });
+//   await createStatusesForTeam({ teamId });
+// }

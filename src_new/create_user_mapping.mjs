@@ -6,7 +6,11 @@ import fs from "fs/promises";
 import path from "path";
 import inquirer from "inquirer";
 
+import DetailedLogger from "../logger/detailed_logger.mjs";
+
 import { DEFAULT_LABELS } from "./labels/create.mjs";
+
+const detailedLogger = new DetailedLogger();
 
 export const RELEASE_LABEL_NAME = "pivotal - release";
 const FEATURE_LABEL_NAME = "pivotal - feature";
@@ -273,10 +277,14 @@ async function createUserMapping({ team, pivotalUsers }) {
         2,
       ),
     );
-    console.log(chalk.green(`User mapping saved to ${mappingPath}`));
+    detailedLogger.importantInfo(
+      `User mapping: ${JSON.stringify(userMapping, null, 2)}`,
+    );
+    detailedLogger.result(`User mapping saved to ${mappingPath}`);
   }
 
-  console.log(chalk.bold.green("✅ Setup complete!"));
+  detailedLogger.importantSuccess("✅ Setup complete!");
+
   console.log(chalk.bold.magenta("\n🚀 Starting import process...\n"));
   return userMapping;
 }
