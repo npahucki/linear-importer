@@ -1,5 +1,5 @@
 import fs from "fs/promises";
-import Logger from "../logger.mjs";
+import Logger from "./logger.mjs";
 
 const readSuccessfulImports = async (teamName) => {
   if (!teamName) {

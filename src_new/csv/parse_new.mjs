@@ -104,6 +104,15 @@ function readCSV(filePath) {
           requestedBy: Array.from(requestedBy),
           ownedBy: Array.from(ownedBy),
           estimates: Array.from(estimates).sort((a, b) => a - b),
+
+          // extractedUsernames: Array.from(new Set([...ownedBy, ...requestedBy])),
+          assignee: ownedBy ? Array.from(ownedBy) : Array.from(requestedBy),
+          subscribers: Array.from(new Set([...ownedBy, ...requestedBy])),
+          meta: {
+            extractedUsernames: Array.from(
+              new Set([...ownedBy, ...requestedBy]),
+            ),
+          },
         }),
       )
       .on("error", reject);

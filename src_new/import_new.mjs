@@ -3,18 +3,23 @@ import { initializeLogger } from "../logger/logger.js";
 import createStatusesForTeam from "./statuses/create.mjs";
 import DetailedLogger from "../logger/detailed_logger.mjs";
 import importLabels from "./prompts/import_labels_new.js";
-import importEstimates from "./prompts/import_estimates_new.mjs";
+import updateIssueEstimationType from "./estimates/update_issue_estimation_type.js";
+// import importEstimates from "./prompts/import_estimates_new.js";
+import importEstimates from "./estimates/import_estimates.js";
 import selectTeam from "./teams/select.mjs";
-import importFileAttachments from "./prompts/import_file_attachments_new.js";
+import importFiles from "./prompts/import_files.js";
 import importController from "./importer/import_controller.mjs";
 import proceedWithImport from "./prompts/proceed_with_import_new.js";
 import selectImportSource from "./prompts/select_import_source.js";
+import pivotal from "./importer/pivotal.mjs";
 
 import createLabels from "./labels/create.mjs";
 import createUserMapping from "./create_user_mapping.mjs";
 import { DEFAULT_LABELS } from "./labels/create.mjs";
 
 import selectDirectory from "./prompts/select_csv_directory_new.js";
+
+const detailedLogger = new DetailedLogger();
 
 /******************************************************************************
  * IMPORT CONFIGURATION AND EXECUTION
@@ -52,19 +57,16 @@ const directory = await selectDirectory();
 // Build Import Options
 //=============================================================================
 // Do you want to import file attachments?
-const shouldImportFileAttachments = await importFileAttachments();
+const shouldImportFiles = await importFiles();
 const shouldImportLabels = await importLabels();
-const { shouldImportEstimates, estimationScale } = await importEstimates(
-  team.id,
-);
+const shouldImportEstimates = await importEstimates();
+
+const issueEstimation = await updateIssueEstimationType(team);
 
 const payload = {
-  team: {
-    ...team,
-    estimationScale,
-  },
+  team,
   options: {
-    shouldImportFileAttachments,
+    shouldImportFiles,
     shouldImportLabels,
     shouldImportEstimates,
   },
@@ -77,27 +79,35 @@ const payload = {
 //=============================================================================
 // Format Data for Import Type
 //=============================================================================
-const sanitizedData = await importController(payload);
+// I need to document the expected shape of`sanitizedDAta`. it should have users,
+// const sanitizedData = await importController(payload);
+const { csvData } = await pivotal(payload);
+
+console.log("csvData", csvData);
 
 //=============================================================================
-// Initialize Team Data
+// Create User Mapping
 //=============================================================================
-await createUserMapping({
-  team,
-  pivotalUsers: sanitizedData.pivotalUsers,
+// await createUserMapping({
+//   team,
+//   extractedUsernames: csvData.extractedUsernames,
+// });
+
+//=============================================================================
+// Confirm Proceed
+//=============================================================================
+const userConfirmedProceed = await proceedWithImport({
+  confirmationMessage: "logging message here",
 });
 
-await createLabels({ teamId: team.id, labels: DEFAULT_LABELS });
-await createStatusesForTeam({ teamId: team.id });
+//=============================================================================
+// Create Labels and Statuses
+//=============================================================================
 
-const { userConfirmedProceed } = await proceedWithImport({
-  releaseStories: newReleaseStories,
-  pivotalStories: newPivotalStories,
-  successfulImportsLength: successfulImports.size,
-  selectedStatusTypes,
-});
+console.log("start doing things...");
+// await createLabels({ teamId: team.id, labels: DEFAULT_LABELS });
+// await createStatusesForTeam({ teamId: team.id });
 
-// function initializeTeamData({ team, data }) {
-//   await createLabels({ teamId, labels: LABELS_TO_CREATE });
-//   await createStatusesForTeam({ teamId });
-// }
+process.exit(0);
+
+detailedLogger.importantSuccess("Import complete!");

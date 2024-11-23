@@ -135,7 +135,7 @@ async function promptForManualMatch(pivotalUser, linearMembers) {
   return selectedMember;
 }
 
-async function createUserMapping({ team, pivotalUsers }) {
+async function createUserMapping({ team, extractedUsernames }) {
   console.log(chalk.yellow("\n🔄 Matching Pivotal users to Linear members..."));
 
   // Fetch Team Members
@@ -184,7 +184,7 @@ async function createUserMapping({ team, pivotalUsers }) {
   const unmatchedUsers = [];
 
   // First pass: automatic matching for users not in existing mapping
-  for (const pivotalUser of pivotalUsers) {
+  for (const pivotalUser of extractedUsernames) {
     // Skip if user already has a mapping
     if (userMapping[pivotalUser]) {
       continue;

@@ -16,7 +16,7 @@ async function importLabels() {
     },
   ]);
 
-  detailedLogger.info(`Should import labels: ${shouldImportLabels}`);
+  detailedLogger.info(`shouldImportLabels: ${shouldImportLabels}`);
 
   return shouldImportLabels;
 }

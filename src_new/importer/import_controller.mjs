@@ -15,24 +15,18 @@ async function importController({ team, options, meta }) {
   console.log("--------------------------------");
   detailedLogger.importantSuccess(`Processing ${meta.importSource} stories...`);
 
-  let data = {};
-  switch (meta.importSource) {
-    case "pivotal":
-      data = await importPivotalStory({ team, options, meta });
+  // let data = {};
+  // switch (meta.importSource) {
+  //   case "pivotal":
+  //     data = await importPivotalStory({ team, options, meta });
 
-      detailedLogger.result(`Data: ${JSON.stringify(data, null, 2)}`);
-      break;
-    default:
-      throw new Error(`Unknown import source: ${meta.importSource}`);
-  }
-
-  // {
-  //   team,
-  //   options,
-  //   meta
+  //     detailedLogger.result(`Data: ${JSON.stringify(data, null, 2)}`);
+  //     break;
+  //   default:
+  //     throw new Error(`Unknown import source: ${meta.importSource}`);
   // }
 
-  return data;
+  // return data;
 }
 
 export default importController;

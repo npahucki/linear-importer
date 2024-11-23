@@ -5,8 +5,17 @@ import selectStatusTypes from "../prompts/select_status_types.js";
 
 const detailedLogger = new DetailedLogger();
 
-async function importPivotalStory({ team, options, meta }) {
+async function pivotal({ team, options, meta }) {
   detailedLogger.importantInfo(`Importing Pivotal story`);
+
+  // detailedLogger.info(`🔸 Starting import for team ${team.name}`);
+  // detailedLogger.loading(`Import Source: ${meta.importSource}`);
+  console.log("--------------------------------");
+  detailedLogger.warning(`Team: ${JSON.stringify(team, null, 2)}`);
+  detailedLogger.success(`Options: ${JSON.stringify(options, null, 2)}`);
+  detailedLogger.info(`Meta: ${JSON.stringify(meta, null, 2)}`);
+  console.log("--------------------------------");
+  detailedLogger.importantSuccess(`Processing ${meta.importSource} stories...`);
 
   // const {
   //   releaseStories,
@@ -24,8 +33,6 @@ async function importPivotalStory({ team, options, meta }) {
 
   const { selectedStatusTypes } = await selectStatusTypes(csvData.statusTypes);
 
-  // Read successful imports
-
   // if (newReleaseStories.length + newPivotalStories.length === 0) {
   //   console.log(chalk.bold.green("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
   //   console.log(chalk.bold.green("✨ All stories already imported! ✨"));
@@ -35,10 +42,10 @@ async function importPivotalStory({ team, options, meta }) {
 
   detailedLogger.info(`Selected Status Types: ${selectedStatusTypes}`);
 
-  return csvData;
+  return { csvData, selectedStatusTypes };
 }
 
-export default importPivotalStory;
+export default pivotal;
 
 // console.log("\nImport Status:");
 //   console.log("Successful imports from CSV:", successfulImports.size);

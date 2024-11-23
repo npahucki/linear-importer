@@ -1,7 +1,9 @@
 import inquirer from "inquirer";
 import DetailedLogger from "../../logger/detailed_logger.mjs";
 
-async function importFileAttachments() {
+const detailedLogger = new DetailedLogger();
+
+async function importFiles() {
   const { shouldImportFiles } = await inquirer.prompt([
     {
       type: "list",
@@ -15,12 +17,9 @@ async function importFileAttachments() {
     },
   ]);
 
-  const detailedLogger = new DetailedLogger();
-  detailedLogger.info(
-    `Do you want to import file attachments? : ${shouldImportFiles}`,
-  );
+  detailedLogger.info(`shouldImportFiles: ${shouldImportFiles}`);
 
   return shouldImportFiles;
 }
 
-export default importFileAttachments;
+export default importFiles;

@@ -1,5 +1,4 @@
 import inquirer from "inquirer";
-import fetchEstimatesForTeam from "../estimates/list.mjs";
 import chalk from "chalk";
 import linearClient from "../../config/client.mjs";
 import { ESTIMATION_SCALES } from "../estimates/estimation_scales.js";
@@ -8,7 +7,7 @@ import DetailedLogger from "../../logger/detailed_logger.mjs";
 
 const detailedLogger = new DetailedLogger();
 
-async function importPivotalEstimates(teamId) {
+async function importPivotalEstimates(team) {
   const { shouldImportEstimates } = await inquirer.prompt([
     {
       type: "list",
@@ -22,13 +21,9 @@ async function importPivotalEstimates(teamId) {
     },
   ]);
 
-  if (shouldImportEstimates) {
-    detailedLogger.info(`Should import estimates: ${shouldImportEstimates}`);
+  detailedLogger.info(`Should import estimates: ${shouldImportEstimates}`);
 
-    // Fetch estimate data
-    const estimateData = await fetchEstimatesForTeam({ teamId });
-
-    // if (estimateData.type) {
+  if (team.issueEstimation.type) {
     const { changeEstimateType } = await inquirer.prompt([
       {
         type: "list",
@@ -38,9 +33,9 @@ async function importPivotalEstimates(teamId) {
           { name: "No", value: false },
         ],
         message: `Your estimation scale is already set to ${
-          estimateData.type
+          team.issueEstimation.type
         } (${
-          ESTIMATION_SCALES[estimateData.type]
+          ESTIMATION_SCALES[team.issueEstimation.type]
         }).\n  Pivotal estimates will be rounded to the nearest value. Change it?`,
         default: false,
       },
@@ -48,13 +43,13 @@ async function importPivotalEstimates(teamId) {
 
     if (!changeEstimateType) {
       detailedLogger.info(`Estimate type not changed`);
-      return estimateData.type;
+      return { issueEstimation: team.issueEstimation };
     }
 
-    const { estimationScale } = await inquirer.prompt([
+    const { issueEstimationType } = await inquirer.prompt([
       {
         type: "list",
-        name: "estimationScale",
+        name: "issueEstimationType",
         message: "Select an estimation scale:",
         choices: [
           { name: "Exponential (0,1,2,4,8,16)", value: "exponential" },
@@ -64,19 +59,17 @@ async function importPivotalEstimates(teamId) {
       },
     ]);
 
-    await linearClient.updateTeam(teamId, {
-      issueEstimationType: estimationScale,
-    });
+    try {
+      await linearClient.updateTeam(team.id, { issueEstimationType });
 
-    console.log(
-      chalk.green(
-        `✅ Team Estimation Scale updated to *${chalk.magenta(
-          estimationScale,
-        )}*`,
-      ),
-    );
+      detailedLogger.success(
+        `Updated issue estimation type to ${issueEstimationType}`,
+      );
+    } catch (error) {
+      detailedLogger.error(`Error updating issue estimation type: ${error}`);
+    }
 
-    return { shouldImportEstimates, estimationScale };
+    return issueEstimationType;
   }
 
   return null;

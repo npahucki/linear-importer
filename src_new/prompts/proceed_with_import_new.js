@@ -1,87 +1,17 @@
-import chalk from "chalk";
 import inquirer from "inquirer";
+
+import DetailedLogger from "../../logger/detailed_logger.mjs";
 import { ENABLE_IMPORTING } from "../../config/config.js";
+import chalk from "chalk";
 
-async function proceedWithImport({
-  pivotalStories = [],
-  releaseStories = [],
-  selectedStatusTypes = [],
-  successfulImportsLength = 0,
-}) {
-  const filteredReleaseStories = releaseStories.filter((story) =>
-    selectedStatusTypes.includes(story.type),
-  );
-  const filteredPivotalStories = pivotalStories.filter((story) =>
-    selectedStatusTypes.includes(story.type),
-  );
+const detailedLogger = new DetailedLogger();
 
-  const typeBreakdown = selectedStatusTypes
-    .map((type) => {
-      const pivotalCount = pivotalStories.filter(
-        (story) => story.type === type,
-      ).length;
-      const releaseCount = releaseStories.filter(
-        (story) => story.type === type,
-      ).length;
-      const totalCount = pivotalCount + releaseCount;
-      const color =
-        {
-          chore: "white",
-          bug: "red",
-          feature: "yellow",
-          epic: "magenta",
-          release: "green",
-        }[type] || "white";
-
-      return `\n       ${type}: ${chalk[color].bold(totalCount)}`;
-    })
-    .join("");
-
-  const confirmProceedPrompt =
-    chalk.blue.bold(`
-    📊 Import Summary:`) +
-    chalk.white(`
-       Already imported: ${chalk.green.bold(successfulImportsLength)}
-      ${typeBreakdown}
-
-      Total Remaining Stories: ${chalk.green.bold(filteredPivotalStories.length + filteredReleaseStories.length)}
-
-    ${chalk.magenta.bold("Proceed with importing?")}`);
-
-  if (!ENABLE_IMPORTING) {
-    console.log(
-      chalk.red.bold(
-        "\n╔═══════════════════════════════════════════════════════════════════════════╗",
-      ),
-    );
-    console.log(
-      chalk.red.bold(
-        "║                              IMPORTING DISABLED                           ║",
-      ),
-    );
-    console.log(
-      chalk.red.bold(
-        "╠═══════════════════════════════════════════════════════════════════════════╣",
-      ),
-    );
-    console.log(
-      chalk.red.bold(
-        "║  Set ENABLE_IMPORTING to true in the .env file to proceed with importing. ║",
-      ),
-    );
-    console.log(
-      chalk.red.bold(
-        "╚═══════════════════════════════════════════════════════════════════════════╝\n",
-      ),
-    );
-    process.exit(1);
-  }
-
+async function proceedWithImport({ confirmationMessage }) {
   const { userConfirmedProceed } = await inquirer.prompt([
     {
       type: "list",
       name: "userConfirmedProceed",
-      message: confirmProceedPrompt,
+      message: "Proceed with import?",
       choices: [
         { name: "Yes", value: true },
         { name: "No", value: false },
@@ -91,7 +21,28 @@ async function proceedWithImport({
     },
   ]);
 
-  return { userConfirmedProceed };
+  if (!userConfirmedProceed) {
+    detailedLogger.importantError("Import cancelled by user.");
+    process.exit(0);
+  }
+
+  if (!ENABLE_IMPORTING) {
+    console.log(chalk.red.bold("\n╔════════════════════════════════════╗"));
+    console.log(chalk.red.bold("║        IMPORTING DISABLED         ║"));
+    console.log(chalk.red.bold("║   Enable importing in .env file   ║"));
+    console.log(chalk.red.bold("╚════════════════════════════════════╝\n"));
+    process.exit(1);
+  }
+
+  detailedLogger.importantSuccess(`🚀 Starting import...`);
+  detailedLogger.info(`userConfirmedProceed: ${userConfirmedProceed}`);
+  // detailedLogger.info(`Import Source: ${payload.meta.importSource}`);
+  detailedLogger.info(confirmationMessage);
+
+  // detailedLogger.importantSuccess(`🚀 Starting import for team ${team.name}`);
+  // detailedLogger.importantInfo(`Import Source: ${payload.meta.importSource}`);
+
+  return userConfirmedProceed;
 }
 
 export default proceedWithImport;
