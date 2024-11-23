@@ -1,10 +1,11 @@
 import chalk from "chalk";
-import getTeamMembers from "./teams/members.mjs";
+import getTeamMembers from "../teams/members.mjs";
+
 import fs from "fs/promises";
 import path from "path";
 import inquirer from "inquirer";
 
-import DetailedLogger from "../logger/detailed_logger.mjs";
+import DetailedLogger from "../../logger/detailed_logger.mjs";
 
 const detailedLogger = new DetailedLogger();
 

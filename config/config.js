@@ -9,8 +9,9 @@ dotenv.config({ path: resolve(__dirname, "..", ".env") });
 
 export const API_KEY = process.env.API_KEY;
 export const MAX_REQUESTS_PER_SECOND = process.env.MAX_REQUESTS_PER_SECOND;
-export const ENABLE_DETAILED_LOGGING = process.env.ENABLE_DETAILED_LOGGING == 'true';
-export const ENABLE_IMPORTING = process.env.ENABLE_IMPORTING == 'true';
+export const ENABLE_DETAILED_LOGGING =
+  process.env.ENABLE_DETAILED_LOGGING == "true";
+export const ENABLE_IMPORTING = process.env.ENABLE_IMPORTING == "true";
 
 export const exitProcess = (code = 1) => {
   console.error("EXITING PROCESS");

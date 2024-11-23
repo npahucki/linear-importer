@@ -14,7 +14,7 @@ import selectImportSource from "./prompts/select_import_source.js";
 import pivotalFormatter from "./importer/pivotal_formatter.js";
 
 import createLabels from "./labels/create.mjs";
-import createUserMapping from "./create_user_mapping.mjs";
+import createUserMapping from "./users/create_user_mapping.js";
 import { DEFAULT_LABELS } from "./labels/create.mjs";
 
 import selectDirectory from "./prompts/select_csv_directory_new.js";
@@ -89,11 +89,8 @@ const payload = {
 //=============================================================================
 // Format Data for Import Type
 //=============================================================================
-// I need to document the expected shape of`sanitizedDAta`. it should have users,
-// const sanitizedData = await importController(payload);
+// TODO: Modify to swap different data sources, based on importSource
 const pivotalData = await pivotalFormatter(payload);
-
-console.log("pivotalData", pivotalData);
 
 //=============================================================================
 // Create User Mapping
@@ -106,7 +103,7 @@ await createUserMapping({
 //=============================================================================
 // Confirm Proceed
 //=============================================================================
-const userConfirmedProceed = await proceedWithImport({
+await proceedWithImport({
   confirmationMessage: "logging message here",
 });
 
@@ -115,8 +112,8 @@ const userConfirmedProceed = await proceedWithImport({
 //=============================================================================
 
 detailedLogger.importantInfo("Creating labels and statuses...");
-// await createLabels({ teamId: team.id, labels: DEFAULT_LABELS });
-// await createStatusesForTeam({ teamId: team.id });
+await createLabels({ teamId: team.id, labels: DEFAULT_LABELS });
+await createStatusesForTeam({ teamId: team.id });
 
 detailedLogger.loading("Importing stories...");
 

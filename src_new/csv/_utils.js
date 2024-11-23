@@ -20,9 +20,6 @@ export function buildParams(row) {
     comments: [...(comments || []), additionalPivotalData],
   };
 
-  // TODO:
-  // - ESTIMATE
-
   return params;
 }
 
