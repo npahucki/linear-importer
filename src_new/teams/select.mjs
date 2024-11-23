@@ -1,14 +1,13 @@
 import inquirer from "inquirer";
 import teamsList from "./list.mjs";
 
-import fetchLabels from "../labels/list.mjs";
 import fetchEstimatesForTeam from "../estimates/list.mjs";
 
 import DetailedLogger from "../../logger/detailed_logger.mjs";
 
-async function selectTeam() {
-  const detailedLogger = new DetailedLogger();
+const detailedLogger = new DetailedLogger();
 
+async function selectTeam() {
   if (!teamsList.length) {
     throw new Error("No teams found");
   }
@@ -37,8 +36,9 @@ async function selectTeam() {
 }
 
 async function buildTeam(selectedTeam) {
-  const detailedLogger = new DetailedLogger();
-  const labels = await fetchLabels({ teamId: selectedTeam.id });
+  // Adding issue estimation to the team object to be used for the `shouldImportEstimates` prompt
+  // We'll fetch this value again in `create_issues.js` immediately before creating issues to ensure the correct estimate type is used,
+  // because it's possible that the user changed the value in `update_issue_estimation_type.js`
   const issueEstimation = await fetchEstimatesForTeam({
     teamId: selectedTeam.id,
   });
@@ -46,7 +46,6 @@ async function buildTeam(selectedTeam) {
   const params = {
     id: selectedTeam.id,
     name: selectedTeam.name,
-    labels,
     issueEstimation,
   };
 

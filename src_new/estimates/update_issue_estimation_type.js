@@ -9,73 +9,55 @@ import chalk from "chalk";
 
 const detailedLogger = new DetailedLogger();
 
-async function updateIssueEstimationType(team, shouldImportEstimates) {
-  if (!shouldImportEstimates) {
+async function updateIssueEstimationType({ team }) {
+  const message = `Issue estimation is set to ${chalk.yellow(
+    `${team.issueEstimation.type} (${team.issueEstimation.scale})`,
+  )}.\n  Pivotal estimates will be rounded to the nearest value. Change it?`;
+
+  const { shouldChangeIssueEstimationType } = await inquirer.prompt([
+    {
+      type: "list",
+      name: "shouldChangeIssueEstimationType",
+      message,
+      choices: [
+        { name: "Yes", value: true },
+        { name: "No", value: false },
+      ],
+      default: false,
+    },
+  ]);
+
+  if (!shouldChangeIssueEstimationType) {
     detailedLogger.info(
-      `shouldImportEstimates is false. Skipping issue estimation type update...`,
+      `Estimate type not changed. Keeping ${team.issueEstimation.type} (${team.issueEstimation.scale})`,
     );
-    return team.issueEstimation;
+    return;
   }
 
-  if (team.issueEstimation.type) {
-    const message = `Issue estimation is set to ${chalk.yellow(
-      `${team.issueEstimation.type} (${team.issueEstimation.scale})`,
-    )}.\n  Pivotal estimates will be rounded to the nearest value. Change it?`;
+  const { issueEstimationType } = await inquirer.prompt([
+    {
+      type: "list",
+      name: "issueEstimationType",
+      message: "Select an estimation scale:",
+      choices: [
+        { name: "Exponential (0,1,2,4,8,16)", value: "exponential" },
+        { name: "Fibonacci (0,1,2,3,5,8)", value: "fibonacci" },
+        { name: "Linear (0,1,2,3,4,5)", value: "linear" },
+      ],
+    },
+  ]);
 
-    const { shouldChangeIssueEstimationType } = await inquirer.prompt([
-      {
-        type: "list",
-        name: "shouldChangeIssueEstimationType",
-        message,
-        choices: [
-          { name: "Yes", value: true },
-          { name: "No", value: false },
-        ],
-        default: false,
-      },
-    ]);
+  try {
+    await linearClient.updateTeam(team.id, { issueEstimationType });
 
-    if (!shouldChangeIssueEstimationType) {
-      detailedLogger.info(
-        `Estimate type not changed. Keeping ${team.issueEstimation.type} (${team.issueEstimation.scale})`,
-      );
-      return team.issueEstimation;
-    }
+    detailedLogger.importantSuccess(
+      `Updated issue estimation type to ${ESTIMATION_SCALES[issueEstimationType]}`,
+    );
 
-    const { issueEstimationType } = await inquirer.prompt([
-      {
-        type: "list",
-        name: "issueEstimationType",
-        message: "Select an estimation scale:",
-        choices: [
-          { name: "Exponential (0,1,2,4,8,16)", value: "exponential" },
-          { name: "Fibonacci (0,1,2,3,5,8)", value: "fibonacci" },
-          { name: "Linear (0,1,2,3,4,5)", value: "linear" },
-        ],
-      },
-    ]);
-
-    try {
-      await linearClient.updateTeam(team.id, { issueEstimationType });
-
-      detailedLogger.importantSuccess(
-        `Updated issue estimation type to ${issueEstimationType}`,
-      );
-
-      const issueEstimation = {
-        type: issueEstimationType,
-        scale: ESTIMATION_SCALES[issueEstimationType],
-      };
-
-      detailedLogger.info(
-        `issueEstimation: ${JSON.stringify(issueEstimation)}`,
-      );
-
-      return issueEstimation;
-    } catch (error) {
-      detailedLogger.error(`Error updating issue estimation type: ${error}`);
-      process.exit(1);
-    }
+    return;
+  } catch (error) {
+    detailedLogger.error(`Error updating issue estimation type: ${error}`);
+    process.exit(1);
   }
 }
 

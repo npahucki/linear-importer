@@ -1,8 +1,7 @@
 import Logger from "./logger.mjs";
 import DetailedLogger from "./detailed_logger.mjs";
 
-// import2.mjs
-export function initializeLogger(team) {
+export function initializeLogger({ team }) {
   const detailedLogger = new DetailedLogger();
   detailedLogger.info(`Initialized logger for team: ${team.name}`);
 

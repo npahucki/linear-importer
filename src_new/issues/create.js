@@ -14,33 +14,33 @@ import { findClosestEstimate } from "../estimates/rounder.mjs";
 
 import path from "path";
 
-async function getUserMapping(teamName) {
-  try {
-    // Move up one directory from 'src' to the project root
-    const projectRoot = path.join(process.cwd(), "..");
-    const mappingPath = path.join(
-      projectRoot,
-      "log",
-      teamName,
-      "user_mapping.json",
-    );
+// async function getUserMapping(teamName) {
+//   try {
+//     // Move up one directory from 'src' to the project root
+//     const projectRoot = path.join(process.cwd(), "..");
+//     const mappingPath = path.join(
+//       projectRoot,
+//       "log",
+//       teamName,
+//       "user_mapping.json",
+//     );
 
-    if (ENABLE_DETAILED_LOGGING) {
-      console.log("Looking for mapping file at:", mappingPath);
-    }
+//     if (ENABLE_DETAILED_LOGGING) {
+//       console.log("Looking for mapping file at:", mappingPath);
+//     }
 
-    const mappingFile = await fs.readFile(mappingPath, "utf8");
-    const mappingData = JSON.parse(mappingFile);
-    return mappingData.mapping;
-  } catch (error) {
-    console.warn(
-      chalk.yellow(
-        `Warning: Could not load user mapping file: ${error.message}`,
-      ),
-    );
-    return {};
-  }
-}
+//     const mappingFile = await fs.readFile(mappingPath, "utf8");
+//     const mappingData = JSON.parse(mappingFile);
+//     return mappingData.mapping;
+//   } catch (error) {
+//     console.warn(
+//       chalk.yellow(
+//         `Warning: Could not load user mapping file: ${error.message}`,
+//       ),
+//     );
+//     return {};
+//   }
+// }
 
 async function createIssue({
   importNumber,
