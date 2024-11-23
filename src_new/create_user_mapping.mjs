@@ -151,19 +151,21 @@ async function createUserMapping({ team, extractedUsernames }) {
   const mappingPath = path.join(logDir, "user_mapping.json");
   let existingMapping = {};
   let shouldRemap = false;
-  let isNewMapping = false; // New flag to track if we're creating a new mapping
+  let isNewMapping = false;
 
   try {
     const mappingFile = await fs.readFile(mappingPath, "utf8");
     const mappingData = JSON.parse(mappingFile);
     existingMapping = mappingData.mapping || {};
 
+    detailedLogger.info(`Found existing user mapping file at: ${mappingPath}`);
+
     const { confirmRemap } = await inquirer.prompt([
       {
         type: "list",
         name: "confirmRemap",
         message:
-          "An existing user mapping file was found. Would you like to start fresh and remap all users?",
+          "Users have already been mapped for this team. Would you like to start fresh and remap all users?",
         choices: [
           { name: "Yes", value: true },
           { name: "No", value: false },
@@ -173,7 +175,7 @@ async function createUserMapping({ team, extractedUsernames }) {
     ]);
 
     shouldRemap = confirmRemap;
-    isNewMapping = shouldRemap; // Set flag if user chooses to remap
+    isNewMapping = shouldRemap;
     if (!shouldRemap) {
       detailedLogger.loading("Continuing with existing User mapping");
     }
@@ -181,12 +183,13 @@ async function createUserMapping({ team, extractedUsernames }) {
     detailedLogger.loading(
       "No existing user mapping file found. Starting with empty mapping...",
     );
-    isNewMapping = true; // Set flag for new mapping
+    isNewMapping = true;
   }
 
   // Create user mapping
   const userMapping = shouldRemap ? {} : { ...existingMapping };
   const unmatchedUsers = [];
+  let hasNewMappings = false;
 
   // First pass: automatic matching for users not in existing mapping
   for (const pivotalUser of extractedUsernames) {
@@ -195,6 +198,7 @@ async function createUserMapping({ team, extractedUsernames }) {
       continue;
     }
 
+    hasNewMappings = true;
     const matchedMember = await findBestUserMatch(
       pivotalUser,
       teamMembers.nodes,
@@ -266,8 +270,8 @@ async function createUserMapping({ team, extractedUsernames }) {
     }
   }
 
-  // Only save mapping if it's new or was remapped
-  if (isNewMapping) {
+  // Save mapping if it's new, was remapped, or has new additions
+  if (isNewMapping || hasNewMappings) {
     await fs.mkdir(logDir, { recursive: true });
     await fs.writeFile(
       mappingPath,
