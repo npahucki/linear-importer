@@ -7,9 +7,7 @@ import selectTeam from "./teams/select.mjs";
 import importFileAttachments from "./prompts/import_file_attachments_new.js";
 import importController from "./importer/import_controller.mjs";
 import proceedWithImport from "./prompts/proceed_with_import_new.js";
-import selectStatusTypes from "./prompts/select_status_types.js";
-
-// import { createIssue } from "./issues/create_new.mjs";
+import selectImportSource from "./prompts/select_import_source.js";
 
 import selectDirectory from "./prompts/select_csv_directory_new.js";
 
@@ -24,9 +22,13 @@ import selectDirectory from "./prompts/select_csv_directory_new.js";
  ******************************************************************************/
 
 //=============================================================================
-// BEGIN PROMPTS
+// Select Import Source
 //=============================================================================
-// Select a team
+const importSource = await selectImportSource();
+
+//=============================================================================
+// Select a Team
+//=============================================================================
 const team = await selectTeam();
 
 //=============================================================================
@@ -37,12 +39,12 @@ const logger = initializeLogger(team);
 logger.enable();
 
 //=============================================================================
-// SELECT DIRECTORY
+// Select Directory
 //=============================================================================
 const directory = await selectDirectory();
 
 //=============================================================================
-// BUILD IMPORT OPTIONS
+// Build Import Options
 //=============================================================================
 // Do you want to import file attachments?
 const shouldImportFileAttachments = await importFileAttachments();
@@ -50,7 +52,6 @@ const shouldImportLabels = await importLabels();
 const { shouldImportEstimates, estimationScale } = await importEstimates(
   team.id,
 );
-const { selectedStatusTypes } = await selectStatusTypes();
 
 const options = {
   shouldImportFileAttachments,
@@ -59,15 +60,15 @@ const options = {
 };
 
 const payload = {
+  options,
   data: {},
   team: {
     ...team,
     estimationScale,
   },
-  options,
   meta: {
     directory,
-    importSource: "pivotal",
+    importSource,
   },
 };
 

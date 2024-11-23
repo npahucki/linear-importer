@@ -17,22 +17,20 @@ async function importController({ data, team, options, meta }) {
   console.log("--------------------------------");
 
   // Main logging statement
-  detailedLogger.info(`Importing ${meta.importSource} stories`);
+  detailedLogger.importantSuccess(`Processing ${meta.importSource} stories...`);
 
   switch (meta.importSource) {
     case "pivotal":
+      importPivotalStory({ data, team, options, meta });
       // Parse CSV
       const csvData = await parseCSV(meta.directory);
       detailedLogger.info(`CSV Data: ${JSON.stringify(csvData, null, 2)}`);
 
-      //=============================================================================
-      // CONFIRM IMPORT
-      //=============================================================================
-      const { userConfirmedProceed } = await proceedWithImport();
+      // import selectStatusTypes from "./prompts/select_status_types.js";
+      // const { selectedStatusTypes } = await selectStatusTypes();
 
-      if (!userConfirmedProceed) process.exit(0);
+      return true;
 
-      return importPivotalStory(data, team, options, meta);
     default:
       throw new Error(`Unknown import source: ${meta.importSource}`);
   }

@@ -2,9 +2,11 @@ import fs from "fs";
 import path from "path";
 import util from "util";
 
+import DetailedLogger from "./detailed_logger.mjs";
+
 class Logger {
   static getTeamLogPath(teamName, filename) {
-    const baseLogDir = "../log";
+    const baseLogDir = "./log";
     return path.join(baseLogDir, teamName, filename);
   }
 
@@ -12,12 +14,15 @@ class Logger {
     if (!logFilePath) return; // Early return if no logFilePath provided
 
     this.teamName = teamName;
-    this.baseLogDir = "../log";
+    this.baseLogDir = "./log";
     this.teamLogDir = path.join(this.baseLogDir, teamName);
     this.logFilePath = path.join(this.teamLogDir, logFilePath);
 
     this.ensureDirectoryExistence(this.logFilePath);
     this.logFile = fs.createWriteStream(this.logFilePath, { flags: "a" });
+
+    const detailedLogger = new DetailedLogger();
+    detailedLogger.info(`Created logfile: ${logFilePath}`);
 
     this.originalConsoleLog = console.log;
     this.originalConsoleError = console.error;
