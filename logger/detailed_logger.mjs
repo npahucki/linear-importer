@@ -26,6 +26,11 @@ class DetailedLogger {
     console.warn(chalk.yellow(`⚠️ ${message}`));
   }
 
+  result(message) {
+    if (ENABLE_DETAILED_LOGGING === false) return;
+    console.log(chalk.green(`📊 ${message}`)); // Changed to 📊 (bar chart) to represent results
+  }
+
   error(message) {
     if (ENABLE_DETAILED_LOGGING === false) return;
     console.error(chalk.red(`❌ ${message}`));

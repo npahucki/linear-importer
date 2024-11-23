@@ -131,13 +131,14 @@ async function promptForManualMatch(pivotalUser, linearMembers) {
   return selectedMember;
 }
 
-async function init({ teamId, teamName, pivotalUsers }) {
+async function createUserMapping({ team, pivotalUsers }) {
   console.log(chalk.yellow("\n🔄 Matching Pivotal users to Linear members..."));
 
-  const { teamMembers } = await getTeamMembers({ teamId, teamName });
+  // Fetch Team Members
+  const { teamMembers } = await getTeamMembers({ teamId: team.id });
 
   // Check for existing mapping file
-  const logDir = path.join(process.cwd(), "..", "log", teamName);
+  const logDir = path.join(process.cwd(), "log", team.name);
   const mappingPath = path.join(logDir, "user_mapping.json");
   let existingMapping = {};
   let shouldRemap = false;
@@ -277,11 +278,7 @@ async function init({ teamId, teamName, pivotalUsers }) {
 
   console.log(chalk.bold.green("✅ Setup complete!"));
   console.log(chalk.bold.magenta("\n🚀 Starting import process...\n"));
-
-  await createLabels({ teamId, labels: LABELS_TO_CREATE });
-  await createStatusesForTeam({ teamId });
-
   return userMapping;
 }
 
-export default init;
+export default createUserMapping;

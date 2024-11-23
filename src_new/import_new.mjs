@@ -61,7 +61,6 @@ const options = {
 
 const payload = {
   options,
-  data: {},
   team: {
     ...team,
     estimationScale,
@@ -74,8 +73,15 @@ const payload = {
 
 importController(payload);
 
-// Log payload
-// const payloadWithoutData = Object.fromEntries(
-//   Object.entries(payload).filter(([key]) => key !== "data"),
-// );
-// detailedLogger.info(JSON.stringify(payloadWithoutData, null, 2));
+// const sanitizedData = importController(payload);
+
+await createUserMapping({
+  team,
+  teamId: team.id,
+  teamName: team.name,
+  pivotalUsers: data.pivotalUsers,
+  foo: "bar",
+});
+
+await createLabels({ teamId: team.id, labels: DEFAULT_LABELS });
+await createStatusesForTeam({ teamId: team.id });

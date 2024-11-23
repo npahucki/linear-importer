@@ -5,7 +5,6 @@ import {
 import parseCSV from "./csv/parse.mjs";
 import chalk from "chalk";
 
-import selectTeam from "./teams/select.mjs";
 import fetchStatuses from "./statuses/list.mjs";
 
 // import deleteLabels from "./labels/delete.mjs";
@@ -14,73 +13,32 @@ import fetchLabels from "./labels/list.mjs";
 import fetchIssuesForTeam from "./issues/list.mjs";
 import createIssue from "./issues/create.mjs";
 
-import importPivotalEstimates from "./prompts/import_pivotal_estimates.mjs";
-import importFileAttachments from "./prompts/import_file_attachments.js";
-import importLabelsFromCSV from "./prompts/import_labels_from_csv.js";
-import selectStatusTypes from "./prompts/select_status_types.js";
 import proceedWithImport from "./prompts/proceed_with_import.js";
 
-// import fetchEstimatesForTeam from "./estimates/list.mjs";
-// import createEstimates from "./estimates/create.mjs";
-// import getTeamMembers from "./teams/members.mjs";
-
-import { setupLogger } from "../logger/init.mjs";
 import { RELEASE_LABEL_NAME } from "./init.mjs";
 import init from "./init.mjs";
-import readSuccessfulImports from "../logger/read_successful_imports.mjs";
-import logSuccessfulImport from "../logger/log_successful_import.mjs";
-
-const CREATE_ISSUES = true;
-const DELAY = Math.ceil(1 / MAX_REQUESTS_PER_SECOND);
-
-const { teamId, teamName } = await selectTeam();
-if (!teamId) {
-  throw new Error("No team selected");
-}
-
-// Write to log file
-const logger = setupLogger(teamName);
-logger.enable();
+import readSuccessfulImports from "./logger/read_successful_imports.mjs";
+import logSuccessfulImport from "./logger/log_successful_import.mjs";
 
 // PROMPTS
 const {
   releaseStories,
   pivotalStories,
-  statusTypes,
+  // statusTypes,
   labels,
   csvFilename,
   pivotalUsers,
 } = await parseCSV();
 
 // Optional Import params
-const { importFiles } = await importFileAttachments();
-const { importLabels } = await importLabelsFromCSV();
-const estimationScale = await importPivotalEstimates({ teamId });
-const { selectedStatusTypes } = await selectStatusTypes(statusTypes);
+// const { importFiles } = await importFileAttachments();
+// const { importLabels } = await importLabelsFromCSV();
+// const estimationScale = await importPivotalEstimates({ teamId });
+// const { selectedStatusTypes } = await selectStatusTypes(statusTypes);
 const successfulImports = await readSuccessfulImports(teamName);
 const uniquePivotalStories = [
   ...new Map(pivotalStories.map((story) => [story.id, story])).values(),
 ];
-
-// Logs
-if (ENABLE_DETAILED_LOGGING) {
-  console.log("\nImport Status:");
-  console.log("Successful imports from CSV:", successfulImports.size);
-  console.log(
-    "Sample of successful imports:",
-    Array.from(successfulImports).slice(0, 5),
-  );
-  console.log("\nPivotal Stories:");
-  console.log("Total stories from Pivotal (raw):", pivotalStories.length);
-  console.log(
-    "Total unique stories from Pivotal:",
-    uniquePivotalStories.length,
-  );
-  console.log(
-    "Sample of unique Pivotal story IDs:",
-    uniquePivotalStories.slice(0, 5).map((story) => story.id),
-  );
-}
 
 const newReleaseStories = releaseStories.filter(
   (story) => !successfulImports.has(story.id),
@@ -108,20 +66,20 @@ if (ENABLE_DETAILED_LOGGING) {
   );
 }
 
-const { userConfirmedProceed } = await proceedWithImport({
-  releaseStories: newReleaseStories,
-  pivotalStories: newPivotalStories,
-  successfulImportsLength: successfulImports.size,
-  selectedStatusTypes,
-});
+// const { userConfirmedProceed } = await proceedWithImport({
+//   releaseStories: newReleaseStories,
+//   pivotalStories: newPivotalStories,
+//   successfulImportsLength: successfulImports.size,
+//   selectedStatusTypes,
+// });
 
 if (userConfirmedProceed) {
-  if (newReleaseStories.length + newPivotalStories.length === 0) {
-    console.log(chalk.bold.green("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
-    console.log(chalk.bold.green("✨ All stories already imported! ✨"));
-    console.log(chalk.bold.green("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"));
-    process.exit(0);
-  }
+  // if (newReleaseStories.length + newPivotalStories.length === 0) {
+  //   console.log(chalk.bold.green("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
+  //   console.log(chalk.bold.green("✨ All stories already imported! ✨"));
+  //   console.log(chalk.bold.green("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"));
+  //   process.exit(0);
+  // }
 
   // Creates Team Labels and Workflow Statuses
   await init({ teamId, teamName, pivotalUsers });
