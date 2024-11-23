@@ -1,6 +1,6 @@
 import DetailedLogger from "../../logger/detailed_logger.mjs";
 
-import importPivotalStory from "./pivotal.mjs";
+import pivotalFormatter from "./pivotal_formatter.js";
 
 const detailedLogger = new DetailedLogger();
 

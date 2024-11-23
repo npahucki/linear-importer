@@ -1,5 +1,3 @@
-import createLabels from "./labels/create.mjs";
-import createStatusesForTeam from "./statuses/create.mjs";
 import chalk from "chalk";
 import getTeamMembers from "./teams/members.mjs";
 import fs from "fs/promises";
@@ -8,23 +6,21 @@ import inquirer from "inquirer";
 
 import DetailedLogger from "../logger/detailed_logger.mjs";
 
-import { DEFAULT_LABELS } from "./labels/create.mjs";
-
 const detailedLogger = new DetailedLogger();
 
-export const RELEASE_LABEL_NAME = "pivotal - release";
-const FEATURE_LABEL_NAME = "pivotal - feature";
-const CHORE_LABEL_NAME = "pivotal - chore";
-const BUG_LABEL_NAME = "pivotal - bug";
-const EPIC_LABEL_NAME = "pivotal - epic";
+// export const RELEASE_LABEL_NAME = "pivotal - release";
+// const FEATURE_LABEL_NAME = "pivotal - feature";
+// const CHORE_LABEL_NAME = "pivotal - chore";
+// const BUG_LABEL_NAME = "pivotal - bug";
+// const EPIC_LABEL_NAME = "pivotal - epic";
 
-const LABELS_TO_CREATE = [
-  { name: FEATURE_LABEL_NAME, color: "#ed7d1a" },
-  { name: CHORE_LABEL_NAME, color: "#e0e2e5" },
-  { name: BUG_LABEL_NAME, color: "#FF5630" },
-  { name: RELEASE_LABEL_NAME, color: "#407aa5" },
-  { name: EPIC_LABEL_NAME, color: "#452481" },
-];
+// const LABELS_TO_CREATE = [
+//   { name: FEATURE_LABEL_NAME, color: "#ed7d1a" },
+//   { name: CHORE_LABEL_NAME, color: "#e0e2e5" },
+//   { name: BUG_LABEL_NAME, color: "#FF5630" },
+//   { name: RELEASE_LABEL_NAME, color: "#407aa5" },
+//   { name: EPIC_LABEL_NAME, color: "#452481" },
+// ];
 
 async function findBestUserMatch(pivotalName, linearMembers) {
   // Convert pivotal name to lowercase and clean it
@@ -136,7 +132,16 @@ async function promptForManualMatch(pivotalUser, linearMembers) {
 }
 
 async function createUserMapping({ team, extractedUsernames }) {
-  console.log(chalk.yellow("\n🔄 Matching Pivotal users to Linear members..."));
+  if (extractedUsernames.length === 0) {
+    detailedLogger.error("No extracted usernames found. Skipping...");
+  }
+
+  detailedLogger.result(
+    `Extracted usernames:\n${extractedUsernames.join("\n")}`,
+  );
+  detailedLogger.importantLoading(
+    `Finding best matches for extracted usernames...`,
+  );
 
   // Fetch Team Members
   const { teamMembers } = await getTeamMembers({ teamId: team.id });
@@ -170,11 +175,11 @@ async function createUserMapping({ team, extractedUsernames }) {
     shouldRemap = confirmRemap;
     isNewMapping = shouldRemap; // Set flag if user chooses to remap
     if (!shouldRemap) {
-      console.log(chalk.yellow("🔄 Continuing with existing User mapping..."));
+      detailedLogger.loading("Continuing with existing User mapping");
     }
   } catch (error) {
-    console.log(
-      "🔄 No existing user mapping file found. Starting with empty mapping...",
+    detailedLogger.loading(
+      "No existing user mapping file found. Starting with empty mapping...",
     );
     isNewMapping = true; // Set flag for new mapping
   }
@@ -209,7 +214,7 @@ async function createUserMapping({ team, extractedUsernames }) {
   if (unmatchedUsers.length > 0) {
     console.log(
       chalk.yellow(
-        "\n⚠️ The following Pivotal users could not be automatically matched:",
+        "\n⚠️ The following usernames could not be automatically matched:",
       ),
     );
     console.log(chalk.green(unmatchedUsers.join("\n")));
@@ -248,9 +253,7 @@ async function createUserMapping({ team, extractedUsernames }) {
             };
       }
     } else {
-      console.log(
-        chalk.yellow("Skipping manual matching for unmatched users..."),
-      );
+      detailedLogger.info("Skipping manual matching for unmatched users");
       // Add unmatched users to mapping with null values without prompting
       unmatchedUsers.forEach((unmatchedUser) => {
         userMapping[unmatchedUser] = {

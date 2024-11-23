@@ -13,7 +13,7 @@ class DetailedLogger {
 
   loading(message) {
     if (ENABLE_DETAILED_LOGGING === false) return;
-    console.log(chalk.dim.yellowBright(`⏳ ${message}`)); // Already has emoji
+    console.log(chalk.dim.yellowBright(`⏳ ${message}...`));
   }
 
   success(message) {
@@ -28,7 +28,7 @@ class DetailedLogger {
 
   result(message) {
     if (ENABLE_DETAILED_LOGGING === false) return;
-    console.log(chalk.green(`📊 ${message}`)); // Changed to 📊 (bar chart) to represent results
+    console.log(chalk.green(`📊 ${message}`));
   }
 
   error(message) {
@@ -40,6 +40,13 @@ class DetailedLogger {
     if (ENABLE_DETAILED_LOGGING === false) return;
     console.log("\n" + chalk.cyan("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
     console.log(chalk.bold.cyan(`  ✨ ${message}`));
+    console.log(chalk.cyan("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"));
+  }
+
+  importantLoading(message) {
+    if (ENABLE_DETAILED_LOGGING === false) return;
+    console.log("\n" + chalk.cyan("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
+    console.log(chalk.bold.cyan(`  ⏳ ${message}...`));
     console.log(chalk.cyan("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"));
   }
 

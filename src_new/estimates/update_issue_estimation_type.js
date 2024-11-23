@@ -3,20 +3,29 @@ import inquirer from "inquirer";
 import linearClient from "../../config/client.mjs";
 import DetailedLogger from "../../logger/detailed_logger.mjs";
 
+import { ESTIMATION_SCALES } from "./estimation_scales.js";
+
 import chalk from "chalk";
 
 const detailedLogger = new DetailedLogger();
 
-async function updateIssueEstimationType(team) {
+async function updateIssueEstimationType(team, shouldImportEstimates) {
+  if (!shouldImportEstimates) {
+    detailedLogger.info(
+      `shouldImportEstimates is false. Skipping issue estimation type update...`,
+    );
+    return team.issueEstimation;
+  }
+
   if (team.issueEstimation.type) {
-    const message = `Your estimation scale is already set to ${chalk.yellow(
+    const message = `Issue estimation is set to ${chalk.yellow(
       `${team.issueEstimation.type} (${team.issueEstimation.scale})`,
     )}.\n  Pivotal estimates will be rounded to the nearest value. Change it?`;
 
-    const { changeEstimateType } = await inquirer.prompt([
+    const { shouldChangeIssueEstimationType } = await inquirer.prompt([
       {
         type: "list",
-        name: "changeEstimateType",
+        name: "shouldChangeIssueEstimationType",
         message,
         choices: [
           { name: "Yes", value: true },
@@ -26,9 +35,11 @@ async function updateIssueEstimationType(team) {
       },
     ]);
 
-    if (!changeEstimateType) {
-      detailedLogger.info(`Estimate type not changed`);
-      return { issueEstimation: team.issueEstimation };
+    if (!shouldChangeIssueEstimationType) {
+      detailedLogger.info(
+        `Estimate type not changed. Keeping ${team.issueEstimation.type} (${team.issueEstimation.scale})`,
+      );
+      return team.issueEstimation;
     }
 
     const { issueEstimationType } = await inquirer.prompt([
@@ -47,14 +58,24 @@ async function updateIssueEstimationType(team) {
     try {
       await linearClient.updateTeam(team.id, { issueEstimationType });
 
-      detailedLogger.success(
+      detailedLogger.importantSuccess(
         `Updated issue estimation type to ${issueEstimationType}`,
       );
+
+      const issueEstimation = {
+        type: issueEstimationType,
+        scale: ESTIMATION_SCALES[issueEstimationType],
+      };
+
+      detailedLogger.info(
+        `issueEstimation: ${JSON.stringify(issueEstimation)}`,
+      );
+
+      return issueEstimation;
     } catch (error) {
       detailedLogger.error(`Error updating issue estimation type: ${error}`);
+      process.exit(1);
     }
-
-    return issueEstimationType;
   }
 }
 

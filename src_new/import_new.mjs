@@ -11,7 +11,7 @@ import importFiles from "./prompts/import_files.js";
 import importController from "./importer/import_controller.mjs";
 import proceedWithImport from "./prompts/proceed_with_import_new.js";
 import selectImportSource from "./prompts/select_import_source.js";
-import pivotal from "./importer/pivotal.mjs";
+import pivotalFormatter from "./importer/pivotal_formatter.js";
 
 import createLabels from "./labels/create.mjs";
 import createUserMapping from "./create_user_mapping.mjs";
@@ -61,10 +61,17 @@ const shouldImportFiles = await importFiles();
 const shouldImportLabels = await importLabels();
 const shouldImportEstimates = await importEstimates();
 
-const issueEstimation = await updateIssueEstimationType(team);
+// Set new issue estimation type if needed
+const issueEstimation = await updateIssueEstimationType(
+  team,
+  shouldImportEstimates,
+);
 
 const payload = {
-  team,
+  team: {
+    ...team,
+    issueEstimation,
+  },
   options: {
     shouldImportFiles,
     shouldImportLabels,
@@ -76,22 +83,25 @@ const payload = {
   },
 };
 
+// detailedLogger.importantSuccess(`Payload: ${JSON.stringify(payload, null, 2)}`);
+// process.exit(0);
+
 //=============================================================================
 // Format Data for Import Type
 //=============================================================================
 // I need to document the expected shape of`sanitizedDAta`. it should have users,
 // const sanitizedData = await importController(payload);
-const { csvData } = await pivotal(payload);
+const pivotalData = await pivotalFormatter(payload);
 
-console.log("csvData", csvData);
+console.log("pivotalData", pivotalData);
 
 //=============================================================================
 // Create User Mapping
 //=============================================================================
-// await createUserMapping({
-//   team,
-//   extractedUsernames: csvData.extractedUsernames,
-// });
+await createUserMapping({
+  team,
+  extractedUsernames: pivotalData.csvData.meta.extractedUsernames,
+});
 
 //=============================================================================
 // Confirm Proceed
@@ -104,10 +114,10 @@ const userConfirmedProceed = await proceedWithImport({
 // Create Labels and Statuses
 //=============================================================================
 
-console.log("start doing things...");
+detailedLogger.importantInfo("Creating labels and statuses...");
 // await createLabels({ teamId: team.id, labels: DEFAULT_LABELS });
 // await createStatusesForTeam({ teamId: team.id });
 
-process.exit(0);
+detailedLogger.loading("Importing stories...");
 
 detailedLogger.importantSuccess("Import complete!");
