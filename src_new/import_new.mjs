@@ -83,7 +83,6 @@ detailedLogger.info(`Import Source: ${importSource}`);
 detailedLogger.info(`Options: ${JSON.stringify(options, null, 2)}`);
 detailedLogger.info(`Meta: ${JSON.stringify(meta, null, 2)}`);
 
-// detailedLogger.importantSuccess(`Payload: ${JSON.stringify(payload, null, 2)}`);
 // process.exit(0);
 
 //=============================================================================
@@ -121,6 +120,8 @@ await proceedWithImport({
 
 await createIssues({
   team,
+  payload: csvData,
+  options,
   // directory,
   // payload,
   // meta: {
