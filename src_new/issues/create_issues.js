@@ -4,6 +4,8 @@ import getUserMapping from "../users/get_user_mapping.mjs";
 import fetchLabels from "../labels/list.mjs";
 import fetchEstimatesForTeam from "../estimates/list.mjs";
 
+import { findClosestEstimate } from "../estimates/rounder.mjs";
+
 const detailedLogger = new DetailedLogger();
 
 async function createIssues({ team, payload, options }) {
@@ -14,11 +16,13 @@ async function createIssues({ team, payload, options }) {
 
   const userMapping = await getUserMapping(team.name);
 
-  detailedLogger.importantSuccess(
-    `Payload: ${JSON.stringify(payload, null, 2)}`,
-  );
+  // detailedLogger.importantSuccess(
+  //   `Payload: ${JSON.stringify(payload, null, 2)}`,
+  // );
   // detailedLogger.info(`Options: ${JSON.stringify(options, null, 2)}`);
-
+  // detailedLogger.info(
+  //   `Issue Estimation: ${JSON.stringify(issueEstimation, null, 2)}`,
+  // );
   // detailedLogger.result(`userMapping: ${JSON.stringify(userMapping, null, 2)}`);
   // detailedLogger.result(`labels: ${JSON.stringify(labels, null, 2)}`);
   // detailedLogger.result(
@@ -35,10 +39,13 @@ async function createIssues({ team, payload, options }) {
           ? teamLabels.filter((label) =>
               formattedIssueParams.labels.includes(label.name),
             )
-          : [],
-        // estimate: options.shouldImportEstimates
-        //   ? findClosestEstimate(formattedIssueParams.estimate, issueEstimation)
-        //   : undefined,
+          : undefined,
+        estimate: options.shouldImportEstimates
+          ? findClosestEstimate(
+              formattedIssueParams.estimate,
+              issueEstimation.scale,
+            )
+          : undefined,
       };
 
       await linearClient.createIssue(params);

@@ -111,8 +111,8 @@ await proceedWithImport({
 // Create Labels and Statuses
 //=============================================================================
 // detailedLogger.importantInfo("Creating labels and statuses...");
-// await createLabels({ teamId: team.id, labels: DEFAULT_LABELS });
-// await createStatusesForTeam({ teamId: team.id });
+await createLabels({ teamId: team.id, labels: DEFAULT_LABELS });
+await createStatusesForTeam({ teamId: team.id });
 
 //=============================================================================
 // Create Issues
