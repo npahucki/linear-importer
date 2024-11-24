@@ -79,8 +79,8 @@ const meta = {
 };
 
 detailedLogger.info(`Team: ${JSON.stringify(team, null, 2)}`);
-detailedLogger.loading(`Import Source: ${importSource}`);
-detailedLogger.success(`Options: ${JSON.stringify(options, null, 2)}`);
+detailedLogger.info(`Import Source: ${importSource}`);
+detailedLogger.info(`Options: ${JSON.stringify(options, null, 2)}`);
 detailedLogger.info(`Meta: ${JSON.stringify(meta, null, 2)}`);
 
 // detailedLogger.importantSuccess(`Payload: ${JSON.stringify(payload, null, 2)}`);
@@ -90,17 +90,15 @@ detailedLogger.info(`Meta: ${JSON.stringify(meta, null, 2)}`);
 // Format Data for Import Type
 //=============================================================================
 // TODO: Modify to swap different data sources, based on importSource
-const pivotalData = await pivotalFormatter({ team, directory });
-
-console.log(pivotalData);
-process.exit(0);
+const csvData = await pivotalFormatter({ directory });
+// process.exit(0);
 
 //=============================================================================
 // Create User Mapping
 //=============================================================================
 await createUserMapping({
   team,
-  extractedUsernames: pivotalData.csvData.meta.extractedUsernames,
+  extractedUsernames: csvData.aggregatedData.userNames,
 });
 
 //=============================================================================
@@ -122,8 +120,8 @@ await proceedWithImport({
 //=============================================================================
 
 await createIssues({
-  team: { id: team.id, name: team.name },
-  directory,
+  team,
+  // directory,
   // payload,
   // meta: {
   //   userMapping,

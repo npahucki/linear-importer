@@ -8,19 +8,11 @@ import fs from "fs/promises";
 import path from "path";
 
 import { buildParams } from "./_utils.js";
-import selectDirectory from "../prompts/select_csv_directory.js";
 
-import { findClosestEstimate } from "../estimates/list.mjs";
-
-// Function to list directories in the assets directory
-async function listDirectories(directory) {
-  const items = await fs.readdir(directory, { withFileTypes: true });
-  return items.filter((item) => item.isDirectory()).map((item) => item.name);
-}
+const detailedLogger = new DetailedLogger();
 
 // Function to read and parse CSV
 function readCSV(filePath) {
-  const detailedLogger = new DetailedLogger();
   detailedLogger.info(`Reading CSV file: ${filePath}`);
 
   return new Promise((resolve, reject) => {
@@ -96,22 +88,12 @@ function readCSV(filePath) {
       })
       .on("end", () =>
         resolve({
-          releaseStories,
-          pivotalStories,
-          labels: buildLabelsArray(labels),
-          statusTypes: Array.from(statusTypes),
-          pivotalUsers: Array.from(new Set([...ownedBy, ...requestedBy])),
-          requestedBy: Array.from(requestedBy),
-          ownedBy: Array.from(ownedBy),
-          estimates: Array.from(estimates).sort((a, b) => a - b),
-
-          // extractedUsernames: Array.from(new Set([...ownedBy, ...requestedBy])),
-          assignee: ownedBy ? Array.from(ownedBy) : Array.from(requestedBy),
-          subscribers: Array.from(new Set([...ownedBy, ...requestedBy])),
-          meta: {
-            extractedUsernames: Array.from(
-              new Set([...ownedBy, ...requestedBy]),
-            ),
+          issues: [...releaseStories, ...pivotalStories],
+          aggregatedData: {
+            userNames: Array.from(new Set([...ownedBy, ...requestedBy])),
+            labels: buildLabelsArray(labels),
+            statusTypes: Array.from(statusTypes),
+            estimates: Array.from(estimates).sort((a, b) => a - b),
           },
         }),
       )
@@ -150,7 +132,10 @@ export async function parseCSVFile(csvFilename, filePath) {
   }
 
   const data = await readCSV(filePath);
-  return { csvFilename, ...data };
+
+  detailedLogger.success(`CSV Data: ${JSON.stringify(data, null, 2)}`);
+
+  return data;
 }
 
 export default parseCSV;
