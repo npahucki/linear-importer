@@ -182,8 +182,6 @@ async function createUserMapping({ team, extractedUsernames }) {
   }
 
   detailedLogger.importantSuccess("✅ Setup complete!");
-
-  console.log(chalk.bold.magenta("\n🚀 Starting import process...\n"));
   return userMapping;
 }
 

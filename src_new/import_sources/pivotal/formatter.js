@@ -1,19 +1,23 @@
-import DetailedLogger from "../../logger/detailed_logger.mjs";
+import DetailedLogger from "../../../logger/detailed_logger.mjs";
 
-import parseCSV from "../csv/parse_new.mjs";
+import parseCSV from "../../csv/parse_new.mjs";
 import selectStatusTypes from "./select_status_types.js";
-import chalk from "chalk";
+
+import buildImportSummary from "./build_import_summary.js";
+import readSuccessfulImports from "../../../logger/read_successful_imports_new.mjs";
 
 const detailedLogger = new DetailedLogger();
 
-async function pivotal({ directory }) {
-  detailedLogger.importantInfo(`Importing Pivotal story`);
+async function formatter({ directory, team }) {
+  detailedLogger.importantLoading(`Beginning Pivotal import...`);
 
   // Prompt user to select status types
   const selectedStatusTypes = await selectStatusTypes();
 
   // Parse CSV
   const csvData = await parseCSV(directory);
+
+  const successfulImports = await readSuccessfulImports({ team });
 
   // Only include stories that match the selected status types
   const formattedIssuePayload = csvData.issues.filter((story) =>
@@ -28,42 +32,40 @@ async function pivotal({ directory }) {
     )}`,
   );
 
-  const confirmationMessage = displayConfirmProceedPrompt(
-    formattedIssuePayload,
-  );
+  const confirmationMessage = buildImportSummary(formattedIssuePayload);
 
   return { csvData, confirmationMessage };
 }
 
-function displayConfirmProceedPrompt(formattedIssuePayload) {
-  const typeBreakdown = formattedIssuePayload
-    .map((issue) => {
-      const color =
-        {
-          chore: "white",
-          bug: "red",
-          feature: "yellow",
-          epic: "magenta",
-          release: "green",
-        }[issue.type] || "white";
+// function displayConfirmProceedPrompt(formattedIssuePayload) {
+//   const typeBreakdown = formattedIssuePayload
+//     .map((issue) => {
+//       const color =
+//         {
+//           chore: "white",
+//           bug: "red",
+//           feature: "yellow",
+//           epic: "magenta",
+//           release: "green",
+//         }[issue.type] || "white";
 
-      return `\n       ${issue.type}: ${chalk[color].bold(formattedIssuePayload.count)}`;
-    })
-    .join("");
+//       return `\n       ${issue.type}: ${chalk[color].bold(formattedIssuePayload.count)}`;
+//     })
+//     .join("");
 
-  const confirmProceedPrompt =
-    chalk.blue.bold(`
-  📊 Import Summary:`) +
-    chalk.white(`
-     Already imported: ${chalk.green.bold("successfulImportsLength - TODO")}
-    ${typeBreakdown}
+//   const confirmProceedPrompt =
+//     chalk.blue.bold(`
+//   📊 Import Summary:`) +
+//     chalk.white(`
+//      Already imported: ${chalk.green.bold("successfulImportsLength - TODO")}
+//     ${typeBreakdown}
 
-    Total Remaining Stories: ${chalk.green.bold("TODO successfulImportsLength - issues.count")}`);
+//     Total Remaining Stories: ${chalk.green.bold("TODO successfulImportsLength - issues.count")}`);
 
-  return confirmProceedPrompt;
-}
+//   return confirmProceedPrompt;
+// }
 
-export default pivotal;
+export default formatter;
 
 // if (newReleaseStories.length + newPivotalStories.length === 0) {
 //   console.log(chalk.bold.green("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));

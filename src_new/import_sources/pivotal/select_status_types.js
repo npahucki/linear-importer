@@ -1,6 +1,6 @@
 import inquirer from "inquirer";
 
-import DetailedLogger from "../../logger/detailed_logger.mjs";
+import DetailedLogger from "../../../logger/detailed_logger.mjs";
 
 import { STATUS_OPTIONS } from "./constants.js";
 
