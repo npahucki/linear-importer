@@ -7,6 +7,8 @@ import chalk from "chalk";
 const detailedLogger = new DetailedLogger();
 
 async function proceedWithImport({ confirmationMessage }) {
+  detailedLogger.importantInfo(confirmationMessage);
+
   const { userConfirmedProceed } = await inquirer.prompt([
     {
       type: "list",
@@ -21,6 +23,7 @@ async function proceedWithImport({ confirmationMessage }) {
     },
   ]);
 
+  detailedLogger.info(`userConfirmedProceed: ${userConfirmedProceed}`);
   if (!userConfirmedProceed) {
     detailedLogger.importantError("Import cancelled by user.");
     process.exit(0);
@@ -35,12 +38,6 @@ async function proceedWithImport({ confirmationMessage }) {
   }
 
   detailedLogger.importantSuccess(`🚀 Starting import...`);
-  detailedLogger.info(`userConfirmedProceed: ${userConfirmedProceed}`);
-  // detailedLogger.info(`Import Source: ${payload.meta.importSource}`);
-  detailedLogger.info(confirmationMessage);
-
-  // detailedLogger.importantSuccess(`🚀 Starting import for team ${team.name}`);
-  // detailedLogger.importantInfo(`Import Source: ${payload.meta.importSource}`);
 
   return userConfirmedProceed;
 }

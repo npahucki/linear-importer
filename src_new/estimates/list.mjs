@@ -1,14 +1,16 @@
 import linearClient from "../../config/client.mjs";
-import { ESTIMATION_SCALES } from "./estimation_scales.js";
+import { ISSUE_ESTIMATION_OPTIONS } from "./estimation_scales.js";
 
 export function findClosestEstimate(value, scale) {
   if (!scale || !value) return null;
-  
+
   const numericValue = Number(value);
   if (isNaN(numericValue)) return null;
 
   return scale.reduce((closest, current) => {
-    return Math.abs(current - numericValue) < Math.abs(closest - numericValue) ? current : closest;
+    return Math.abs(current - numericValue) < Math.abs(closest - numericValue)
+      ? current
+      : closest;
   });
 }
 
@@ -21,7 +23,9 @@ async function fetchEstimatesForTeam({ teamId }) {
     const team = await linearClient.team(teamId);
     const issueEstimationType = await team.issueEstimationType;
 
-    const estimationScale = ESTIMATION_SCALES[issueEstimationType] || null;
+    const estimationScale = ISSUE_ESTIMATION_OPTIONS.find(
+      (option) => option.value === issueEstimationType,
+    ).scale;
 
     const data = {
       type: issueEstimationType,

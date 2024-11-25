@@ -2,6 +2,7 @@ import DetailedLogger from "../../logger/detailed_logger.mjs";
 
 import parseCSV from "../csv/parse_new.mjs";
 import selectStatusTypes from "./select_status_types.js";
+import chalk from "chalk";
 
 const detailedLogger = new DetailedLogger();
 
@@ -27,11 +28,39 @@ async function pivotal({ directory }) {
     )}`,
   );
 
-  detailedLogger.importantSuccess(
-    `COUNT HERE!!!! ${formattedIssuePayload.length}`,
+  const confirmationMessage = displayConfirmProceedPrompt(
+    formattedIssuePayload,
   );
 
-  return csvData;
+  return { csvData, confirmationMessage };
+}
+
+function displayConfirmProceedPrompt(formattedIssuePayload) {
+  const typeBreakdown = formattedIssuePayload
+    .map((issue) => {
+      const color =
+        {
+          chore: "white",
+          bug: "red",
+          feature: "yellow",
+          epic: "magenta",
+          release: "green",
+        }[issue.type] || "white";
+
+      return `\n       ${issue.type}: ${chalk[color].bold(formattedIssuePayload.count)}`;
+    })
+    .join("");
+
+  const confirmProceedPrompt =
+    chalk.blue.bold(`
+  📊 Import Summary:`) +
+    chalk.white(`
+     Already imported: ${chalk.green.bold("successfulImportsLength - TODO")}
+    ${typeBreakdown}
+
+    Total Remaining Stories: ${chalk.green.bold("TODO successfulImportsLength - issues.count")}`);
+
+  return confirmProceedPrompt;
 }
 
 export default pivotal;

@@ -1,8 +1,6 @@
 import inquirer from "inquirer";
 import teamsList from "./list.mjs";
 
-import fetchEstimatesForTeam from "../estimates/list.mjs";
-
 import DetailedLogger from "../../logger/detailed_logger.mjs";
 
 const detailedLogger = new DetailedLogger();
@@ -12,10 +10,12 @@ async function selectTeam() {
     throw new Error("No teams found");
   }
 
-  const teamChoices = teamsList.map((team) => ({
-    name: team.name,
-    value: team,
-  }));
+  const teamChoices = teamsList
+    .map((team) => ({
+      name: team.name,
+      value: team,
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
 
   detailedLogger.info(`${teamChoices.length} teams found`);
 
@@ -30,28 +30,13 @@ async function selectTeam() {
     },
   ]);
 
-  const team = buildTeam(selectedTeam);
+  // const team = buildTeam(selectedTeam);
+  detailedLogger.info(`Selected team: ${JSON.stringify(selectedTeam)}`);
 
-  return team;
-}
-
-async function buildTeam(selectedTeam) {
-  // Adding issue estimation to the team object to be used for the `shouldImportEstimates` prompt
-  // We'll fetch this value again in `create_issues.js` immediately before creating issues to ensure the correct estimate type is used,
-  // because it's possible that the user changed the value in `update_issue_estimation_type.js`
-  const issueEstimation = await fetchEstimatesForTeam({
-    teamId: selectedTeam.id,
-  });
-
-  const params = {
+  return {
     id: selectedTeam.id,
     name: selectedTeam.name,
-    issueEstimation,
   };
-
-  detailedLogger.info(`Selected team: ${JSON.stringify(params)}`);
-
-  return params;
 }
 
 export default selectTeam;
