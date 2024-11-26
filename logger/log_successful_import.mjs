@@ -19,9 +19,7 @@ const logSuccessfulImport = async ({ team, issue, importNumber }) => {
     const logEntry = `${new Date().toISOString()},${issue.id},${issue.title}\n`;
     await fs.appendFile(filePath, logEntry);
 
-    detailedLogger.result(
-      `${importNumber} - Logging successful import for story ${issue.title}`,
-    );
+    detailedLogger.result(`${importNumber} - Issue created: ${issue.title}`);
 
     // const issueId = newIssue._issue.id;
     // console.log(

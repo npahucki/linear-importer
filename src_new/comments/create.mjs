@@ -1,6 +1,5 @@
 import linearClient from "../../config/client.mjs";
 import chalk from "chalk";
-import { exitProcess } from "../../config/config.js";
 
 async function createComment({ issueId, body }) {
   try {
@@ -10,14 +9,14 @@ async function createComment({ issueId, body }) {
     });
 
     if (response.success) {
-      // console.log(chalk.cyan("✅ Comment created"));
+      return response._comment;
     } else {
       console.error(chalk.red("Error creating comment:"), response.errors);
-      exitProcess();
+      process.exit(1);
     }
   } catch (error) {
     console.error(chalk.red("Error creating comment:"), error.message);
-    exitProcess();
+    process.exit(1);
   }
 }
 
