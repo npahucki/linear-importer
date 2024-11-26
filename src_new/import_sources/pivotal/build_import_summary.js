@@ -18,13 +18,14 @@ function buildImportSummary(formattedIssuePayload) {
           release: "green",
         }[type] || "white";
 
-      return `\n       ${type}: ${chalk[color].bold(count)}`;
+      return `   ${type}: ${chalk[color].bold(count)}`;
     })
     .join("");
 
   const confirmProceedPrompt =
     chalk.blue.bold(`Import Summary:`) +
-    chalk.white(`Already imported: ${chalk.green.bold("successfulImportsLength - TODO")}
+    chalk.white(`
+    Already imported: ${chalk.green.bold("successfulImportsLength - TODO")}
 
     ${typeBreakdown}
   

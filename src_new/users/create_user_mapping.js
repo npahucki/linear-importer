@@ -25,6 +25,7 @@ const detailedLogger = new DetailedLogger();
 async function createUserMapping({ team, extractedUsernames }) {
   if (extractedUsernames.length === 0) {
     detailedLogger.error("No extracted usernames found. Skipping...");
+    process.exit(0);
   }
 
   detailedLogger.result(

@@ -51,10 +51,10 @@ const options = {
   shouldImportEstimates,
 };
 
-// detailedLogger.info(`Import Source: ${importSource}`);
-// detailedLogger.info(`Team: ${JSON.stringify(team, null, 2)}`);
-// detailedLogger.info(`Directory: ${directory}`);
-// detailedLogger.info(`Options: ${JSON.stringify(options, null, 2)}`);
+detailedLogger.info(`Import Source: ${importSource}`);
+detailedLogger.info(`Team: ${JSON.stringify(team, null, 2)}`);
+detailedLogger.info(`Directory: ${directory}`);
+detailedLogger.info(`Options: ${JSON.stringify(options, null, 2)}`);
 
 //=============================================================================
 // Format Data for Import Type
