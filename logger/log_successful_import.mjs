@@ -19,16 +19,7 @@ const logSuccessfulImport = async ({ team, issue, importNumber }) => {
     const logEntry = `${new Date().toISOString()},${issue.id},${issue.title}\n`;
     await fs.appendFile(filePath, logEntry);
 
-    detailedLogger.result(`${importNumber} - Issue created: ${issue.title}`);
-
-    // const issueId = newIssue._issue.id;
-    // console.log(
-    //   chalk.green(
-    //     `✅ ${importNumber} - Linear Issue ${issueId} created from Pivotal story ${
-    //       pivotalStory.id
-    //     } - ${chalk.magenta(pivotalStory.name)}`,
-    //   ),
-    // );
+    detailedLogger.created(`${importNumber} - Issue`, `${issue.title}`);
   } catch (error) {
     detailedLogger.importantError(
       `Failed to log successful import for story ${issue.id}:`,

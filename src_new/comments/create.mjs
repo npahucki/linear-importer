@@ -1,5 +1,7 @@
 import linearClient from "../../config/client.mjs";
-import chalk from "chalk";
+import DetailedLogger from "../../logger/detailed_logger.mjs";
+
+const detailedLogger = new DetailedLogger();
 
 async function createComment({ issueId, body }) {
   try {
@@ -9,13 +11,14 @@ async function createComment({ issueId, body }) {
     });
 
     if (response.success) {
+      detailedLogger.createdSecondary("Comment", `${response._comment.id}`);
       return response._comment;
     } else {
-      console.error(chalk.red("Error creating comment:"), response.errors);
+      detailedLogger.error("Error creating comment:", response.errors);
       process.exit(1);
     }
   } catch (error) {
-    console.error(chalk.red("Error creating comment:"), error.message);
+    detailedLogger.error("Error creating comment:", error.message);
     process.exit(1);
   }
 }

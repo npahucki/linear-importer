@@ -9,8 +9,8 @@ import findAttachmentsInFolder from "../files/find_attachments_in_folder.mjs";
 import upload from "../files/upload.mjs";
 import createComment from "../comments/create.mjs";
 import formatPriority from "../priority/formatter.js";
-import { MAX_REQUESTS_PER_SECOND } from "../../config/config.js";
 import { roundEstimate } from "../estimates/rounder.mjs";
+import { REQUEST_DELAY_MS } from "../../config/config.js";
 
 const detailedLogger = new DetailedLogger();
 
@@ -22,8 +22,6 @@ async function createIssues({ team, payload, options, directory }) {
   });
 
   const userMapping = await getUserMapping(team.name);
-
-  const DELAY = 1000;
 
   // TODO:
   // - create a comment for each pull request link
@@ -69,12 +67,17 @@ async function createIssues({ team, payload, options, directory }) {
         labelIds: options.shouldImportLabels ? labelIds : undefined,
         estimate: options.shouldImportEstimates ? estimate : undefined,
         priority: options.shouldFormatPriority ? priority : undefined,
+        // parentId,
+        // dueDate,
+        // createdAt,
+        // assigneeId,
+        // subscriberIds,
         cycleId: null,
       };
 
-      detailedLogger.importantInfo(
-        `Params: ${JSON.stringify(params, null, 2)}`,
-      );
+      // detailedLogger.importantInfo(
+      //   `Params: ${JSON.stringify(params, null, 2)}`,
+      // );
 
       const newIssue = await linearClient.createIssue(params);
       await logSuccessfulImport({
@@ -87,22 +90,14 @@ async function createIssues({ team, payload, options, directory }) {
       if (options.shouldImportComments) {
         if (issue.comments.length > 0) {
           for (const body of issue.comments) {
-            try {
-              const newComment = await createComment({
-                issueId: newIssue._issue.id,
-                body,
-              });
-              detailedLogger.result(`Comment created: ${newComment.id}`);
-              // Add delay between comment creations
-              await new Promise((resolve) => setTimeout(resolve, DELAY));
-            } catch (error) {
-              detailedLogger.error(`Error creating comment: ${error.message}`);
-              process.exit(1);
-            }
+            await createComment({ issueId: newIssue._issue.id, body });
+
+            await new Promise((resolve) =>
+              setTimeout(resolve, REQUEST_DELAY_MS),
+            );
           }
-          detailedLogger.success(
-            `(${issue.comments.length}) comment(s) created.`,
-          );
+        } else {
+          detailedLogger.info(`No comments found for story ${issue.id}.`);
         }
       }
 
@@ -114,17 +109,11 @@ async function createIssues({ team, payload, options, directory }) {
 
         if (attachments.length > 0) {
           for (const attachment of attachments) {
-            try {
-              await upload(attachment, newIssue._issue.id);
-              detailedLogger.success(`Attachment uploaded: ${attachment}`);
-              // Add delay between file uploads
-              await new Promise((resolve) => setTimeout(resolve, DELAY));
-            } catch (error) {
-              detailedLogger.error(
-                `Error uploading attachment ${attachment}: ${error.message}`,
-              );
-              process.exit(1);
-            }
+            await upload(attachment, newIssue._issue.id);
+
+            await new Promise((resolve) =>
+              setTimeout(resolve, REQUEST_DELAY_MS),
+            );
           }
         } else {
           detailedLogger.info(`No attachments found for story ${issue.id}`);
@@ -132,7 +121,7 @@ async function createIssues({ team, payload, options, directory }) {
       }
 
       // Wait 1 second between processing each issue
-      await new Promise((resolve) => setTimeout(resolve, DELAY));
+      await new Promise((resolve) => setTimeout(resolve, REQUEST_DELAY_MS));
     } catch (error) {
       detailedLogger.error(`Failed to create issue: ${error.message}`);
       throw error;

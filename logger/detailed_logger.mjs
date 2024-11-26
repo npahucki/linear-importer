@@ -31,6 +31,20 @@ class DetailedLogger {
     console.log(chalk.green(`📊 ${message}`));
   }
 
+  created(attribute, message) {
+    // if (ENABLE_DETAILED_LOGGING === false) return;
+    console.log(
+      `✅ ${chalk.green(`${attribute} created`)}: ${chalk.magenta(message)}`,
+    );
+  }
+
+  createdSecondary(attribute, message) {
+    // if (ENABLE_DETAILED_LOGGING === false) return;
+    console.log(
+      `✅ ${chalk.yellow(`${attribute} created`)}: ${chalk.cyan(message)}`,
+    );
+  }
+
   error(message) {
     if (ENABLE_DETAILED_LOGGING === false) return;
     console.error(chalk.red(`❌ ${message}`));
