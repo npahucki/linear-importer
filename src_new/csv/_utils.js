@@ -3,7 +3,7 @@ export function buildParams(row) {
   const additionalPivotalData = buildAdditionalPivotalData(row);
 
   const params = {
-    name: row["Title"],
+    title: row["Title"],
     id: row["Id"],
     type: row["Type"],
     createdAt: row["Created at"],

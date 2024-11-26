@@ -9,130 +9,135 @@ import findAttachmentsInFolder from "../files/find_attachments_in_folder.mjs";
 import upload from "../files/upload.mjs";
 import createComment from "../comments/create.mjs";
 import formatPriority from "../priority/formatter.js";
+import { MAX_REQUESTS_PER_SECOND } from "../../config/config.js";
 
-import { findClosestEstimate } from "../estimates/rounder.mjs";
+import { roundEstimate } from "../estimates/rounder.mjs";
 
 const detailedLogger = new DetailedLogger();
 
 async function createIssues({ team, payload, options, directory }) {
-  detailedLogger.importantLoading("Creating issues");
-
   const teamStatuses = await fetchStatuses({ teamId: team.id });
   const teamLabels = await fetchLabels({ teamId: team.id });
-  const issueEstimation = await fetchIssueEstimationSettings({
+  const { scale } = await fetchIssueEstimationSettings({
     teamId: team.id,
   });
-
-  process.exit(1);
 
   const userMapping = await getUserMapping(team.name);
 
   // TODO:
   // - create a comment for each pull request link
 
-  payload.issues.map(async (issue, index) => {
-    const stateId = teamStatuses.find(
-      (state) => state.name === `pivotal - ${issue.state}`,
-    )?.id;
+  await Promise.all(
+    payload.issues.map(async (issue, index) => {
+      const stateId = teamStatuses.find(
+        (state) => state.name === `pivotal - ${issue.state}`,
+      )?.id;
 
-    const pivotalStoryTypeLabelId = teamLabels.find(
-      (label) => label.name === `pivotal - ${issue.type}`,
-    )?.id;
+      const pivotalStoryTypeLabelId = teamLabels.find(
+        (label) => label.name === `pivotal - ${issue.type}`,
+      )?.id;
 
-    const otherLabelIds = issue.labels
-      ? issue.labels
-          .split(",")
-          .map((label) => label.trim())
-          .map(
-            (label) =>
-              teamLabels.find((teamLabel) => teamLabel.name === label)?.id,
-          )
-          .filter((id) => id)
-      : [];
-    const labelIds = [pivotalStoryTypeLabelId, ...otherLabelIds].filter(
-      Boolean,
-    );
+      const otherLabelIds = issue.labels
+        ? issue.labels
+            .split(",")
+            .map((label) => label.trim())
+            .map(
+              (label) =>
+                teamLabels.find((teamLabel) => teamLabel.name === label)?.id,
+            )
+            .filter((id) => id)
+        : [];
 
-    const estimate = issue.estimate
-      ? findClosestEstimate(issue.estimate, issueEstimation.type)
-      : undefined;
-
-    const priority = issue.priority
-      ? formatPriority(issue.priority)
-      : undefined;
-
-    try {
-      const params = {
-        teamId: team.id,
-        stateId,
-        title: issue.name,
-        description: issue.description,
-        labelIds: options.shouldImportLabels ? labelIds : undefined,
-        estimate: options.shouldImportEstimates ? estimate : undefined,
-        priority: options.shouldFormatPriority ? priority : undefined,
-        cycleId: null,
-      };
-
-      detailedLogger.importantInfo(
-        `Params: ${JSON.stringify(params, null, 2)}`,
+      const labelIds = [pivotalStoryTypeLabelId, ...otherLabelIds].filter(
+        Boolean,
       );
 
-      const newIssue = await linearClient.createIssue(params);
-      await logSuccessfulImport(issue.id, team.name, index + 1);
+      const estimate = issue.estimate
+        ? roundEstimate(issue.estimate, scale)
+        : undefined;
 
-      // Create comments
-      if (options.shouldImportComments) {
-        if (issue.comments.length > 0) {
-          await Promise.all(
-            issue.comments.map(async (body) => {
-              try {
-                await createComment({ issueId: newIssue._issue.id, body });
-                detailedLogger.success(`Comment created: ${body}`);
-              } catch (error) {
-                detailedLogger.error(
-                  `Error creating comment: ${error.message}`,
-                );
-                process.exit(1);
-              }
-            }),
-          );
-          detailedLogger.success(
-            `(${issue.comments.length}) comment(s) created.`,
-          );
-        }
-      }
+      const priority = issue.priority
+        ? formatPriority(issue.priority)
+        : undefined;
 
-      if (options.shouldImportFiles) {
-        const attachments = await findAttachmentsInFolder({
-          csvFilename: directory,
-          pivotalStoryId: issue.id,
+      try {
+        const params = {
+          teamId: team.id,
+          stateId,
+          title: issue.title,
+          description: issue.description,
+          labelIds: options.shouldImportLabels ? labelIds : undefined,
+          estimate: options.shouldImportEstimates ? estimate : undefined,
+          priority: options.shouldFormatPriority ? priority : undefined,
+          cycleId: null,
+        };
+
+        detailedLogger.importantInfo(
+          `Params: ${JSON.stringify(params, null, 2)}`,
+        );
+
+        const newIssue = await linearClient.createIssue(params);
+        await logSuccessfulImport({
+          team,
+          issue,
+          importNumber: index + 1,
         });
 
-        // detailedLogger.info(`Attachments for story ${issue.id}:`, attachments);
-
-        if (attachments.length > 0) {
-          for (const attachment of attachments) {
-            try {
-              await upload(attachment, issueId);
-              detailedLogger.success(`Attachment uploaded: ${attachment}`);
-            } catch (error) {
-              detailedLogger.error(
-                `Error uploading attachment ${attachment}: ${error.message}`,
-              );
-              exitProcess();
-            }
+        // Create comments
+        if (options.shouldImportComments) {
+          if (issue.comments.length > 0) {
+            await Promise.all(
+              issue.comments.map(async (body) => {
+                try {
+                  await createComment({ issueId: newIssue._issue.id, body });
+                  detailedLogger.result(`Comment created: ${body}`);
+                } catch (error) {
+                  detailedLogger.error(
+                    `Error creating comment: ${error.message}`,
+                  );
+                  process.exit(1);
+                }
+              }),
+            );
+            detailedLogger.success(
+              `(${issue.comments.length}) comment(s) created.`,
+            );
           }
-        } else {
-          detailedLogger.info(`No attachments found for story ${issue.id}`);
         }
-      }
-    } catch (error) {
-      detailedLogger.error(`Failed to create issue: ${error.message}`);
-      throw error;
-    }
 
-    await new Promise((resolve) => setTimeout(resolve, 5));
-  });
+        if (options.shouldImportFiles) {
+          const attachments = await findAttachmentsInFolder({
+            csvFilename: directory,
+            pivotalStoryId: issue.id,
+          });
+
+          // detailedLogger.info(`Attachments for story ${issue.id}:`, attachments);
+
+          if (attachments.length > 0) {
+            for (const attachment of attachments) {
+              try {
+                await upload(attachment, issueId);
+                detailedLogger.success(`Attachment uploaded: ${attachment}`);
+              } catch (error) {
+                detailedLogger.error(
+                  `Error uploading attachment ${attachment}: ${error.message}`,
+                );
+                exitProcess();
+              }
+            }
+          } else {
+            detailedLogger.info(`No attachments found for story ${issue.id}`);
+          }
+        }
+      } catch (error) {
+        detailedLogger.error(`Failed to create issue: ${error.message}`);
+        throw error;
+      }
+
+      const DELAY = Math.ceil(500 / MAX_REQUESTS_PER_SECOND);
+      await new Promise((resolve) => setTimeout(resolve, DELAY * 2));
+    }),
+  );
 }
 
 export default createIssues;

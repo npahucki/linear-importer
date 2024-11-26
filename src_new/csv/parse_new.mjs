@@ -29,7 +29,7 @@ function readCSV(filePath) {
       .pipe(
         parse({
           columns: true,
-          group_columns_by_name: true,
+          group_columns_by_title: true,
           trim: true,
           relax_column_count: true,
         }),
@@ -71,7 +71,7 @@ function readCSV(filePath) {
         if (row["Type"] == "release") {
           const releaseRowFormatted = {
             ...params,
-            name: row["Iteration"]
+            title: row["Iteration"]
               ? `[${row["Iteration"]}] ${row["Title"]}`
               : row["Title"],
             dueDate: row["Iteration End"],

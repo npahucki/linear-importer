@@ -89,9 +89,9 @@ await proceedWithImport({ confirmationMessage });
 //=============================================================================
 // Create Labels and Statuses
 //=============================================================================
-await createLabels({ teamId: team.id, labels: DEFAULT_LABELS });
-await createLabels({ teamId: team.id, labels: csvData.aggregatedData.labels });
-await createStatusesForTeam({ teamId: team.id });
+// await createLabels({ teamId: team.id, labels: DEFAULT_LABELS });
+// await createLabels({ teamId: team.id, labels: csvData.aggregatedData.labels });
+// await createStatusesForTeam({ teamId: team.id });
 
 //=============================================================================
 // Create Issues
@@ -103,4 +103,4 @@ await createIssues({
   directory,
 });
 
-detailedLogger.importantSuccess("Import complete!");
+await detailedLogger.importantSuccess("Import complete!");

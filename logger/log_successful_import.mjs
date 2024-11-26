@@ -4,23 +4,23 @@ import DetailedLogger from "./detailed_logger.mjs";
 
 const detailedLogger = new DetailedLogger();
 
-const logSuccessfulImport = async (pivotalStoryId, teamName, importNumber) => {
+const logSuccessfulImport = async ({ team, issue, importNumber }) => {
   try {
     // Use getTeamLogPath as a static method instead
-    const filePath = Logger.getTeamLogPath(teamName, "successful_imports.csv");
+    const filePath = Logger.getTeamLogPath(team.name, "successful_imports.csv");
 
     // Check if file exists, if not create it with headers
     try {
       await fs.access(filePath);
     } catch {
-      await fs.writeFile(filePath, "Date,ID\n");
+      await fs.writeFile(filePath, "Date,ID,Title\n");
     }
 
-    const logEntry = `${new Date().toISOString()},${pivotalStoryId}\n`;
+    const logEntry = `${new Date().toISOString()},${issue.id},${issue.title}\n`;
     await fs.appendFile(filePath, logEntry);
 
-    detailedLogger.success(
-      `${importNumber} - Logging successful import for story ${pivotalStoryId}`,
+    detailedLogger.result(
+      `${importNumber} - Logging successful import for story ${issue.title}`,
     );
 
     // const issueId = newIssue._issue.id;
@@ -32,10 +32,11 @@ const logSuccessfulImport = async (pivotalStoryId, teamName, importNumber) => {
     //   ),
     // );
   } catch (error) {
-    console.error(
-      `Failed to log successful import for story ${pivotalStoryId}:`,
+    detailedLogger.importantError(
+      `Failed to log successful import for story ${issue.id}:`,
       error,
     );
+    process.exit(1);
   }
 };
 
