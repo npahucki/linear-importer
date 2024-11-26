@@ -52,7 +52,7 @@ async function createIssue({
   csvFilename,
   importFiles,
   labelIds,
-  estimationScale
+  estimationScale,
 }) {
   try {
     const userMapping = await getUserMapping(teamName);
@@ -64,7 +64,10 @@ async function createIssue({
     // Add creator as subscriber if they have a mapping
     if (pivotalStory.requestedBy) {
       const mappedRequester = userMapping[pivotalStory.requestedBy];
-      if (mappedRequester?.linearId && !subscriberIds.includes(mappedRequester.linearId)) {
+      if (
+        mappedRequester?.linearId &&
+        !subscriberIds.includes(mappedRequester.linearId)
+      ) {
         subscriberIds.push(mappedRequester.linearId);
         if (ENABLE_DETAILED_LOGGING) {
           console.log(
@@ -101,9 +104,7 @@ async function createIssue({
             subscriberIds.push(mappedUser.linearId);
             if (ENABLE_DETAILED_LOGGING) {
               console.log(
-                chalk.blue(
-                  `Added Pivotal user "${owner}" to subscribers`,
-                ),
+                chalk.blue(`Added Pivotal user "${owner}" to subscribers`),
               );
             }
           }
@@ -153,7 +154,9 @@ async function createIssue({
       assigneeId,
       subscriberIds,
       cycleId: null,
-      estimate: pivotalStory.estimate ? findClosestEstimate(pivotalStory.estimate, estimationScale) : undefined,
+      estimate: pivotalStory.estimate
+        ? findClosestEstimate(pivotalStory.estimate, estimationScale)
+        : undefined,
     });
 
     if (newIssue.success) {

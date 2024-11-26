@@ -21,34 +21,49 @@ async function createIssues({ team, payload, options }) {
 
   const userMapping = await getUserMapping(team.name);
 
-  // detailedLogger.importantSuccess(
-  //   `Payload: ${JSON.stringify(payload, null, 2)}`,
-  // );
-  // detailedLogger.info(`Options: ${JSON.stringify(options, null, 2)}`);
-  // detailedLogger.info(
-  //   `Issue Estimation: ${JSON.stringify(issueEstimation, null, 2)}`,
-  // );
-  // detailedLogger.result(`userMapping: ${JSON.stringify(userMapping, null, 2)}`);
-  // detailedLogger.result(`labels: ${JSON.stringify(labels, null, 2)}`);
-  // detailedLogger.result(
-  //   `issueEstimation: ${JSON.stringify(issueEstimation, null, 2)}`,
-  // );
+  // TODO:
+  // - create a comment for each pull request link
 
   payload.issues.map(async (issue) => {
     const stateId = teamStatuses.find(
       (state) => state.name === `pivotal - ${issue.state}`,
     )?.id;
+
+    const pivotalStoryTypeLabelId = teamLabels.find(
+      (label) => label.name === `pivotal - ${issue.type}`,
+    )?.id;
+
+    const otherLabelIds = issue.labels
+      ? issue.labels
+          .split(",")
+          .map((label) => label.trim())
+          .map(
+            (label) =>
+              teamLabels.find((teamLabel) => teamLabel.name === label)?.id,
+          )
+          .filter((id) => id)
+      : [];
+    const labelIds = [pivotalStoryTypeLabelId, ...otherLabelIds].filter(
+      Boolean,
+    );
+
+    const estimate = issue.estimate
+      ? findClosestEstimate(issue.estimate, issueEstimation.type)
+      : undefined;
+
     try {
       const params = {
         teamId: team.id,
         title: issue.name,
         description: issue.description,
         stateId,
-        // labelIds: options.shouldImportLabels ? labelIds : undefined,
-        estimate: options.shouldImportEstimates
-          ? findClosestEstimate(issue.estimate, issueEstimation.scale)
-          : undefined,
+        labelIds,
+        estimate,
       };
+
+      detailedLogger.importantInfo(
+        `Params: ${JSON.stringify(params, null, 2)}`,
+      );
 
       await linearClient.createIssue(params);
       await logSuccessfulImport(issue.id, team.name);
@@ -80,3 +95,14 @@ export default createIssues;
 //   cycleId: null,
 //   estimate: pivotalStory.estimate ? findClosestEstimate(pivotalStory.estimate, estimationScale) : undefined,
 // });
+
+// detailedLogger.importantSuccess(
+//   `Payload: ${JSON.stringify(payload, null, 2)}`,
+// );
+// detailedLogger.info(
+//   `Issue Estimation: ${JSON.stringify(issueEstimation, null, 2)}`,
+// );
+// detailedLogger.result(`labels: ${JSON.stringify(labels, null, 2)}`);
+// detailedLogger.result(
+//   `issueEstimation: ${JSON.stringify(issueEstimation, null, 2)}`,
+// );

@@ -2,6 +2,7 @@ import { initializeLogger } from "../logger/initialize.js";
 import createStatusesForTeam from "./statuses/create.mjs";
 import DetailedLogger from "../logger/detailed_logger.mjs";
 import importLabels from "./prompts/import_labels_new.js";
+import importComments from "./prompts/import_comments.js";
 import updateIssueEstimationType from "./estimates/update_issue_estimation_type.js";
 import importEstimates from "./estimates/import_estimates.js";
 import selectTeam from "./teams/select.mjs";
@@ -42,19 +43,16 @@ const directory = await selectDirectory();
 //=============================================================================
 const shouldImportFiles = await importFiles();
 const shouldImportLabels = await importLabels();
+const shouldImportComments = await importComments();
 const shouldImportEstimates = await importEstimates();
 if (shouldImportEstimates) await updateIssueEstimationType({ team });
 
 const options = {
   shouldImportFiles,
   shouldImportLabels,
+  shouldImportComments,
   shouldImportEstimates,
 };
-
-detailedLogger.info(`Import Source: ${importSource}`);
-detailedLogger.info(`Team: ${JSON.stringify(team, null, 2)}`);
-detailedLogger.info(`Directory: ${directory}`);
-detailedLogger.info(`Options: ${JSON.stringify(options, null, 2)}`);
 
 //=============================================================================
 // Format Data for Import Type
@@ -73,6 +71,11 @@ await createUserMapping({
   extractedUsernames: csvData.aggregatedData.userNames,
 });
 
+detailedLogger.info(`Import Source: ${importSource}`);
+detailedLogger.info(`Team: ${JSON.stringify(team, null, 2)}`);
+detailedLogger.info(`Directory: ${directory}`);
+detailedLogger.info(`Options: ${JSON.stringify(options, null, 2)}`);
+
 //=============================================================================
 // Confirm Proceed
 //=============================================================================
@@ -81,9 +84,9 @@ await proceedWithImport({ confirmationMessage });
 //=============================================================================
 // Create Labels and Statuses
 //=============================================================================
-// detailedLogger.importantInfo("Creating labels and statuses...");
-// await createLabels({ teamId: team.id, labels: DEFAULT_LABELS });
-// await createStatusesForTeam({ teamId: team.id });
+await createLabels({ teamId: team.id, labels: DEFAULT_LABELS });
+await createLabels({ teamId: team.id, labels: csvData.aggregatedData.labels });
+await createStatusesForTeam({ teamId: team.id });
 
 //=============================================================================
 // Create Issues
