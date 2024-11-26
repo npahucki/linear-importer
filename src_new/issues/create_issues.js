@@ -5,12 +5,15 @@ import getUserMapping from "../users/get_user_mapping.mjs";
 import fetchLabels from "../labels/list.mjs";
 import fetchStatuses from "../statuses/list.mjs";
 import fetchEstimatesForTeam from "../estimates/list.mjs";
+import findAttachmentsInFolder from "../files/find_attachments_in_folder.mjs";
+import upload from "../files/upload.mjs";
+import createComment from "../comments/create.mjs";
 
 import { findClosestEstimate } from "../estimates/rounder.mjs";
 
 const detailedLogger = new DetailedLogger();
 
-async function createIssues({ team, payload, options }) {
+async function createIssues({ team, payload, options, directory }) {
   detailedLogger.importantLoading("Creating issues");
 
   const teamStatuses = await fetchStatuses({ teamId: team.id });
@@ -24,7 +27,7 @@ async function createIssues({ team, payload, options }) {
   // TODO:
   // - create a comment for each pull request link
 
-  payload.issues.map(async (issue) => {
+  payload.issues.map(async (issue, index) => {
     const stateId = teamStatuses.find(
       (state) => state.name === `pivotal - ${issue.state}`,
     )?.id;
@@ -54,19 +57,66 @@ async function createIssues({ team, payload, options }) {
     try {
       const params = {
         teamId: team.id,
+        stateId,
         title: issue.name,
         description: issue.description,
-        stateId,
-        labelIds,
-        estimate,
+        labelIds: options.shouldImportLabels ? labelIds : undefined,
+        estimate: options.shouldImportEstimates ? estimate : undefined,
       };
 
       detailedLogger.importantInfo(
         `Params: ${JSON.stringify(params, null, 2)}`,
       );
 
-      await linearClient.createIssue(params);
-      await logSuccessfulImport(issue.id, team.name);
+      const newIssue = await linearClient.createIssue(params);
+      await logSuccessfulImport(issue.id, team.name, index + 1);
+
+      // Create comments
+      if (options.shouldImportComments) {
+        if (issue.comments.length > 0) {
+          await Promise.all(
+            issue.comments.map(async (body) => {
+              try {
+                await createComment({ issueId: newIssue._issue.id, body });
+                detailedLogger.success(`Comment created: ${body}`);
+              } catch (error) {
+                detailedLogger.error(
+                  `Error creating comment: ${error.message}`,
+                );
+                process.exit(1);
+              }
+            }),
+          );
+          detailedLogger.success(
+            `(${issue.comments.length}) comment(s) created.`,
+          );
+        }
+      }
+
+      if (options.shouldImportFiles) {
+        const attachments = await findAttachmentsInFolder({
+          csvFilename: directory,
+          pivotalStoryId: issue.id,
+        });
+
+        // detailedLogger.info(`Attachments for story ${issue.id}:`, attachments);
+
+        if (attachments.length > 0) {
+          for (const attachment of attachments) {
+            try {
+              await upload(attachment, issueId);
+              detailedLogger.success(`Attachment uploaded: ${attachment}`);
+            } catch (error) {
+              detailedLogger.error(
+                `Error uploading attachment ${attachment}: ${error.message}`,
+              );
+              exitProcess();
+            }
+          }
+        } else {
+          detailedLogger.info(`No attachments found for story ${issue.id}`);
+        }
+      }
     } catch (error) {
       detailedLogger.error(`Failed to create issue: ${error.message}`);
       throw error;

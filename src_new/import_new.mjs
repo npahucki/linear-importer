@@ -54,14 +54,16 @@ const options = {
   shouldImportEstimates,
 };
 
+const meta = {
+  importSource,
+  directory,
+};
+
 //=============================================================================
 // Format Data for Import Type
 //=============================================================================
 // TODO: Modify to swap different data sources, based on importSource
-const { csvData, confirmationMessage } = await pivotalFormatter({
-  team,
-  directory,
-});
+const { csvData, confirmationMessage } = await pivotalFormatter({ team, meta });
 
 //=============================================================================
 // Create User Mapping
@@ -95,6 +97,7 @@ await createIssues({
   team,
   payload: csvData,
   options,
+  directory,
 });
 
 detailedLogger.importantSuccess("Import complete!");

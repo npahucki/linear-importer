@@ -18,6 +18,7 @@ function readCSV(filePath) {
   return new Promise((resolve, reject) => {
     const pivotalStories = [];
     const releaseStories = [];
+    const issues = [];
     const labels = new Set();
     const estimates = new Set();
     const statusTypes = new Set();

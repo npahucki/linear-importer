@@ -4,7 +4,7 @@ import DetailedLogger from "./detailed_logger.mjs";
 
 const detailedLogger = new DetailedLogger();
 
-const logSuccessfulImport = async (pivotalStoryId, teamName) => {
+const logSuccessfulImport = async (pivotalStoryId, teamName, importNumber) => {
   try {
     // Use getTeamLogPath as a static method instead
     const filePath = Logger.getTeamLogPath(teamName, "successful_imports.csv");
@@ -20,7 +20,7 @@ const logSuccessfulImport = async (pivotalStoryId, teamName) => {
     await fs.appendFile(filePath, logEntry);
 
     detailedLogger.success(
-      `Logging successful import for story ${pivotalStoryId}`,
+      `${importNumber} - Logging successful import for story ${pivotalStoryId}`,
     );
 
     // const issueId = newIssue._issue.id;

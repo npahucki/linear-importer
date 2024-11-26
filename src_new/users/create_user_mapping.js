@@ -32,7 +32,7 @@ async function createUserMapping({ team, extractedUsernames }) {
     `Extracted usernames:\n${extractedUsernames.join("\n")}`,
   );
   detailedLogger.importantLoading(
-    `Finding best matches for extracted usernames...`,
+    `Finding best matches for extracted usernames`,
   );
 
   // Fetch Team Members

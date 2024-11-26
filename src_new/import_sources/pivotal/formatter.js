@@ -8,14 +8,14 @@ import buildImportSummary from "./build_import_summary.js";
 
 const detailedLogger = new DetailedLogger();
 
-async function formatter({ team, directory }) {
+async function formatter({ team, meta }) {
   detailedLogger.importantLoading(`Setting up Pivotal Import...`);
 
   // Prompt user to select status types
   const selectedStatusTypes = await selectStatusTypes();
 
   // Parse CSV
-  const csvData = await parseCSV(directory);
+  const csvData = await parseCSV(meta.directory);
 
   // Read previously imported stories from `successful_imports.csv`
   const successfulImports = await readSuccessfulImports(team.name);
@@ -23,7 +23,8 @@ async function formatter({ team, directory }) {
   // Filter out stories that have already been imported and logged in `successful_imports.csv`
   // TODO: move this out of pivotal formatter and make it a global function. probably need to create a dir for each import source to allow for different log files per import source
   const pivotalStoriesThatHaveNotBeenImported = csvData.issues.filter(
-    (story) => !successfulImports.has(story.id),
+    // (story) => !successfulImports.has(story.id),
+    (story) => true,
   );
 
   // Only include stories that match the selected status types in `selectedStatusTypes`
