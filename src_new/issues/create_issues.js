@@ -4,10 +4,11 @@ import logSuccessfulImport from "../../logger/log_successful_import.mjs";
 import getUserMapping from "../users/get_user_mapping.mjs";
 import fetchLabels from "../labels/list.mjs";
 import fetchStatuses from "../statuses/list.mjs";
-import fetchEstimatesForTeam from "../estimates/list.mjs";
+import fetchIssueEstimationDetails from "../estimates/list.mjs";
 import findAttachmentsInFolder from "../files/find_attachments_in_folder.mjs";
 import upload from "../files/upload.mjs";
 import createComment from "../comments/create.mjs";
+import formatPriority from "../priority/formatter.js";
 
 import { findClosestEstimate } from "../estimates/rounder.mjs";
 
@@ -18,9 +19,11 @@ async function createIssues({ team, payload, options, directory }) {
 
   const teamStatuses = await fetchStatuses({ teamId: team.id });
   const teamLabels = await fetchLabels({ teamId: team.id });
-  const issueEstimation = await fetchEstimatesForTeam({
+  const issueEstimation = await fetchIssueEstimationDetails({
     teamId: team.id,
   });
+
+  process.exit(1);
 
   const userMapping = await getUserMapping(team.name);
 
@@ -54,6 +57,10 @@ async function createIssues({ team, payload, options, directory }) {
       ? findClosestEstimate(issue.estimate, issueEstimation.type)
       : undefined;
 
+    const priority = issue.priority
+      ? formatPriority(issue.priority)
+      : undefined;
+
     try {
       const params = {
         teamId: team.id,
@@ -62,6 +69,8 @@ async function createIssues({ team, payload, options, directory }) {
         description: issue.description,
         labelIds: options.shouldImportLabels ? labelIds : undefined,
         estimate: options.shouldImportEstimates ? estimate : undefined,
+        priority: options.shouldFormatPriority ? priority : undefined,
+        cycleId: null,
       };
 
       detailedLogger.importantInfo(
@@ -121,6 +130,8 @@ async function createIssues({ team, payload, options, directory }) {
       detailedLogger.error(`Failed to create issue: ${error.message}`);
       throw error;
     }
+
+    await new Promise((resolve) => setTimeout(resolve, 5));
   });
 }
 

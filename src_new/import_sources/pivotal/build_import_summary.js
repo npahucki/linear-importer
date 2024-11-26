@@ -18,9 +18,9 @@ function buildImportSummary(formattedIssuePayload) {
           release: "green",
         }[type] || "white";
 
-      return `   ${type}: ${chalk[color].bold(count)}`;
+      return `     ${type}: ${chalk[color].bold(count)}`;
     })
-    .join("");
+    .join("     \n");
 
   const confirmProceedPrompt =
     chalk.blue.bold(`Import Summary:`) +

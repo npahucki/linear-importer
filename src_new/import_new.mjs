@@ -5,6 +5,7 @@ import importLabels from "./prompts/import_labels_new.js";
 import importComments from "./prompts/import_comments.js";
 import updateIssueEstimationType from "./estimates/update_issue_estimation_type.js";
 import importEstimates from "./estimates/import_estimates.js";
+import importPriority from "./priority/import_priority.js";
 import selectTeam from "./teams/select.mjs";
 import importFiles from "./prompts/import_files.js";
 import proceedWithImport from "./prompts/proceed_with_import_new.js";
@@ -44,6 +45,7 @@ const directory = await selectDirectory();
 const shouldImportFiles = await importFiles();
 const shouldImportLabels = await importLabels();
 const shouldImportComments = await importComments();
+const shouldImportPriority = await importPriority();
 const shouldImportEstimates = await importEstimates();
 if (shouldImportEstimates) await updateIssueEstimationType({ team });
 
@@ -51,6 +53,7 @@ const options = {
   shouldImportFiles,
   shouldImportLabels,
   shouldImportComments,
+  shouldImportPriority,
   shouldImportEstimates,
 };
 
