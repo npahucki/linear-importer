@@ -4,21 +4,21 @@ import DetailedLogger from "./detailed_logger.mjs";
 
 const detailedLogger = new DetailedLogger();
 
-const readSuccessfulImports = async ({ team }) => {
-  if (!team.name) {
+const readSuccessfulImports = async (teamName) => {
+  if (!teamName) {
     detailedLogger.warning("No team name provided to readSuccessfulImports");
-    process.exit(0);
+    return new Set();
   }
 
   try {
-    const filePath = Logger.getTeamLogPath(team.name, "successful_imports.csv");
+    const filePath = Logger.getTeamLogPath(teamName, "successful_imports.csv");
 
     // Check if file exists
     try {
       await fs.access(filePath);
     } catch (error) {
-      detailedLogger.info(
-        `No existing import log found for team "${team.name}"`,
+      detailedLogger.warning(
+        `No existing import log found for team "${teamName}"`,
       );
       return new Set();
     }
@@ -35,17 +35,17 @@ const readSuccessfulImports = async ({ team }) => {
         })
         .filter(Boolean), // Remove any undefined/null/empty values
     );
-    detailedLogger.info(
-      `Found ${successfulImports.size} previously imported stories for team "${team.name}"`,
-    );
 
+    detailedLogger.result(
+      `Found ${successfulImports.size} previously imported stories for team "${teamName}"`,
+    );
     return successfulImports;
   } catch (error) {
     detailedLogger.error(
-      `Error reading successful imports for team "${team.name}":`,
+      `Error reading successful imports for team "${teamName}":`,
       error,
     );
-    process.exit(0);
+    return new Set();
   }
 };
 

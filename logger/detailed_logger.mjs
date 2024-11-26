@@ -63,6 +63,13 @@ class DetailedLogger {
     console.error(chalk.bold.red(`  ⚠️  ${message}`));
     console.error(chalk.red("▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓\n"));
   }
+
+  importantSummary(message) {
+    if (ENABLE_DETAILED_LOGGING === false) return;
+    console.log("\n" + chalk.cyan("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
+    console.log(chalk.bold.cyan(`  📊 ${message}`));
+    console.log(chalk.cyan("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"));
+  }
 }
 
 export default DetailedLogger;

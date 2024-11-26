@@ -1,15 +1,15 @@
 import DetailedLogger from "../../../logger/detailed_logger.mjs";
+import readSuccessfulImports from "../../../logger/read_successful_imports_new.mjs";
 
 import parseCSV from "../../csv/parse_new.mjs";
 import selectStatusTypes from "./select_status_types.js";
 
 import buildImportSummary from "./build_import_summary.js";
-import readSuccessfulImports from "../../../logger/read_successful_imports_new.mjs";
 
 const detailedLogger = new DetailedLogger();
 
-async function formatter({ directory, team }) {
-  detailedLogger.importantLoading(`Beginning Pivotal import...`);
+async function formatter({ team, directory }) {
+  detailedLogger.importantLoading(`Setting up Pivotal Import...`);
 
   // Prompt user to select status types
   const selectedStatusTypes = await selectStatusTypes();
@@ -17,13 +17,20 @@ async function formatter({ directory, team }) {
   // Parse CSV
   const csvData = await parseCSV(directory);
 
-  const successfulImports = await readSuccessfulImports({ team });
+  // Read previously imported stories from `successful_imports.csv`
+  const successfulImports = await readSuccessfulImports(team.name);
 
-  // Only include stories that match the selected status types
-  const formattedIssuePayload = csvData.issues.filter((story) =>
-    selectedStatusTypes.includes(story.state),
+  // Filter out stories that have already been imported and logged in `successful_imports.csv`
+  const pivotalStoriesThatHaveNotBeenImported = csvData.issues.filter(
+    (story) => !successfulImports.has(story.id),
   );
 
+  // Only include stories that match the selected status types in `selectedStatusTypes`
+  const formattedIssuePayload = pivotalStoriesThatHaveNotBeenImported.filter(
+    (story) => selectedStatusTypes.includes(story.state),
+  );
+
+  // TODO: Make this shorter... maybe return a sample object or set to a different logging level
   detailedLogger.info(
     `Formatted Issue Payload: ${JSON.stringify(
       formattedIssuePayload,
@@ -32,6 +39,15 @@ async function formatter({ directory, team }) {
     )}`,
   );
 
+  // Check if there are any stories left to import
+  if (formattedIssuePayload.length === 0) {
+    detailedLogger.importantSuccess(
+      "You have already imported all Pivotal Stories! Exiting.",
+    );
+    process.exit(0);
+  }
+
+  // Build import summary
   const confirmationMessage = buildImportSummary(formattedIssuePayload);
 
   return { csvData, confirmationMessage };

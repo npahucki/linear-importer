@@ -23,12 +23,11 @@ function buildImportSummary(formattedIssuePayload) {
     .join("");
 
   const confirmProceedPrompt =
-    chalk.blue.bold(`
-  📊 Import Summary:`) +
-    chalk.white(`
-     Already imported: ${chalk.green.bold("successfulImportsLength - TODO")}
-    ${typeBreakdown}
+    chalk.blue.bold(`Import Summary:`) +
+    chalk.white(`Already imported: ${chalk.green.bold("successfulImportsLength - TODO")}
 
+    ${typeBreakdown}
+  
     Total Remaining Stories: ${chalk.green.bold("TODO successfulImportsLength - issues.count")}`);
 
   return confirmProceedPrompt;

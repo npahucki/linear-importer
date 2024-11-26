@@ -1,14 +1,14 @@
-import chalk from "chalk";
-
 import { promises as fs } from "fs";
 
-import { ENABLE_DETAILED_LOGGING } from "../../config/config.js";
+import DetailedLogger from "../../logger/detailed_logger.mjs";
 
 import path from "path";
 
+const detailedLogger = new DetailedLogger();
+
 async function getUserMapping(teamName) {
   try {
-    const projectRoot = path.join(process.cwd(), "..");
+    const projectRoot = path.join(process.cwd());
     const mappingPath = path.join(
       projectRoot,
       "log",
@@ -16,20 +16,19 @@ async function getUserMapping(teamName) {
       "user_mapping.json",
     );
 
-    if (ENABLE_DETAILED_LOGGING) {
-      console.log("Looking for mapping file at:", mappingPath);
-    }
+    detailedLogger.loading(`Looking for user mapping file at: ${mappingPath}`);
 
     const mappingFile = await fs.readFile(mappingPath, "utf8");
-    const mappingData = JSON.parse(mappingFile);
-    return mappingData.mapping;
+    const userMappingPath = JSON.parse(mappingFile);
+
+    detailedLogger.info(`User mapping file found at ${mappingPath}`);
+
+    return userMappingPath.mapping;
   } catch (error) {
-    console.warn(
-      chalk.yellow(
-        `Warning: Could not load user mapping file: ${error.message}`,
-      ),
+    detailedLogger.warning(
+      `Could not load user mapping file: ${error.message}`,
     );
-    return {};
+    process.exit(0);
   }
 }
 

@@ -11,6 +11,8 @@ import { findClosestEstimate } from "../estimates/rounder.mjs";
 const detailedLogger = new DetailedLogger();
 
 async function createIssues({ team, payload, options }) {
+  detailedLogger.importantLoading("Creating issues");
+
   const teamStatuses = await fetchStatuses({ teamId: team.id });
   const teamLabels = await fetchLabels({ teamId: team.id });
   const issueEstimation = await fetchEstimatesForTeam({
@@ -49,7 +51,6 @@ async function createIssues({ team, payload, options }) {
       };
 
       await linearClient.createIssue(params);
-
       await logSuccessfulImport(issue.id, team.name);
     } catch (error) {
       detailedLogger.error(`Failed to create issue: ${error.message}`);

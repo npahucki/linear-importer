@@ -21,7 +21,7 @@ async function updateIssueEstimationType({ team }) {
       message: `Issue estimation is set to ${chalk.cyan(
         ISSUE_ESTIMATION_OPTIONS.find(
           (option) => option.value === issueEstimation.type,
-        ).name,
+        )?.name,
       )}.\n  Estimates will be rounded to the nearest value. Change it?`,
       choices: [
         { name: "Yes", value: true },
@@ -54,7 +54,7 @@ async function updateIssueEstimationType({ team }) {
       `Updated issue estimation type to ${
         ISSUE_ESTIMATION_OPTIONS.find(
           (option) => option.value === issueEstimationType,
-        ).name
+        )?.name
       }`,
     );
 

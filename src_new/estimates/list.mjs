@@ -25,7 +25,7 @@ async function fetchEstimatesForTeam({ teamId }) {
 
     const estimationScale = ISSUE_ESTIMATION_OPTIONS.find(
       (option) => option.value === issueEstimationType,
-    ).scale;
+    )?.scale;
 
     const data = {
       type: issueEstimationType,

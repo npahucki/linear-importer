@@ -51,10 +51,10 @@ const options = {
   shouldImportEstimates,
 };
 
-detailedLogger.info(`Import Source: ${importSource}`);
-detailedLogger.info(`Team: ${JSON.stringify(team, null, 2)}`);
-detailedLogger.info(`Directory: ${directory}`);
-detailedLogger.info(`Options: ${JSON.stringify(options, null, 2)}`);
+// detailedLogger.info(`Import Source: ${importSource}`);
+// detailedLogger.info(`Team: ${JSON.stringify(team, null, 2)}`);
+// detailedLogger.info(`Directory: ${directory}`);
+// detailedLogger.info(`Options: ${JSON.stringify(options, null, 2)}`);
 
 //=============================================================================
 // Format Data for Import Type
@@ -82,8 +82,8 @@ await proceedWithImport({ confirmationMessage });
 // Create Labels and Statuses
 //=============================================================================
 // detailedLogger.importantInfo("Creating labels and statuses...");
-await createLabels({ teamId: team.id, labels: DEFAULT_LABELS });
-await createStatusesForTeam({ teamId: team.id });
+// await createLabels({ teamId: team.id, labels: DEFAULT_LABELS });
+// await createStatusesForTeam({ teamId: team.id });
 
 //=============================================================================
 // Create Issues

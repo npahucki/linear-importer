@@ -68,7 +68,7 @@ async function createUserMapping({ team, extractedUsernames }) {
     shouldRemap = confirmRemap;
     isNewMapping = shouldRemap;
     if (!shouldRemap) {
-      detailedLogger.loading("Continuing with existing User mapping");
+      detailedLogger.loading("Continuing with existing user mapping");
     }
   } catch (error) {
     detailedLogger.loading(

@@ -1,8 +1,15 @@
 import fs from "fs/promises";
 import Logger from "./logger.mjs";
+import DetailedLogger from "./detailed_logger.mjs";
+
+const detailedLogger = new DetailedLogger();
 
 const logSuccessfulImport = async (pivotalStoryId, teamName) => {
   try {
+    detailedLogger.loading(
+      `Logging successful import for story ${pivotalStoryId}`,
+    );
+
     // Use getTeamLogPath as a static method instead
     const filePath = Logger.getTeamLogPath(teamName, "successful_imports.csv");
 

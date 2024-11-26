@@ -7,7 +7,7 @@ import chalk from "chalk";
 const detailedLogger = new DetailedLogger();
 
 async function proceedWithImport({ confirmationMessage }) {
-  detailedLogger.importantInfo(confirmationMessage);
+  detailedLogger.importantSummary(confirmationMessage);
 
   const { userConfirmedProceed } = await inquirer.prompt([
     {
@@ -31,7 +31,7 @@ async function proceedWithImport({ confirmationMessage }) {
   // detailedLogger.info(`Meta: ${JSON.stringify(meta, null, 2)}`);
   // console.log("--------------------------------");
   // detailedLogger.importantSuccess(`Processing ${meta.importSource} stories...`);
-  console.log(chalk.bold.magenta("\n🚀 Starting import process...\n"));
+  // console.log(chalk.bold.magenta("\n🚀 Starting import process...\n"));
 
   // detailedLogger.importantLoading(`Import Source: ${meta.importSource}`);
 
