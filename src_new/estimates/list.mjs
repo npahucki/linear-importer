@@ -1,7 +1,7 @@
 import linearClient from "../../config/client.mjs";
 import { ISSUE_ESTIMATION_OPTIONS } from "./estimation_scales.js";
 import DetailedLogger from "../../logger/detailed_logger.mjs";
-
+import chalk from "chalk";
 const detailedLogger = new DetailedLogger();
 
 export function findClosestEstimate(value, scale) {
@@ -17,7 +17,7 @@ export function findClosestEstimate(value, scale) {
   });
 }
 
-async function fetchIssueEstimationDetails({ teamId }) {
+async function fetchIssueEstimationSettings({ teamId }) {
   if (!teamId) {
     detailedLogger.importantError("Team ID not provided");
     process.exit(1);
@@ -30,20 +30,39 @@ async function fetchIssueEstimationDetails({ teamId }) {
     const allowZero = team.issueEstimationAllowZero;
     const extended = team.issueEstimationExtended;
 
-    // Use map to
+    // Find correct base values
     const estimationScaleByType = ISSUE_ESTIMATION_OPTIONS.find(
       (option) => option.value === type,
     ).scale;
 
-    const scale = estimationScaleByType.filter(
-      (value) => allowZero || value !== 0,
-    );
+    const choices = ISSUE_ESTIMATION_OPTIONS.map((option) => ({
+      name: `${option.value} (${option.scale.regular.join(", ")}) [Extended: ${option.scale.extended.join(", ")}]`,
+      value: option.value,
+    }));
+
+    // Find scale based using `extended` type
+    const scaleToUse = extended
+      ? estimationScaleByType.extended
+      : estimationScaleByType.regular;
+
+    // Filter out zero if not allowed
+    const scale = scaleToUse.filter((value) => allowZero || value !== 0);
+
+    // Create details to be displayed in prompt
+    const details = [
+      `${chalk.yellow("Current Issue estimation settings:")}`,
+      `  Type: ${chalk.cyan(type)} (${chalk.cyan(scale.join(", "))})`,
+      `  Allow zero estimates: ${chalk.cyan(allowZero)}`,
+      `  Extended estimate scale: ${chalk.cyan(extended)}\n`,
+    ].join("\n");
 
     const data = {
       type,
       allowZero,
       extended,
       scale,
+      details,
+      choices,
     };
 
     detailedLogger.success(
@@ -59,4 +78,4 @@ async function fetchIssueEstimationDetails({ teamId }) {
   }
 }
 
-export default fetchIssueEstimationDetails;
+export default fetchIssueEstimationSettings;

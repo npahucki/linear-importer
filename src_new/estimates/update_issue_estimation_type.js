@@ -3,14 +3,14 @@ import inquirer from "inquirer";
 import linearClient from "../../config/client.mjs";
 import DetailedLogger from "../../logger/detailed_logger.mjs";
 
-import fetchEstimatesForTeam from "./list.mjs";
+import fetchIssueEstimationSettings from "./list.mjs";
 import { ISSUE_ESTIMATION_OPTIONS } from "./estimation_scales.js";
 import chalk from "chalk";
 
 const detailedLogger = new DetailedLogger();
 
 async function updateIssueEstimationType({ team }) {
-  const issueEstimation = await fetchEstimatesForTeam({
+  const { type, details, scale, choices } = await fetchIssueEstimationSettings({
     teamId: team.id,
   });
 
@@ -18,11 +18,7 @@ async function updateIssueEstimationType({ team }) {
     {
       type: "list",
       name: "shouldChangeIssueEstimationType",
-      message: `Issue estimation is set to ${chalk.cyan(
-        ISSUE_ESTIMATION_OPTIONS.find(
-          (option) => option.value === issueEstimation.type,
-        )?.name,
-      )}.\n  Estimates will be rounded to the nearest value. Change it?`,
+      message: `${details}.\n  Estimates will be rounded to the nearest value. Change it?`,
       choices: [
         { name: "Yes", value: true },
         { name: "No", value: false },
@@ -32,30 +28,64 @@ async function updateIssueEstimationType({ team }) {
   ]);
 
   if (!shouldChangeIssueEstimationType) {
-    detailedLogger.info(
-      `Estimate type not changed. Keeping ${issueEstimation.type} (${issueEstimation.scale})`,
-    );
+    detailedLogger.info(`Estimate type not changed. Keeping ${details})`);
     return;
   }
 
+  // First select the estimation type
   const { issueEstimationType } = await inquirer.prompt([
     {
       type: "list",
       name: "issueEstimationType",
-      message: "Select a new issue estimation type:",
-      choices: ISSUE_ESTIMATION_OPTIONS,
+      message: "Select estimation type:",
+      choices,
+    },
+  ]);
+
+  // Then select additional options
+  const { allowZero, extended } = await inquirer.prompt([
+    {
+      type: "list",
+      name: "allowZero",
+      message: "Allow zero as an estimate value?",
+      choices: [
+        { name: "Yes", value: true },
+        { name: "No", value: false },
+      ],
+      default: true,
+    },
+    {
+      type: "list",
+      name: "extended",
+      message: "Use extended estimate scale? (normally not recommended)",
+      choices: [
+        { name: "Yes", value: true },
+        { name: "No", value: false },
+      ],
+      default: false,
     },
   ]);
 
   try {
-    await linearClient.updateTeam(team.id, { issueEstimationType });
+    await linearClient.updateTeam(team.id, {
+      issueEstimationType,
+      issueEstimationAllowZero: allowZero,
+      issueEstimationExtended: extended,
+    });
+
+    const selectedOption = ISSUE_ESTIMATION_OPTIONS.find(
+      (option) => option.value === issueEstimationType,
+    );
+
+    const scale = extended
+      ? selectedOption.scale.extended
+      : selectedOption.scale.regular;
+    const finalScale = allowZero ? scale : scale.filter((v) => v !== 0);
 
     detailedLogger.importantSuccess(
-      `Updated issue estimation type to ${
-        ISSUE_ESTIMATION_OPTIONS.find(
-          (option) => option.value === issueEstimationType,
-        )?.name
-      }`,
+      `Updated issue estimation type to ${selectedOption.name} (${finalScale.join(", ")})\n` +
+        `  • Allow zero estimates: ${chalk.cyan(allowZero ? "Yes" : "No")}\n` +
+        `  • Extended scale: ${chalk.cyan(extended ? "Yes" : "No")}`,
     );
 
     return;

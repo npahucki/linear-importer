@@ -4,7 +4,7 @@ import logSuccessfulImport from "../../logger/log_successful_import.mjs";
 import getUserMapping from "../users/get_user_mapping.mjs";
 import fetchLabels from "../labels/list.mjs";
 import fetchStatuses from "../statuses/list.mjs";
-import fetchIssueEstimationDetails from "../estimates/list.mjs";
+import fetchIssueEstimationSettings from "../estimates/list.mjs";
 import findAttachmentsInFolder from "../files/find_attachments_in_folder.mjs";
 import upload from "../files/upload.mjs";
 import createComment from "../comments/create.mjs";
@@ -19,7 +19,7 @@ async function createIssues({ team, payload, options, directory }) {
 
   const teamStatuses = await fetchStatuses({ teamId: team.id });
   const teamLabels = await fetchLabels({ teamId: team.id });
-  const issueEstimation = await fetchIssueEstimationDetails({
+  const issueEstimation = await fetchIssueEstimationSettings({
     teamId: team.id,
   });
 
