@@ -26,7 +26,7 @@ function buildParams({
   const priority = issue.priority ? formatPriority(issue.priority) : undefined;
   const dueDate = formatDate(issue.dueDate);
   const createdAt = formatDate(issue.createdAt);
-  const labelIds = formatLabels(issue.labels, teamLabels);
+  const labelIds = formatLabels(issue, teamLabels);
 
   const params = {
     teamId: team.id,

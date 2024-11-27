@@ -2,17 +2,19 @@ import DetailedLogger from "../../logger/detailed_logger.mjs";
 
 const detailedLogger = new DetailedLogger();
 
-function formatLabels(labels, teamLabels) {
+function formatLabels(issue, teamLabels) {
   const pivotalStoryTypeLabelId = teamLabels.find(
-    (label) => label.name === `pivotal - ${labels.type}`,
+    (label) => label.name === `pivotal - ${issue.type}`,
   )?.id;
 
   if (!pivotalStoryTypeLabelId) {
-    detailedLogger.warn(`No pivotal story type label found for ${labels.type}`);
+    detailedLogger.warning(
+      `No pivotal story type label found for ${issue.type}`,
+    );
   }
 
-  const otherLabelIds = labels
-    ? labels
+  const otherLabelIds = issue.labels
+    ? issue.labels
         .split(",")
         .map((label) => label.trim())
         .map(

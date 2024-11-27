@@ -4,7 +4,7 @@ const detailedLogger = new DetailedLogger();
 
 function roundEstimate(estimate, scale) {
   if (!estimate) {
-    detailedLogger.importantError("No team provided");
+    detailedLogger.importantError("No estimate provided");
     process.exit(1);
   }
 

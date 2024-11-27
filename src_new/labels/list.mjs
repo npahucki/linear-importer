@@ -1,4 +1,7 @@
 import linearClient from "../../config/client.mjs";
+import DetailedLogger from "../../logger/detailed_logger.mjs";
+
+const detailedLogger = new DetailedLogger();
 
 async function fetchLabels(teamId) {
   try {
@@ -12,6 +15,8 @@ async function fetchLabels(teamId) {
 
     // Fetch labels for the team
     const labels = await team.labels();
+
+    detailedLogger.info(`Team Labels: ${JSON.stringify(labels, null, 2)}`);
 
     const data = labels.nodes.map((label) => {
       return {

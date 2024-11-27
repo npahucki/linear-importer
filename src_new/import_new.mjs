@@ -89,12 +89,19 @@ await proceedWithImport({
 //=============================================================================
 // Create Labels and Statuses
 //=============================================================================
-// await createLabels({ teamId: team.id, labels: DEFAULT_LABELS });
 // await createLabels({
 //   teamId: team.id,
-//   labels: extractedPivotalData.csvData.aggregatedData.labels,
-// });
-// await createStatuses({ teamId: team.id });
+//   labels: [
+//     ...DEFAULT_LABELS,
+//     ...extractedPivotalData.csvData.aggregatedData.labels,
+//   ],
+// })
+await createStatuses({ teamId: team.id });
+await createLabels({ teamId: team.id, labels: DEFAULT_LABELS });
+await createLabels({
+  teamId: team.id,
+  labels: extractedPivotalData.csvData.aggregatedData.labels,
+});
 
 //=============================================================================
 // Create Issues
