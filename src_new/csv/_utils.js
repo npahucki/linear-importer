@@ -1,6 +1,6 @@
 export function buildParams(row) {
   const comments = joinMultipleColumns(row["Comment"]);
-  const additionalPivotalData = buildAdditionalPivotalData(row);
+  const rawPivotalTrackerDataComment = buildRawPivotalTrackerDataComment(row);
 
   const params = {
     title: row["Title"],
@@ -17,13 +17,13 @@ export function buildParams(row) {
     requestedBy: row["Requested By"],
     ownedBy: row["Owned By"],
     estimate: row["Estimate"],
-    comments: [...(comments || []), additionalPivotalData],
+    comments: [rawPivotalTrackerDataComment, ...(comments || [])],
   };
 
   return params;
 }
 
-function buildAdditionalPivotalData(row) {
+function buildRawPivotalTrackerDataComment(row) {
   const header = ["#### Raw Pivotal Tracker Data:", ""];
 
   const dataRows = Object.entries(row)

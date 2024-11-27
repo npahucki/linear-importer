@@ -18,7 +18,15 @@ const detailedLogger = new DetailedLogger();
  * @param {string[]} params.extractedUsernames - Array of usernames found in the CSV import file
  *
  * This step:
- * 1. Creates/updates a JSON mapping file in the format: { "external_username": "linear_username" }
+ * 1. Creates/updates a JSON mapping file in the format:
+ *    {
+ *      "external_username": {
+ *        linearId: string | null,
+ *        linearName: string | null,
+ *        linearEmail: string | null,
+ *        note?: string  // Only present for unmatched users
+ *      }
+ *    }
  * 2. Prompts for Linear username matches if they don't exist
  * 3. Saves the mapping for use during issue creation
  */

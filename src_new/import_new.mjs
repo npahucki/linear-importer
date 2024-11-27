@@ -1,5 +1,5 @@
 import { initializeLogger } from "../logger/initialize.js";
-import createStatusesForTeam from "./statuses/create.mjs";
+import createStatuses from "./statuses/create.mjs";
 import DetailedLogger from "../logger/detailed_logger.mjs";
 import importLabels from "./prompts/import_labels_new.js";
 import importComments from "./prompts/import_comments.js";
@@ -15,7 +15,6 @@ import createLabels from "./labels/create.mjs";
 import createUserMapping from "./users/create_user_mapping.js";
 import { DEFAULT_LABELS } from "./labels/create.mjs";
 import selectDirectory from "./prompts/select_csv_directory_new.js";
-// import createIssues from "./issues/create_issues.js";
 import createIssues from "./issues/create.js";
 
 const detailedLogger = new DetailedLogger();
@@ -51,11 +50,11 @@ const directory = await selectDirectory();
 // if (shouldImportEstimates) await updateIssueEstimationType({ team });
 
 const options = {
-  shouldImportFiles: false,
-  shouldImportLabels: false,
-  shouldImportComments: false,
-  shouldImportPriority: false,
-  shouldImportEstimates: false,
+  shouldImportFiles: true,
+  shouldImportLabels: true,
+  shouldImportComments: true,
+  shouldImportPriority: true,
+  shouldImportEstimates: true,
 };
 
 //=============================================================================
@@ -91,8 +90,11 @@ await proceedWithImport({
 // Create Labels and Statuses
 //=============================================================================
 // await createLabels({ teamId: team.id, labels: DEFAULT_LABELS });
-// await createLabels({ teamId: team.id, labels: csvData.aggregatedData.labels });
-// await createStatusesForTeam({ teamId: team.id });
+// await createLabels({
+//   teamId: team.id,
+//   labels: extractedPivotalData.csvData.aggregatedData.labels,
+// });
+// await createStatuses({ teamId: team.id });
 
 //=============================================================================
 // Create Issues

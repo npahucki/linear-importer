@@ -1,6 +1,6 @@
 import linearClient from "../../config/client.mjs";
 
-async function fetchLabels({ teamId }) {
+async function fetchLabels(teamId) {
   try {
     // Fetch the team
     const team = await linearClient.team(teamId);

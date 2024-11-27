@@ -10,9 +10,7 @@ import chalk from "chalk";
 const detailedLogger = new DetailedLogger();
 
 async function updateIssueEstimationType({ team }) {
-  const { details, choices } = await fetchIssueEstimationSettings({
-    teamId: team.id,
-  });
+  const { details, choices } = await fetchIssueEstimationSettings(team.id);
 
   const { shouldChangeIssueEstimationType } = await inquirer.prompt([
     {

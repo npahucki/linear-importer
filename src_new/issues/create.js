@@ -9,25 +9,13 @@ import findAttachmentsInFolder from "../files/find_attachments_in_folder.mjs";
 import upload from "../files/upload.mjs";
 import createComment from "../comments/create.mjs";
 import formatPriority from "../priority/formatter.js";
-import { roundEstimate } from "../estimates/rounder.mjs";
+import roundEstimate from "../estimates/rounder.mjs";
 import { REQUEST_DELAY_MS } from "../../config/config.js";
 import buildParams from "./build_params.js";
-
+import createComments from "./create_comments.js";
+import createFileAttachments from "./create_file_attachments.js";
 const detailedLogger = new DetailedLogger();
 
-/**
- * Creates issues in Linear based on the provided properties
- * @param {Object} props - The properties object
- * @param {Object} props.team - The Linear team object
- * @param {Object} props.payload - The payload containing issues to create
- * @param {Array<Object>} props.payload.issues - Array of issues to create
- * @param {Object} props.options - Import options
- * @param {boolean} props.options.shouldImportLabels - Whether to import labels
- * @param {boolean} props.options.shouldImportEstimates - Whether to import estimates
- * @param {boolean} props.options.shouldFormatPriority - Whether to format priority
- * @param {string} props.directory - Directory path for attachments
- * @returns {Promise<void>}
- */
 async function create({
   team,
   issuesPayload,
@@ -37,15 +25,12 @@ async function create({
 }) {
   // Keep outside of loop to only fetch these values once
   const teamStatuses = await fetchStatuses(team.id);
-  const teamLabels = await fetchLabels({ teamId: team.id });
-  const { scale } = await fetchIssueEstimationSettings({
-    teamId: team.id,
-  });
-
-  detailedLogger.importantInfo(`Params: ${JSON.stringify(params, null, 2)}`);
+  const teamLabels = await fetchLabels(team.id);
+  const { scale } = await fetchIssueEstimationSettings(team.id);
 
   for (const [index, issue] of issuesPayload.entries()) {
     try {
+      // Build Params
       const issueParams = buildParams({
         team,
         issue,
@@ -57,23 +42,30 @@ async function create({
         index,
       });
 
-      // process.exit(0);
-
+      // Create Issue
       const newIssue = await linearClient.createIssue(issueParams);
+
+      // Write successful import to log
       await logSuccessfulImport({
         team,
         issue,
+        newIssue,
         importNumber: index + 1,
       });
 
-      // await createComments();
-      // await createAttachments();
+      // Create Comments
+      if (options.shouldImportComments)
+        await createComments({ issue, newIssue });
+
+      // Create File Attachments
+      if (options.shouldImportFiles)
+        await createFileAttachments({ issue, newIssue, directory });
 
       // Wait 1 second between processing each issue
       await new Promise((resolve) => setTimeout(resolve, REQUEST_DELAY_MS));
     } catch (error) {
-      detailedLogger.error(`Failed to create issue: ${error.message}`);
-      throw error;
+      detailedLogger.importantError(`Failed to create issue: ${error.message}`);
+      process.exit(1);
     }
   }
 }

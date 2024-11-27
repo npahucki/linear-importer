@@ -17,7 +17,7 @@ export function findClosestEstimate(value, scale) {
   });
 }
 
-async function fetchIssueEstimationSettings({ teamId }) {
+async function fetchIssueEstimationSettings(teamId) {
   if (!teamId) {
     detailedLogger.importantError("Team ID not provided");
     process.exit(1);
@@ -65,9 +65,10 @@ async function fetchIssueEstimationSettings({ teamId }) {
       choices,
     };
 
-    detailedLogger.success(
-      `issueEstimationDetails: ${JSON.stringify(data, null, 2)}`,
-    );
+    // TODO
+    // detailedLogger.success(
+    //   `issueEstimationDetails: ${JSON.stringify(data, null, 2)}`,
+    // );
 
     return data;
   } catch (error) {

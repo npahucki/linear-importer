@@ -1,8 +1,13 @@
 import DetailedLogger from "../../logger/detailed_logger.mjs";
+import roundEstimate from "../estimates/rounder.mjs";
+import formatPriority from "../priority/formatter.js";
+import formatLabels from "../labels/formatter.js";
 
 const detailedLogger = new DetailedLogger();
 
-async function buildParams({
+const formatDate = (date) => (date ? new Date(date).toISOString() : undefined);
+
+function buildParams({
   team,
   issue,
   options,
@@ -18,27 +23,29 @@ async function buildParams({
   const estimate = issue.estimate
     ? roundEstimate(issue.estimate, scale)
     : undefined;
-
   const priority = issue.priority ? formatPriority(issue.priority) : undefined;
+  const dueDate = formatDate(issue.dueDate);
+  const createdAt = formatDate(issue.createdAt);
+  const labelIds = formatLabels(issue.labels, teamLabels);
 
   const params = {
     teamId: team.id,
     stateId,
+    dueDate,
+    createdAt,
     title: issue.title,
     description: issue.description,
     labelIds: options.shouldImportLabels ? labelIds : undefined,
     estimate: options.shouldImportEstimates ? estimate : undefined,
     priority: options.shouldFormatPriority ? priority : undefined,
     // parentId,
-    // dueDate,
-    // createdAt,
     // assigneeId,
     // subscriberIds,
     cycleId: null,
   };
 
   detailedLogger.importantInfo(
-    `Issue Params: ${JSON.stringify(params, null, 2)}`,
+    `buildParams: ${JSON.stringify(params, null, 2)}`,
   );
 
   return params;

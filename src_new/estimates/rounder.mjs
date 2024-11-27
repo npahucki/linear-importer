@@ -2,7 +2,7 @@ import DetailedLogger from "../../logger/detailed_logger.mjs";
 
 const detailedLogger = new DetailedLogger();
 
-export function roundEstimate(estimate, scale) {
+function roundEstimate(estimate, scale) {
   if (!estimate) {
     detailedLogger.importantError("No team provided");
     process.exit(1);
@@ -37,3 +37,5 @@ export function roundEstimate(estimate, scale) {
 
   return closest;
 }
+
+export default roundEstimate;
