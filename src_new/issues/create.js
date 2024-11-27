@@ -11,9 +11,10 @@ import createComment from "../comments/create.mjs";
 import formatPriority from "../priority/formatter.js";
 import roundEstimate from "../estimates/rounder.mjs";
 import { REQUEST_DELAY_MS } from "../../config/config.js";
-import buildParams from "./build_params.js";
+import buildIssueParams from "./build_issue_params.js";
 import createComments from "./create_comments.js";
 import createFileAttachments from "./create_file_attachments.js";
+
 const detailedLogger = new DetailedLogger();
 
 async function create({
@@ -30,8 +31,7 @@ async function create({
 
   for (const [index, issue] of issuesPayload.entries()) {
     try {
-      // Build Params
-      const issueParams = buildParams({
+      const issueParams = await buildIssueParams({
         team,
         issue,
         options,
