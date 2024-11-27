@@ -10,7 +10,7 @@ import chalk from "chalk";
 const detailedLogger = new DetailedLogger();
 
 async function updateIssueEstimationType({ team }) {
-  const { type, details, scale, choices } = await fetchIssueEstimationSettings({
+  const { details, choices } = await fetchIssueEstimationSettings({
     teamId: team.id,
   });
 
@@ -18,7 +18,7 @@ async function updateIssueEstimationType({ team }) {
     {
       type: "list",
       name: "shouldChangeIssueEstimationType",
-      message: `${details}.\n  Estimates will be rounded to the nearest value. Change it?`,
+      message: `${details}------------\nEstimates will be rounded to the nearest value. Change it?`,
       choices: [
         { name: "Yes", value: true },
         { name: "No", value: false },
@@ -83,12 +83,10 @@ async function updateIssueEstimationType({ team }) {
     const finalScale = allowZero ? scale : scale.filter((v) => v !== 0);
 
     detailedLogger.importantSuccess(
-      `Updated issue estimation type to ${selectedOption.name} (${finalScale.join(", ")})\n` +
+      `Updated issue estimation type to ${selectedOption.value} (${finalScale.join(", ")})\n` +
         `  • Allow zero estimates: ${chalk.cyan(allowZero ? "Yes" : "No")}\n` +
         `  • Extended scale: ${chalk.cyan(extended ? "Yes" : "No")}`,
     );
-
-    return;
   } catch (error) {
     detailedLogger.error(`Error updating issue estimation type: ${error}`);
     process.exit(1);

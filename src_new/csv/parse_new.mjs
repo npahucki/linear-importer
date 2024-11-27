@@ -16,14 +16,10 @@ function readCSV(filePath) {
   detailedLogger.info(`Reading CSV file: ${filePath}`);
 
   return new Promise((resolve, reject) => {
-    const pivotalStories = [];
-    const releaseStories = [];
     const issues = [];
     const labels = new Set();
-    const estimates = new Set();
     const statusTypes = new Set();
-    const requestedBy = new Set();
-    const ownedBy = new Set();
+    const userNames = new Set();
 
     createReadStream(filePath)
       .pipe(
@@ -42,19 +38,14 @@ function readCSV(filePath) {
           statusTypes.add(row["Type"]);
         }
 
-        if (row["Estimate"] && !isNaN(Number(row["Estimate"]))) {
-          estimates.add(Number(row["Estimate"]));
-        }
-
-        if (row["Requested By"]) {
-          requestedBy.add(row["Requested By"]);
-        }
+        // Requested By
+        if (row["Requested By"]) userNames.add(row["Requested By"]);
 
         if (row["Owned By"]) {
           // If Owned By is already an array, add each owner to the Set
           (Array.isArray(row["Owned By"]) ? row["Owned By"] : [row["Owned By"]])
-            .filter((owner) => owner) // Remove empty values
-            .forEach((owner) => ownedBy.add(owner));
+            .filter((owner) => owner)
+            .forEach((owner) => userNames.add(owner));
         }
 
         // Add labels to Set if they exist
@@ -63,38 +54,38 @@ function readCSV(filePath) {
           row["Labels"]
             .split(",")
             .map((label) => label.trim())
-            .filter((label) => label) // Remove empty strings
+            .filter((label) => label)
             .forEach((label) => labels.add(label));
         }
 
         // Separate release stories so that we can attach sub-issues to them
         if (row["Type"] == "release") {
-          const releaseRowFormatted = {
+          const formattedRow = {
             ...params,
             title: row["Iteration"]
               ? `[${row["Iteration"]}] ${row["Title"]}`
               : row["Title"],
             dueDate: row["Iteration End"],
+            isParentIssue: true,
           };
 
-          releaseStories.push(releaseRowFormatted);
+          issues.push(formattedRow);
         } else {
-          const rowFormatted = {
+          const formattedRow = {
             ...params,
             dueDate: row["Accepted at"] || row["Iteration End"],
           };
 
-          pivotalStories.push(rowFormatted);
+          issues.push(formattedRow);
         }
       })
       .on("end", () =>
         resolve({
-          issues: [...releaseStories, ...pivotalStories],
+          issues,
           aggregatedData: {
-            userNames: Array.from(new Set([...ownedBy, ...requestedBy])),
+            userNames: Array.from(new Set([...userNames])),
             labels: buildLabelsArray(labels),
             statusTypes: Array.from(statusTypes),
-            estimates: Array.from(estimates).sort((a, b) => a - b),
           },
         }),
       )

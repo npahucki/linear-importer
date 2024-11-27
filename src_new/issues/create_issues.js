@@ -14,8 +14,14 @@ import { REQUEST_DELAY_MS } from "../../config/config.js";
 
 const detailedLogger = new DetailedLogger();
 
-async function createIssues({ team, payload, options, directory }) {
-  const teamStatuses = await fetchStatuses({ teamId: team.id });
+async function createIssues({
+  team,
+  payload,
+  options,
+  directory,
+  importSource,
+}) {
+  const teamStatuses = await fetchStatuses(team.id);
   const teamLabels = await fetchLabels({ teamId: team.id });
   const { scale } = await fetchIssueEstimationSettings({
     teamId: team.id,
@@ -28,11 +34,11 @@ async function createIssues({ team, payload, options, directory }) {
 
   for (const [index, issue] of payload.issues.entries()) {
     const stateId = teamStatuses.find(
-      (state) => state.name === `pivotal - ${issue.state}`,
+      (state) => state.name === `${importSource} - ${issue.state}`,
     )?.id;
 
     const pivotalStoryTypeLabelId = teamLabels.find(
-      (label) => label.name === `pivotal - ${issue.type}`,
+      (label) => label.name === `${importSource} - ${issue.type}`,
     )?.id;
 
     const otherLabelIds = issue.labels
@@ -75,9 +81,9 @@ async function createIssues({ team, payload, options, directory }) {
         cycleId: null,
       };
 
-      // detailedLogger.importantInfo(
-      //   `Params: ${JSON.stringify(params, null, 2)}`,
-      // );
+      detailedLogger.importantInfo(
+        `Params!!!: ${JSON.stringify(params, null, 2)}`,
+      );
 
       const newIssue = await linearClient.createIssue(params);
       await logSuccessfulImport({
@@ -123,8 +129,8 @@ async function createIssues({ team, payload, options, directory }) {
       // Wait 1 second between processing each issue
       await new Promise((resolve) => setTimeout(resolve, REQUEST_DELAY_MS));
     } catch (error) {
-      detailedLogger.error(`Failed to create issue: ${error.message}`);
-      throw error;
+      detailedLogger.importantError(`Failed to create issue: ${error.message}`);
+      process.exit(1);
     }
   }
 }

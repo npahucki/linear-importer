@@ -1,252 +1,81 @@
 import linearClient from "../../config/client.mjs";
-import chalk from "chalk";
-import createComment from "../comments/create.mjs";
-
-import { promises as fs } from "fs";
-
+import DetailedLogger from "../../logger/detailed_logger.mjs";
+import logSuccessfulImport from "../../logger/log_successful_import.mjs";
+import getUserMapping from "../users/get_user_mapping.mjs";
+import fetchLabels from "../labels/list.mjs";
+import fetchStatuses from "../statuses/list.mjs";
+import fetchIssueEstimationSettings from "../estimates/list.mjs";
 import findAttachmentsInFolder from "../files/find_attachments_in_folder.mjs";
 import upload from "../files/upload.mjs";
+import createComment from "../comments/create.mjs";
+import formatPriority from "../priority/formatter.js";
+import { roundEstimate } from "../estimates/rounder.mjs";
+import { REQUEST_DELAY_MS } from "../../config/config.js";
+import buildParams from "./build_params.js";
 
-import { ENABLE_DETAILED_LOGGING } from "../../config/config.js";
-import { exitProcess } from "../../config/config.js";
+const detailedLogger = new DetailedLogger();
 
-import { findClosestEstimate } from "../estimates/rounder.mjs";
-
-import path from "path";
-
-// async function getUserMapping(teamName) {
-//   try {
-//     // Move up one directory from 'src' to the project root
-//     const projectRoot = path.join(process.cwd(), "..");
-//     const mappingPath = path.join(
-//       projectRoot,
-//       "log",
-//       teamName,
-//       "user_mapping.json",
-//     );
-
-//     if (ENABLE_DETAILED_LOGGING) {
-//       console.log("Looking for mapping file at:", mappingPath);
-//     }
-
-//     const mappingFile = await fs.readFile(mappingPath, "utf8");
-//     const mappingData = JSON.parse(mappingFile);
-//     return mappingData.mapping;
-//   } catch (error) {
-//     console.warn(
-//       chalk.yellow(
-//         `Warning: Could not load user mapping file: ${error.message}`,
-//       ),
-//     );
-//     return {};
-//   }
-// }
-
-async function createIssue({
-  importNumber,
-  teamId,
-  teamName,
-  pivotalStory,
-  parentId,
-  stateId,
-  csvFilename,
-  importFiles,
-  labelIds,
-  estimationScale,
+/**
+ * Creates issues in Linear based on the provided properties
+ * @param {Object} props - The properties object
+ * @param {Object} props.team - The Linear team object
+ * @param {Object} props.payload - The payload containing issues to create
+ * @param {Array<Object>} props.payload.issues - Array of issues to create
+ * @param {Object} props.options - Import options
+ * @param {boolean} props.options.shouldImportLabels - Whether to import labels
+ * @param {boolean} props.options.shouldImportEstimates - Whether to import estimates
+ * @param {boolean} props.options.shouldFormatPriority - Whether to format priority
+ * @param {string} props.directory - Directory path for attachments
+ * @returns {Promise<void>}
+ */
+async function create({
+  team,
+  issuesPayload,
+  options,
+  importSource,
+  directory,
 }) {
-  try {
-    const userMapping = await getUserMapping(teamName);
+  // Keep outside of loop to only fetch these values once
+  const teamStatuses = await fetchStatuses(team.id);
+  const teamLabels = await fetchLabels({ teamId: team.id });
+  const { scale } = await fetchIssueEstimationSettings({
+    teamId: team.id,
+  });
 
-    // Get assigneeId and subscriberIds from mapping if they exist
-    let assigneeId;
-    const subscriberIds = [];
+  detailedLogger.importantInfo(`Params: ${JSON.stringify(params, null, 2)}`);
 
-    // Add creator as subscriber if they have a mapping
-    if (pivotalStory.requestedBy) {
-      const mappedRequester = userMapping[pivotalStory.requestedBy];
-      if (
-        mappedRequester?.linearId &&
-        !subscriberIds.includes(mappedRequester.linearId)
-      ) {
-        subscriberIds.push(mappedRequester.linearId);
-        if (ENABLE_DETAILED_LOGGING) {
-          console.log(
-            chalk.blue(
-              `Added creator "${pivotalStory.requestedBy}" to subscribers`,
-            ),
-          );
-        }
-      }
+  for (const [index, issue] of issuesPayload.entries()) {
+    try {
+      const issueParams = buildParams({
+        team,
+        issue,
+        options,
+        importSource,
+        teamStatuses,
+        teamLabels,
+        scale,
+        index,
+      });
+
+      // process.exit(0);
+
+      const newIssue = await linearClient.createIssue(issueParams);
+      await logSuccessfulImport({
+        team,
+        issue,
+        importNumber: index + 1,
+      });
+
+      // await createComments();
+      // await createAttachments();
+
+      // Wait 1 second between processing each issue
+      await new Promise((resolve) => setTimeout(resolve, REQUEST_DELAY_MS));
+    } catch (error) {
+      detailedLogger.error(`Failed to create issue: ${error.message}`);
+      throw error;
     }
-
-    if (pivotalStory.ownedBy) {
-      // Ensure ownedBy is a string and split by comma
-      const ownedByString = String(pivotalStory.ownedBy);
-      const owners = ownedByString.split(",").map((owner) => owner.trim());
-
-      // Find all owners that have a mapping
-      for (const owner of owners) {
-        const mappedUser = userMapping[owner];
-        if (mappedUser?.linearId) {
-          // First valid user becomes assignee
-          if (!assigneeId) {
-            assigneeId = mappedUser.linearId;
-            if (ENABLE_DETAILED_LOGGING) {
-              console.log(
-                chalk.blue(
-                  `Mapped Pivotal user "${owner}" to Linear ID: ${assigneeId} as assignee`,
-                ),
-              );
-            }
-          }
-          // Add all valid users as subscribers
-          if (!subscriberIds.includes(mappedUser.linearId)) {
-            subscriberIds.push(mappedUser.linearId);
-            if (ENABLE_DETAILED_LOGGING) {
-              console.log(
-                chalk.blue(`Added Pivotal user "${owner}" to subscribers`),
-              );
-            }
-          }
-        }
-      }
-
-      if (!assigneeId && ENABLE_DETAILED_LOGGING) {
-        console.log(
-          chalk.yellow(
-            `No Linear user mapping found for any Pivotal users: ${owners.join(
-              ", ",
-            )}`,
-          ),
-        );
-      }
-    }
-
-    // If no owner was found, try to use the requestedBy user as the assignee
-    if (!assigneeId && pivotalStory.requestedBy) {
-      const mappedRequester = userMapping[pivotalStory.requestedBy];
-      if (mappedRequester?.linearId) {
-        assigneeId = mappedRequester.linearId;
-        if (ENABLE_DETAILED_LOGGING) {
-          console.log(
-            chalk.blue(
-              `No owner found. Mapped requester "${pivotalStory.requestedBy}" to Linear ID: ${assigneeId}`,
-            ),
-          );
-        }
-      }
-    }
-
-    const newIssue = await linearClient.createIssue({
-      teamId,
-      labelIds,
-      title: pivotalStory.name,
-      description: pivotalStory.description,
-      stateId: stateId ? stateId : undefined,
-      parentId: parentId ? parentId : undefined,
-      dueDate: pivotalStory.dueDate
-        ? new Date(pivotalStory.dueDate).toISOString()
-        : undefined,
-      createdAt: pivotalStory.createdAt
-        ? new Date(pivotalStory.createdAt).toISOString()
-        : undefined,
-      priority: formatPriority(pivotalStory.priority),
-      assigneeId,
-      subscriberIds,
-      cycleId: null,
-      estimate: pivotalStory.estimate
-        ? findClosestEstimate(pivotalStory.estimate, estimationScale)
-        : undefined,
-    });
-
-    if (newIssue.success) {
-      const issueId = newIssue._issue.id;
-      console.log(
-        chalk.green(
-          `✅ ${importNumber} - Linear Issue ${issueId} created from Pivotal story ${
-            pivotalStory.id
-          } - ${chalk.magenta(pivotalStory.name)}`,
-        ),
-      );
-
-      // Create comments
-      if (pivotalStory.comments.length > 0) {
-        await Promise.all(
-          pivotalStory.comments.map(async (body) => {
-            try {
-              await createComment({ issueId, body });
-            } catch (error) {
-              console.error(
-                chalk.red(
-                  `${importNumber} - Error creating comment: ${error.message}`,
-                ),
-              );
-              exitProcess();
-            }
-          }),
-        );
-        console.log(
-          chalk.yellow(
-            `✅ (${pivotalStory.comments.length}) comment(s) created.`,
-          ),
-        );
-      }
-
-      if (importFiles) {
-        // Attachments
-        const attachments = await findAttachmentsInFolder({
-          csvFilename,
-          pivotalStoryId: pivotalStory.id,
-        });
-
-        if (ENABLE_DETAILED_LOGGING)
-          console.log(`Attachments for story ${pivotalStory.id}:`, attachments);
-
-        if (attachments.length > 0) {
-          for (const attachment of attachments) {
-            try {
-              await upload(attachment, issueId);
-              console.log(
-                chalk.yellow(`✅ Attachment uploaded: ${attachment}`),
-              );
-            } catch (error) {
-              console.error(
-                chalk.red(
-                  `Error uploading attachment ${attachment}: ${error.message}`,
-                ),
-              );
-              exitProcess();
-            }
-          }
-        } else {
-          if (ENABLE_DETAILED_LOGGING)
-            console.log(
-              chalk.yellow(`No attachments found for story ${pivotalStory.id}`),
-            );
-        }
-      }
-    } else {
-      console.error(
-        chalk.red(`${importNumber} - Error creating issue:`, error.message),
-      );
-      exitProcess();
-    }
-  } catch (error) {
-    console.error(
-      chalk.red(`${importNumber} - Error creating issue:`, error.message),
-    );
-    exitProcess();
   }
 }
 
-function formatPriority(pivotalStoryPriority) {
-  const pivotalPriorities = {
-    "p1 - High": 2,
-    "p2 - Medium": 3,
-    "p3 - Low": 4,
-  };
-
-  return pivotalPriorities[pivotalStoryPriority] || 4;
-}
-
-export default createIssue;
+export default create;

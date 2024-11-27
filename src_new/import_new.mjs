@@ -15,7 +15,8 @@ import createLabels from "./labels/create.mjs";
 import createUserMapping from "./users/create_user_mapping.js";
 import { DEFAULT_LABELS } from "./labels/create.mjs";
 import selectDirectory from "./prompts/select_csv_directory_new.js";
-import createIssues from "./issues/create_issues.js";
+// import createIssues from "./issues/create_issues.js";
+import createIssues from "./issues/create.js";
 
 const detailedLogger = new DetailedLogger();
 
@@ -42,38 +43,36 @@ const directory = await selectDirectory();
 //=============================================================================
 // Build Import Options
 //=============================================================================
-const shouldImportFiles = await importFiles();
-const shouldImportLabels = await importLabels();
-const shouldImportComments = await importComments();
-const shouldImportPriority = await importPriority();
-const shouldImportEstimates = await importEstimates();
-if (shouldImportEstimates) await updateIssueEstimationType({ team });
+// const shouldImportFiles = await importFiles();
+// const shouldImportLabels = await importLabels();
+// const shouldImportComments = await importComments();
+// const shouldImportPriority = await importPriority();
+// const shouldImportEstimates = await importEstimates();
+// if (shouldImportEstimates) await updateIssueEstimationType({ team });
 
 const options = {
-  shouldImportFiles,
-  shouldImportLabels,
-  shouldImportComments,
-  shouldImportPriority,
-  shouldImportEstimates,
-};
-
-const meta = {
-  importSource,
-  directory,
+  shouldImportFiles: false,
+  shouldImportLabels: false,
+  shouldImportComments: false,
+  shouldImportPriority: false,
+  shouldImportEstimates: false,
 };
 
 //=============================================================================
 // Format Data for Import Type
 //=============================================================================
 // TODO: Modify to swap different data sources, based on importSource
-const { csvData, confirmationMessage } = await pivotalFormatter({ team, meta });
+const extractedPivotalData = await pivotalFormatter({
+  team,
+  directory,
+});
 
 //=============================================================================
 // Create User Mapping
 //=============================================================================
 await createUserMapping({
   team,
-  extractedUsernames: csvData.aggregatedData.userNames,
+  extractedUsernames: extractedPivotalData.csvData.aggregatedData.userNames,
 });
 
 detailedLogger.info(`Import Source: ${importSource}`);
@@ -84,7 +83,9 @@ detailedLogger.info(`Options: ${JSON.stringify(options, null, 2)}`);
 //=============================================================================
 // Confirm Proceed
 //=============================================================================
-await proceedWithImport({ confirmationMessage });
+await proceedWithImport({
+  confirmationMessage: extractedPivotalData.confirmationMessage,
+});
 
 //=============================================================================
 // Create Labels and Statuses
@@ -98,8 +99,9 @@ await proceedWithImport({ confirmationMessage });
 //=============================================================================
 await createIssues({
   team,
-  payload: csvData,
+  issuesPayload: extractedPivotalData.csvData.issues,
   options,
+  importSource,
   directory,
 });
 

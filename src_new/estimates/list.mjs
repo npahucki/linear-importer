@@ -50,7 +50,7 @@ async function fetchIssueEstimationSettings({ teamId }) {
 
     // Create details to be displayed in prompt
     const details = [
-      `${chalk.yellow("Current Issue estimation settings:")}`,
+      `Current Issue estimation settings:`,
       `  Type: ${chalk.cyan(type)} (${chalk.cyan(scale.join(", "))})`,
       `  Allow zero estimates: ${chalk.cyan(allowZero)}`,
       `  Extended estimate scale: ${chalk.cyan(extended)}\n`,

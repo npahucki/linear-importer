@@ -8,14 +8,14 @@ import buildImportSummary from "./build_import_summary.js";
 
 const detailedLogger = new DetailedLogger();
 
-async function formatter({ team, meta }) {
+async function formatter({ team, directory }) {
   detailedLogger.importantLoading(`Setting up Pivotal Import...`);
 
   // Prompt user to select status types
   const selectedStatusTypes = await selectStatusTypes();
 
   // Parse CSV
-  const csvData = await parseCSV(meta.directory);
+  const csvData = await parseCSV(directory);
 
   // Read previously imported stories from `successful_imports.csv`
   const successfulImports = await readSuccessfulImports(team.name);
@@ -54,34 +54,6 @@ async function formatter({ team, meta }) {
 
   return { csvData, confirmationMessage };
 }
-
-// function displayConfirmProceedPrompt(formattedIssuePayload) {
-//   const typeBreakdown = formattedIssuePayload
-//     .map((issue) => {
-//       const color =
-//         {
-//           chore: "white",
-//           bug: "red",
-//           feature: "yellow",
-//           epic: "magenta",
-//           release: "green",
-//         }[issue.type] || "white";
-
-//       return `\n       ${issue.type}: ${chalk[color].bold(formattedIssuePayload.count)}`;
-//     })
-//     .join("");
-
-//   const confirmProceedPrompt =
-//     chalk.blue.bold(`
-//   📊 Import Summary:`) +
-//     chalk.white(`
-//      Already imported: ${chalk.green.bold("successfulImportsLength - TODO")}
-//     ${typeBreakdown}
-
-//     Total Remaining Stories: ${chalk.green.bold("TODO successfulImportsLength - issues.count")}`);
-
-//   return confirmProceedPrompt;
-// }
 
 export default formatter;
 
