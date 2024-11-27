@@ -46,7 +46,8 @@ async function buildIssueParams({
   };
 
   detailedLogger.importantInfo(
-    `issueParams: ${JSON.stringify(issueParams, null, 2)}`,
+    `Original Issue ID: ${issue.id}
+     issueParams: ${JSON.stringify(issueParams, null, 2)}`,
   );
 
   return issueParams;

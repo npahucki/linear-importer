@@ -21,7 +21,7 @@ async function getUserMapping(teamName) {
     const mappingFile = await fs.readFile(mappingPath, "utf8");
     const userMappingPath = JSON.parse(mappingFile);
 
-    detailedLogger.info(`User mapping file found at ${mappingPath}`);
+    detailedLogger.success(`User mapping file found at ${mappingPath}`);
 
     return userMappingPath.mapping;
   } catch (error) {
