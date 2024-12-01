@@ -20,13 +20,13 @@ async function buildIssueParams({
   const stateId = teamStatuses.find(
     (state) => state.name === `${importSource} - ${issue.state}`,
   )?.id;
+  const labelIds = formatLabels(issue, teamLabels);
+  const priority = issue.priority ? formatPriority(issue.priority) : undefined;
   const estimate = issue.estimate
     ? roundEstimate(issue.estimate, scale)
     : undefined;
-  const priority = issue.priority ? formatPriority(issue.priority) : undefined;
   const dueDate = formatDate(issue.dueDate);
   const createdAt = formatDate(issue.createdAt);
-  const labelIds = formatLabels(issue, teamLabels);
   const { assigneeId, subscriberIds } = await userDistributor(issue, team.name);
 
   const issueParams = {

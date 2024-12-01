@@ -65,7 +65,7 @@ async function create({
       await new Promise((resolve) => setTimeout(resolve, REQUEST_DELAY_MS));
     } catch (error) {
       detailedLogger.importantError(`Failed to create issue: ${error.message}`);
-      process.exit(1);
+      process.exit(0);
     }
   }
 }

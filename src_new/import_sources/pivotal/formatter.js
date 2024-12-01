@@ -50,7 +50,10 @@ async function formatter({ team, directory }) {
   }
 
   // Build import summary
-  const confirmationMessage = buildImportSummary(formattedIssuePayload);
+  const confirmationMessage = buildImportSummary({
+    formattedIssuePayload,
+    successfulImports,
+  });
 
   return { csvData, confirmationMessage };
 }
