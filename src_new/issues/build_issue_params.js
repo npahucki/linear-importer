@@ -16,6 +16,7 @@ async function buildIssueParams({
   teamStatuses,
   teamLabels,
   scale,
+  releaseIssues,
 }) {
   const stateId = teamStatuses.find(
     (state) => state.name === `${importSource} - ${issue.state}`,
@@ -28,6 +29,9 @@ async function buildIssueParams({
   const dueDate = formatDate(issue.dueDate);
   const createdAt = formatDate(issue.createdAt);
   const { assigneeId, subscriberIds } = await userDistributor(issue, team.name);
+  const parentId = releaseIssues?.find((release) =>
+    release.title.includes(`[${issue.iteration}]`),
+  )?.id;
 
   const issueParams = {
     teamId: team.id,
@@ -42,7 +46,7 @@ async function buildIssueParams({
     assigneeId,
     subscriberIds,
     cycleId: null,
-    // parentId,
+    parentId,
   };
 
   detailedLogger.importantInfo(

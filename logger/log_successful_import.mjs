@@ -25,6 +25,21 @@ const logSuccessfulImport = async ({ team, issue, newIssue, importNumber }) => {
       createdId: newIssue._issue.id,
       message: issue.title,
     });
+
+    if (issue.release) {
+      const filePath = Logger.getTeamLogPath(team.name, "release_issues.csv");
+
+      try {
+        await fs.access(filePath);
+      } catch {
+        await fs.writeFile(filePath, "Iteration,Linear ID,Pivotal ID,Title\n");
+      }
+
+      console.log("newIssue! ", newIssue);
+
+      const logEntry = `${issue.iteration},${newIssue._issue.id},${issue.id},${issue.title}\n`;
+      await fs.appendFile(filePath, logEntry);
+    }
   } catch (error) {
     detailedLogger.importantError(
       `Failed to log successful import for story ${issue.id}:`,

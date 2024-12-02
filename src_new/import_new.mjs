@@ -42,19 +42,19 @@ const directory = await selectDirectory();
 //=============================================================================
 // Build Import Options
 //=============================================================================
-// const shouldImportFiles = await importFiles();
-// const shouldImportLabels = await importLabels();
-// const shouldImportComments = await importComments();
-// const shouldImportPriority = await importPriority();
-// const shouldImportEstimates = await importEstimates();
-// if (shouldImportEstimates) await updateIssueEstimationType({ team });
+const shouldImportFiles = await importFiles();
+const shouldImportLabels = await importLabels();
+const shouldImportComments = await importComments();
+const shouldImportPriority = await importPriority();
+const shouldImportEstimates = await importEstimates();
+if (shouldImportEstimates) await updateIssueEstimationType({ team });
 
 const options = {
-  shouldImportFiles: true,
-  shouldImportLabels: true,
-  shouldImportComments: true,
-  shouldImportPriority: true,
-  shouldImportEstimates: true,
+  shouldImportFiles,
+  shouldImportLabels,
+  shouldImportComments,
+  shouldImportPriority,
+  shouldImportEstimates,
 };
 
 //=============================================================================
@@ -104,11 +104,30 @@ await createLabels({
 });
 
 //=============================================================================
-// Create Issues
+// Create Release Issues
 //=============================================================================
+// We're doing this first before creating the issues, so we can set the parentId
+// and set any sub-issues
+const releaseIssues = extractedPivotalData.csvData.issues.filter(
+  (issue) => issue.release,
+);
 await createIssues({
   team,
-  issuesPayload: extractedPivotalData.csvData.issues,
+  issuesPayload: releaseIssues,
+  options,
+  importSource,
+  directory,
+});
+
+//=============================================================================
+// Create Issues
+//=============================================================================
+const nonReleaseIssues = extractedPivotalData.csvData.issues.filter(
+  (issue) => !issue.release,
+);
+await createIssues({
+  team,
+  issuesPayload: nonReleaseIssues,
   options,
   importSource,
   directory,

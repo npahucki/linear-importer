@@ -5,6 +5,7 @@ export function buildFormattedIssue(row) {
   const dueDate = buildDueDate(row);
 
   const params = {
+    release: row["Type"] == "release",
     title,
     dueDate,
     id: row["Id"],

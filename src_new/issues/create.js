@@ -1,19 +1,15 @@
 import linearClient from "../../config/client.mjs";
 import DetailedLogger from "../../logger/detailed_logger.mjs";
 import logSuccessfulImport from "../../logger/log_successful_import.mjs";
-import getUserMapping from "../users/get_user_mapping.mjs";
 import fetchLabels from "../labels/list.mjs";
 import fetchStatuses from "../statuses/list.mjs";
 import fetchIssueEstimationSettings from "../estimates/list.mjs";
-import findAttachmentsInFolder from "../files/find_attachments_in_folder.mjs";
-import upload from "../files/upload.mjs";
-import createComment from "../comments/create.mjs";
-import formatPriority from "../priority/formatter.js";
-import roundEstimate from "../estimates/rounder.mjs";
 import { REQUEST_DELAY_MS } from "../../config/config.js";
 import buildIssueParams from "./build_issue_params.js";
 import createComments from "./create_comments.js";
 import createFileAttachments from "./create_file_attachments.js";
+import { RELEASE_LABEL_NAME } from "../labels/create.mjs";
+import fetchIssuesForTeam from "./list.mjs";
 
 const detailedLogger = new DetailedLogger();
 
@@ -28,6 +24,13 @@ async function create({
   const teamStatuses = await fetchStatuses(team.id);
   const teamLabels = await fetchLabels(team.id);
   const { scale } = await fetchIssueEstimationSettings(team.id);
+  // Fetch release issues to set parentId
+  const releaseIssues = await fetchIssuesForTeam({
+    teamId: team.id,
+    filters: {
+      labels: { some: { name: { eq: RELEASE_LABEL_NAME } } },
+    },
+  });
 
   for (const [index, issue] of issuesPayload.entries()) {
     try {
@@ -40,6 +43,7 @@ async function create({
         teamLabels,
         scale,
         index,
+        releaseIssues,
       });
 
       // Create Issue
