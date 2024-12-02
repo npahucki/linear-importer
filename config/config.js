@@ -13,7 +13,6 @@ export const ENABLE_DETAILED_LOGGING =
   process.env.ENABLE_DETAILED_LOGGING == "true";
 export const ENABLE_IMPORTING = process.env.ENABLE_IMPORTING == "true";
 export const REQUEST_DELAY_MS = process.env.REQUEST_DELAY_MS;
-export const LOGGING_LEVEL = parseInt(process.env.LOGGING_LEVEL);
 
 export const exitProcess = (code = 1) => {
   console.error("EXITING PROCESS");

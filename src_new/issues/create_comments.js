@@ -20,8 +20,9 @@ async function createComments({ issue, newIssue }) {
     });
 
     detailedLogger.createdSecondary(
-      `Created comment for story ${issue.id}`,
-      "placeholder",
+      `Created comment`,
+      `Issue ID: ${newIssue._issue.id}`,
+      body,
     );
 
     await new Promise((resolve) => setTimeout(resolve, REQUEST_DELAY_MS));

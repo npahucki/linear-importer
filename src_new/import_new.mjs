@@ -11,9 +11,9 @@ import importFiles from "./prompts/import_files.js";
 import proceedWithImport from "./prompts/proceed_with_import_new.js";
 import selectImportSource from "./prompts/select_import_source.js";
 import pivotalFormatter from "./import_sources/pivotal/formatter.js";
-import createLabels from "./labels/create.mjs";
+import createLabels from "./labels/create.js";
 import createUserMapping from "./users/create_user_mapping.js";
-import { DEFAULT_LABELS } from "./labels/create.mjs";
+import { PIVOTAL_DEFAULT_LABELS } from "./labels/pivotal/_constants.js";
 import selectDirectory from "./prompts/select_csv_directory_new.js";
 import createIssues from "./issues/create.js";
 
@@ -49,6 +49,7 @@ const shouldImportPriority = await importPriority();
 const shouldImportEstimates = await importEstimates();
 if (shouldImportEstimates) await updateIssueEstimationType({ team });
 
+// Options get passed to createIssues
 const options = {
   shouldImportFiles,
   shouldImportLabels,
@@ -89,15 +90,14 @@ await proceedWithImport({
 //=============================================================================
 // Create Labels and Statuses
 //=============================================================================
-// await createLabels({
-//   teamId: team.id,
-//   labels: [
-//     ...DEFAULT_LABELS,
-//     ...extractedPivotalData.csvData.aggregatedData.labels,
-//   ],
-// })
+// Create Workspace statuses using Pivotal statuses
+// TODO: Modify for other import sources
 await createStatuses({ teamId: team.id });
-await createLabels({ teamId: team.id, labels: DEFAULT_LABELS });
+
+// Create Workspace labels using Pivotal default labels
+await createLabels({ teamId: team.id, labels: PIVOTAL_DEFAULT_LABELS });
+
+// Create Workspace labels using extracted labels
 await createLabels({
   teamId: team.id,
   labels: extractedPivotalData.csvData.aggregatedData.labels,
@@ -121,6 +121,8 @@ await createIssues({
 //=============================================================================
 // Create Issues
 //=============================================================================
+// Create non-release issues after release issues have been created, so that
+// a parentId can be assigned if necessary
 const nonReleaseIssues = extractedPivotalData.formattedIssuePayload.filter(
   (issue) => !issue.release,
 );

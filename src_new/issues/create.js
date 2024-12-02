@@ -1,14 +1,14 @@
 import linearClient from "../../config/client.mjs";
 import DetailedLogger from "../../logger/detailed_logger.mjs";
 import logSuccessfulImport from "../../logger/log_successful_import.mjs";
-import fetchLabels from "../labels/list.mjs";
+import fetchLabels from "../labels/list.js";
 import fetchStatuses from "../statuses/list.mjs";
 import fetchIssueEstimationSettings from "../estimates/list.mjs";
 import { REQUEST_DELAY_MS } from "../../config/config.js";
 import buildIssueParams from "./build_issue_params.js";
 import createComments from "./create_comments.js";
 import createFileAttachments from "./create_file_attachments.js";
-import { RELEASE_LABEL_NAME } from "../labels/create.mjs";
+import { RELEASE_LABEL_NAME } from "../labels/pivotal/_constants.js";
 import fetchIssuesForTeam from "./list.mjs";
 
 const detailedLogger = new DetailedLogger();
