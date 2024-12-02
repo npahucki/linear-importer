@@ -3,7 +3,7 @@ import DetailedLogger from "./detailed_logger.mjs";
 
 const detailedLogger = new DetailedLogger();
 
-export function initializeLogger({ team }) {
+function initializeLogger({ team }) {
   detailedLogger.info(`Initialized logger for team: ${team.name}`);
 
   // Generate a unique filename for the log
@@ -20,3 +20,5 @@ export function initializeLogger({ team }) {
 
   return logger;
 }
+
+export default initializeLogger;

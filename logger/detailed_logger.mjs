@@ -48,7 +48,7 @@ class DetailedLogger {
   }
 
   importantInfo(message) {
-    // if (ENABLE_DETAILED_LOGGING === false) return;
+    if (ENABLE_DETAILED_LOGGING === false) return;
     console.log("\n" + chalk.cyan("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
     console.log(chalk.bold.cyan(`  ✨ ${message}`));
     console.log(chalk.cyan("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"));

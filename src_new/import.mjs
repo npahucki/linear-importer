@@ -1,20 +1,20 @@
-import { initializeLogger } from "../logger/initialize.js";
+import initializeLogger from "../logger/initialize.js";
 import createStatuses from "./statuses/create.mjs";
 import DetailedLogger from "../logger/detailed_logger.mjs";
-import importLabels from "./prompts/import_labels_new.js";
+import importLabels from "./prompts/import_labels.js";
 import importComments from "./prompts/import_comments.js";
 import updateIssueEstimationType from "./estimates/update_issue_estimation_type.js";
 import importEstimates from "./estimates/import_estimates.js";
-import importPriority from "./priority/import_priority.js";
+import importPriority from "./prompts/import_priority.js";
 import selectTeam from "./teams/select.mjs";
 import importFiles from "./prompts/import_files.js";
-import proceedWithImport from "./prompts/proceed_with_import_new.js";
+import proceedWithImport from "./prompts/proceed_with_import.js";
 import selectImportSource from "./prompts/select_import_source.js";
 import pivotalFormatter from "./import_sources/pivotal/formatter.js";
 import createLabels from "./labels/create.js";
 import createUserMapping from "./users/create_user_mapping.js";
 import { PIVOTAL_DEFAULT_LABELS } from "./labels/pivotal/_constants.js";
-import selectDirectory from "./prompts/select_csv_directory_new.js";
+import selectDirectory from "./prompts/select_csv_directory.js";
 import createIssues from "./issues/create.js";
 
 const detailedLogger = new DetailedLogger();

@@ -1,4 +1,4 @@
-import getUserMapping from "./get_user_mapping.mjs";
+import getUserMapping from "./get_user_mapping.js";
 import DetailedLogger from "../../logger/detailed_logger.mjs";
 
 const detailedLogger = new DetailedLogger();

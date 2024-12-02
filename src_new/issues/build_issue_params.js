@@ -34,10 +34,8 @@ async function buildIssueParams({
   )?.id;
 
   const issueParams = {
+    cycleId: null,
     teamId: team.id,
-    stateId,
-    dueDate,
-    createdAt,
     title: issue.title,
     description: issue.description,
     labelIds: options.shouldImportLabels ? labelIds : undefined,
@@ -45,8 +43,10 @@ async function buildIssueParams({
     priority: options.shouldImportPriority ? priority : undefined,
     assigneeId,
     subscriberIds,
-    cycleId: null,
     parentId,
+    stateId,
+    dueDate,
+    createdAt,
   };
 
   detailedLogger.importantInfo(

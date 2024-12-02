@@ -11,12 +11,8 @@ async function createComment({ issueId, body }) {
     });
 
     if (response.success) {
-      detailedLogger.created({
-        attribute: "Comment",
-        originalId: issueId,
-        createdId: response._comment.id,
-        message: body,
-      });
+      detailedLogger.createdSecondary(`Comment`, response._comment.id, body);
+
       return response._comment;
     } else {
       detailedLogger.error(`Error creating comment: ${response.errors}`);

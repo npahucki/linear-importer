@@ -5,7 +5,7 @@ import { parse } from "csv-parse";
 import fs from "fs/promises";
 import path from "path";
 
-import { buildFormattedIssue } from "./_build_formatted_issue.js";
+import { buildFormattedIssue } from "./pivotal/_build_formatted_issue.js";
 
 import DetailedLogger from "../../logger/detailed_logger.mjs";
 

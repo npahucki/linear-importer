@@ -1,7 +1,7 @@
 import DetailedLogger from "../../../logger/detailed_logger.mjs";
 import readSuccessfulImports from "../../../logger/read_successful_imports.js";
 
-import parseCSV from "../../csv/parse_new.mjs";
+import parseCSV from "../../csv/parse.js";
 import selectStatusTypes from "./select_status_types.js";
 
 import buildImportSummary from "./build_import_summary.js";

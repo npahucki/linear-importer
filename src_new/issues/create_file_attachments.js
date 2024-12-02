@@ -1,4 +1,4 @@
-import findAttachmentsInFolder from "../files/find_attachments_in_folder.mjs";
+import findAttachmentsInFolder from "../files/find_attachments_in_folder.js";
 import upload from "../files/upload.mjs";
 import DetailedLogger from "../../logger/detailed_logger.mjs";
 

@@ -16,7 +16,13 @@ async function uploadFileToLinear(file, issueId) {
   let fileSize = file.size;
 
   if (!(file instanceof File) && !(file instanceof Blob)) {
-    if (typeof file === 'object' && file !== null && 'name' in file && 'type' in file && 'size' in file) {
+    if (
+      typeof file === "object" &&
+      file !== null &&
+      "name" in file &&
+      "type" in file &&
+      "size" in file
+    ) {
       try {
         if (file.arrayBuffer) {
           const buffer = await file.arrayBuffer();
@@ -30,7 +36,9 @@ async function uploadFileToLinear(file, issueId) {
         exitProcess();
       }
     } else {
-      throw new Error("Invalid file object. Expected File or Blob, or an object with name, type, and size properties.");
+      throw new Error(
+        "Invalid file object. Expected File or Blob, or an object with name, type, and size properties.",
+      );
     }
   }
 
@@ -38,11 +46,15 @@ async function uploadFileToLinear(file, issueId) {
     console.log(chalk.magenta("File details:"), {
       name: fileName,
       type: fileType,
-      size: fileSize
+      size: fileSize,
     });
   }
 
-  const uploadPayload = await linearClient.fileUpload(fileType, fileName, fileSize);
+  const uploadPayload = await linearClient.fileUpload(
+    fileType,
+    fileName,
+    fileSize,
+  );
 
   if (!uploadPayload.success || !uploadPayload.uploadFile) {
     throw new Error("Failed to request upload URL");
@@ -55,27 +67,36 @@ async function uploadFileToLinear(file, issueId) {
     console.log(chalk.magenta("Upload URL:", uploadUrl));
     console.log(chalk.magenta("Asset URL:", assetUrl));
   }
-  
+
   const headers = new Headers();
   headers.set("Content-Type", fileType);
   headers.set("Cache-Control", "public, max-age=31536000");
-  uploadPayload.uploadFile.headers.forEach(({ key, value }) => headers.set(key, value));
+  uploadPayload.uploadFile.headers.forEach(({ key, value }) =>
+    headers.set(key, value),
+  );
 
   if (ENABLE_DETAILED_LOGGING) {
-    console.log(chalk.magenta("Request headers:"), chalk.magenta(JSON.stringify(Object.fromEntries(headers.entries()), null, 2)));
+    console.log(
+      chalk.magenta("Request headers:"),
+      chalk.magenta(
+        JSON.stringify(Object.fromEntries(headers.entries()), null, 2),
+      ),
+    );
   }
 
   try {
     const uploadResponse = await fetch(uploadUrl, {
       method: "PUT",
       headers,
-      body: file
+      body: file,
     });
 
     if (!uploadResponse.ok) {
       const errorText = await uploadResponse.text();
       console.log(chalk.red("Error details:"), chalk.red(errorText));
-      console.error(`Failed to upload file: ${uploadResponse.status} ${uploadResponse.statusText}\nError details: ${errorText}`);
+      console.error(
+        `Failed to upload file: ${uploadResponse.status} ${uploadResponse.statusText}\nError details: ${errorText}`,
+      );
       exitProcess();
     }
 
@@ -89,7 +110,10 @@ async function uploadFileToLinear(file, issueId) {
     });
 
     if (ENABLE_DETAILED_LOGGING) {
-      console.log(chalk.magenta("Attachment response:"), chalk.magenta(attachmentResponse));
+      console.log(
+        chalk.magenta("Attachment response:"),
+        chalk.magenta(attachmentResponse),
+      );
     }
 
     return assetUrl;
