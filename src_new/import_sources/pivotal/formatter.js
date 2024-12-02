@@ -1,5 +1,5 @@
 import DetailedLogger from "../../../logger/detailed_logger.mjs";
-import readSuccessfulImports from "../../../logger/read_successful_imports_new.mjs";
+import readSuccessfulImports from "../../../logger/read_successful_imports.js";
 
 import parseCSV from "../../csv/parse_new.mjs";
 import selectStatusTypes from "./select_status_types.js";

@@ -1,6 +1,6 @@
 import linearClient from "../../config/client.mjs";
 import DetailedLogger from "../../logger/detailed_logger.mjs";
-import logSuccessfulImport from "../../logger/log_successful_import.mjs";
+import logSuccessfulImport from "../../logger/log_successful_import.js";
 import fetchLabels from "../labels/list.js";
 import fetchStatuses from "../statuses/list.mjs";
 import fetchIssueEstimationSettings from "../estimates/list.mjs";
