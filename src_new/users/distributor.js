@@ -19,7 +19,8 @@ async function distributeUsers(issue, teamName) {
   if (issue.ownedBy) {
     const owners = String(issue.ownedBy)
       .split(",")
-      .map((owner) => owner.trim());
+      .map((owner) => owner.trim())
+      .filter((owner) => owner);
 
     for (const owner of owners) {
       const linearId = userMapping[owner]?.linearId;
@@ -36,7 +37,7 @@ async function distributeUsers(issue, teamName) {
     }
 
     if (!assigneeId) {
-      detailedLogger.info(
+      detailedLogger.warning(
         `No Linear user mapping found for any Pivotal users: ${owners.join(", ")}`,
       );
     }

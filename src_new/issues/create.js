@@ -65,7 +65,6 @@ async function create({
       if (options.shouldImportFiles)
         await createFileAttachments({ issue, newIssue, directory });
 
-      // Wait 1 second between processing each issue
       await new Promise((resolve) => setTimeout(resolve, REQUEST_DELAY_MS));
     } catch (error) {
       detailedLogger.importantError(`Failed to create issue: ${error.message}`);

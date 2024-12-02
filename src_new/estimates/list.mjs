@@ -31,9 +31,9 @@ async function fetchIssueEstimationSettings(teamId) {
     const extended = team.issueEstimationExtended;
 
     // Find correct base values
-    const estimationScaleByType = ISSUE_ESTIMATION_OPTIONS.find(
-      (option) => option.value === type,
-    ).scale;
+    const estimationScaleByType =
+      ISSUE_ESTIMATION_OPTIONS.find((option) => option.value === type)?.scale ||
+      [];
 
     const choices = ISSUE_ESTIMATION_OPTIONS.map((option) => ({
       name: `${option.value} (${option.scale.regular.join(", ")}) [Extended: ${option.scale.extended.join(", ")}]`,
@@ -46,7 +46,9 @@ async function fetchIssueEstimationSettings(teamId) {
       : estimationScaleByType.regular;
 
     // Filter out zero if not allowed
-    const scale = scaleToUse.filter((value) => allowZero || value !== 0);
+    const scale = (scaleToUse || []).filter(
+      (value) => allowZero || value !== 0,
+    );
 
     // Create details to be displayed in prompt
     const details = [

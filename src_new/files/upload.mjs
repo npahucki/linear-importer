@@ -29,7 +29,7 @@ async function upload(filePath, issueId) {
     );
   } catch (error) {
     detailedLogger.error("Error uploading file:", error.message);
-    process.exit(1);
+    process.exit(0);
   }
 }
 

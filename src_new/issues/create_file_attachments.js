@@ -17,10 +17,12 @@ async function createFileAttachments({ issue, newIssue, directory }) {
     return;
   }
 
+  detailedLogger.info(
+    `Found ${attachments.length} attachments for story ${issue.id}`,
+  );
+
   for (const attachment of attachments) {
     await upload(attachment, newIssue._issue.id);
-
-    detailedLogger.createdSecondary("File Attachment", attachment.filename);
 
     await new Promise((resolve) => setTimeout(resolve, REQUEST_DELAY_MS));
   }
