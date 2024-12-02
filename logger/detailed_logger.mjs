@@ -33,7 +33,7 @@ class DetailedLogger {
 
   created({ attribute, originalId, createdId, message }) {
     console.log(
-      `✅ ${chalk.green(`${attribute} created`)}! ${chalk.cyan(originalId)} => ${chalk.yellow(createdId)} - ${chalk.magenta(message)}`,
+      `✅ ${chalk.green(`${attribute} created`)}! ${chalk.cyan(originalId)} => ${chalk.yellow(createdId)} - ${chalk.magenta(message.slice(0, 20))}...`,
     );
   }
 
@@ -47,41 +47,36 @@ class DetailedLogger {
     console.error(chalk.red(`❌ ${message}`));
   }
 
-  error(message) {
-    if (ENABLE_DETAILED_LOGGING === false) return;
-    console.error(chalk.red(`❌ ${message}`));
-  }
-
   importantInfo(message) {
-    if (ENABLE_DETAILED_LOGGING === false) return;
+    // if (ENABLE_DETAILED_LOGGING === false) return;
     console.log("\n" + chalk.cyan("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
     console.log(chalk.bold.cyan(`  ✨ ${message}`));
     console.log(chalk.cyan("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"));
   }
 
   importantLoading(message) {
-    if (ENABLE_DETAILED_LOGGING === false) return;
+    // if (ENABLE_DETAILED_LOGGING === false) return;
     console.log("\n" + chalk.cyan("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
     console.log(chalk.bold.cyan(`  ⏳ ${message}...`));
     console.log(chalk.cyan("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"));
   }
 
   importantSuccess(message) {
-    if (ENABLE_DETAILED_LOGGING === false) return;
+    // if (ENABLE_DETAILED_LOGGING === false) return;
     console.log("\n" + chalk.green("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
     console.log(chalk.bold.green(`  ✨ ${message}`));
     console.log(chalk.green("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"));
   }
 
   importantError(message) {
-    if (ENABLE_DETAILED_LOGGING === false) return;
+    // if (ENABLE_DETAILED_LOGGING === false) return;
     console.error("\n" + chalk.red("▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓"));
     console.error(chalk.bold.red(`  ⚠️  ${message}`));
     console.error(chalk.red("▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓\n"));
   }
 
   importantSummary(message) {
-    if (ENABLE_DETAILED_LOGGING === false) return;
+    // if (ENABLE_DETAILED_LOGGING === false) return;
     console.log("\n" + chalk.cyan("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
     console.log(chalk.bold.cyan(`  📊 ${message}`));
     console.log(chalk.cyan("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"));

@@ -9,7 +9,7 @@ async function getTeamMembers({ teamId }) {
     const team = await linearClient.team(teamId); // Pass teamId directly, not as an object
     const members = await team.members();
 
-    detailedLogger.result(`Team Members: ${JSON.stringify(members, null, 2)}`);
+    detailedLogger.info(`Team Members: ${JSON.stringify(members, null, 2)}`);
     return { teamMembers: members };
   } catch (error) {
     detailedLogger.error(`Error fetching team members: ${error.message}`);
