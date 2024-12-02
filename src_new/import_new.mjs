@@ -106,9 +106,8 @@ await createLabels({
 //=============================================================================
 // Create Release Issues
 //=============================================================================
-// We're doing this first before creating the issues, so we can set the parentId
-// and set any sub-issues
-const releaseIssues = extractedPivotalData.csvData.issues.filter(
+// Create Release Issues first so that we can assign sub-issues
+const releaseIssues = extractedPivotalData.formattedIssuePayload.filter(
   (issue) => issue.release,
 );
 await createIssues({
@@ -122,7 +121,7 @@ await createIssues({
 //=============================================================================
 // Create Issues
 //=============================================================================
-const nonReleaseIssues = extractedPivotalData.csvData.issues.filter(
+const nonReleaseIssues = extractedPivotalData.formattedIssuePayload.filter(
   (issue) => !issue.release,
 );
 await createIssues({

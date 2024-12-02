@@ -55,7 +55,7 @@ async function formatter({ team, directory }) {
     successfulImports,
   });
 
-  return { csvData, confirmationMessage };
+  return { csvData, formattedIssuePayload, confirmationMessage };
 }
 
 export default formatter;
