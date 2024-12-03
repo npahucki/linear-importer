@@ -1,6 +1,9 @@
 import linearClient from "../../config/client.mjs";
 import chalk from "chalk";
 import { ENABLE_DETAILED_LOGGING } from "../../config/config.js";
+import DetailedLogger from "../../logger/detailed_logger.mjs";
+
+const detailedLogger = new DetailedLogger();
 
 async function uploadFileToLinear(file, issueId) {
   if (ENABLE_DETAILED_LOGGING) {
@@ -56,7 +59,7 @@ async function uploadFileToLinear(file, issueId) {
   );
 
   if (!uploadPayload.success || !uploadPayload.uploadFile) {
-    throw new Error("Failed to request upload URL");
+    detailedLogger.error(`Failed to request upload URL for file: ${fileName}`);
     process.exit(0);
   }
 
@@ -65,8 +68,9 @@ async function uploadFileToLinear(file, issueId) {
 
   if (ENABLE_DETAILED_LOGGING) {
     console.log(chalk.magenta("Upload URL:", uploadUrl));
-    console.log(chalk.magenta("Asset URL:", assetUrl));
   }
+
+  detailedLogger.createdSecondary("File Attachment", issueId, assetUrl);
 
   const headers = new Headers();
   headers.set("Content-Type", fileType);
@@ -113,6 +117,10 @@ async function uploadFileToLinear(file, issueId) {
         chalk.magenta(attachmentResponse),
       );
     }
+
+    detailedLogger.result(
+      `File Attachment uploaded successfully! Issue ID: ${issueId}, Asset URL: ${assetUrl}`,
+    );
 
     return assetUrl;
   } catch (e) {

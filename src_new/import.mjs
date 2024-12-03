@@ -98,10 +98,12 @@ await createStatuses({ teamId: team.id });
 await createLabels({ teamId: team.id, labels: PIVOTAL_DEFAULT_LABELS });
 
 // Create Workspace labels using extracted labels
-await createLabels({
-  teamId: team.id,
-  labels: extractedPivotalData.csvData.aggregatedData.labels,
-});
+if (shouldImportLabels) {
+  await createLabels({
+    teamId: team.id,
+    labels: extractedPivotalData.csvData.aggregatedData.labels,
+  });
+}
 
 //=============================================================================
 // Create Release Issues

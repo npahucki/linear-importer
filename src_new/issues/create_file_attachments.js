@@ -21,7 +21,6 @@ async function createFileAttachments({ issue, newIssue, directory }) {
     for (const attachment of attachments) {
       try {
         await upload(attachment, newIssue._issue.id);
-        detailedLogger.createdSecondary("Attachment", attachment, "success!");
 
         // Add delay between uploads
         await new Promise((resolve) => setTimeout(resolve, REQUEST_DELAY_MS));

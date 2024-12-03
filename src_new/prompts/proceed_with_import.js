@@ -31,8 +31,8 @@ async function proceedWithImport({ confirmationMessage }) {
 
   if (!ENABLE_IMPORTING) {
     console.log(chalk.red.bold("\n╔════════════════════════════════════╗"));
-    console.log(chalk.red.bold("║        IMPORTING DISABLED         ║"));
-    console.log(chalk.red.bold("║   Enable importing in .env file   ║"));
+    console.log(chalk.red.bold("║        IMPORTING DISABLED          ║"));
+    console.log(chalk.red.bold("║   Enable importing in .env file    ║"));
     console.log(chalk.red.bold("╚════════════════════════════════════╝\n"));
     process.exit(1);
   }
