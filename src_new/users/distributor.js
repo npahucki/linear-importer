@@ -53,7 +53,7 @@ async function distributeUsers(issue, teamName) {
 
   const data = { assigneeId, subscriberIds: [...new Set(subscriberIds)] };
 
-  detailedLogger.result(`distributeUsers: ${JSON.stringify(data, null, 2)}`);
+  detailedLogger.info(`distributeUsers: ${JSON.stringify(data, null, 2)}`);
 
   return data;
 }

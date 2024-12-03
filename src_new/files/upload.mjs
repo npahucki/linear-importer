@@ -1,4 +1,4 @@
-import { uploadFileToLinear } from "../files/import.mjs";
+import { uploadFileToLinear } from "./import.mjs";
 import fs from "fs/promises";
 import path from "path";
 
