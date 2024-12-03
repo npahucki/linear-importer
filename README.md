@@ -1,24 +1,30 @@
-# Pivotal Tracker to Linear Converter
+# Linear Importer
 
-A command-line tool that migrates your Pivotal Tracker projects to Linear. Using Pivotal's CSV export feature, this tool converts:
+CLI tool for migrating Pivotal Tracker projects to Linear via CSV export. Converts:
 
 - Pivotal Stories → Linear Issues
-- Pivotal Releases → Linear Parent Issues (with associated stories as sub-issues)
-- Preserves file attachments, comments, labels, statuses, priorities, estimates, assignees, subscribers and dates
+- Pivotal Releases → Linear Parent Issues (with sub-issues)
+- Preserves attachments, comments, labels, statuses, priorities, estimates, assignees, subscribers, dates
 
-Built with the [Linear SDK](https://github.com/linear/linear/tree/master/packages/sdk).
+**Disclaimer**: This is a community-maintained tool and is not officially associated with either Linear or Pivotal Tracker.
+
+### For Developers
+
+- The codebase is structured to support additional importers reasonably easily (as of `v2.0.0`). Contact me if you intend to add support for other platforms (e.g., Trello).
+
+Built with [Linear SDK](https://github.com/linear/linear/tree/master/packages/sdk).
 
 ## Key Features
 
-- [File Attachments](#file-attachments)
-- [Comments](#comments)
-- [Labels](#labels)
+- [File Attachments](#file-attachments) (optional)
+- [Comments](#comments) (optional)
+- [Assignee](#assignee) (Automatically matches Pivotal Users to Linear Member accounts)
+- [Labels](#labels) (optional)
+- [Priority](#priority) (optional)
+- [Estimate](#estimate) (optional)
+- [Releases](#releases) (Pivotal Releases → Linear parent issues with associated stories as sub-issues)
 - [Statuses](#statuses)
 - [Story Types](#story-types)
-- [Releases](#releases) (Pivotal Releases → Linear parent issues with associated stories as sub-issues)
-- [Priority](#priority)
-- [Estimate](#estimate)
-- [Assignee](#assignee) (Automatically matches Pivotal Users to Linear Member accounts)
 - [Subscribers](#subscribers)
 - [Created Date](#created-date)
 - [Due Date](#due-date)
@@ -44,39 +50,40 @@ Built with the [Linear SDK](https://github.com/linear/linear/tree/master/package
 
 ### Usage
 
-1. `cd src`
-2. `npm run import`
+`npm run import`
 
 ![alt text](image.png)
 
 #### ENV Options
 
+- `API_KEY` = ""
 - `ENABLE_IMPORTING` = true
   - `false` to halt execution before any requests; allows testing CLI
 - `ENABLE_DETAILED_LOGGING` = false
-  - `true` to show additional logging output for user mapping and file attachments
-- `REQUEST_DELAY_MS` = 5
+  - `true` to log all output. Enable this while developing or to see detailed messages
+- `REQUEST_DELAY_MS` = 1
+  - increase if reaching API rate limits
 
 ## Details
 
 #### File Attachments
 
-- File attachments can be optionally imported via the provided prompt
+- `ENABLE_DETAILED_LOGGING` to view debug output
 
 #### Comments
 
 - Comments are imported with original author, timestamp, and content preserved.
-- A Comment titled `Raw Pivotal Tracker Data` will be created for each issue that contains all CSV data for that issue (except Description and Comments, which are populated directly on the Issue)
+- A Comment titled `Raw Pivotal Tracker Data` will be created for each issue that contains all CSV data for that issue (except Description, Comments, and Files, which are all populated independently)
 
 #### Labels
 
 - The following Labels will be created in the selected Team. This allows each Team to modify labels at their own pace without affecting other Teams, and will avoid any naming conflicts with existing labels.
 
-  - `pivotal - epic`
-  - `pivotal - release`
-  - `pivotal - feature`
-  - `pivotal - bug`
-  - `pivotal - chore`
+  - `pivotal-epic`
+  - `pivotal-release`
+  - `pivotal-feature`
+  - `pivotal-bug`
+  - `pivotal-chore`
 
 - Additionally, you will be prompted with the option to import labels created in Pivotal Tracker. These will be added to the imported Linear Issues.
 
@@ -100,7 +107,7 @@ Linear Issues will be assigned a label with the corresponding Story Type (See [L
 #### Releases
 
 - Pivotal Releases → Linear parent issues with:
-  - Label: `pivotal - release`
+  - Label: `pivotal-release`
   - Associated stories as sub-issues
 
 #### Priority

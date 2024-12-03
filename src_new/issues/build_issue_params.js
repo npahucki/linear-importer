@@ -19,7 +19,7 @@ async function buildIssueParams({
   releaseIssues,
 }) {
   const stateId = teamStatuses.find(
-    (state) => state.name === `${importSource} - ${issue.state}`,
+    (state) => state.name === `${importSource}-${issue.state}`,
   )?.id;
   const labelIds = extractLabelIds(issue, teamLabels);
   const priority = issue.priority ? formatPriority(issue.priority) : undefined;
