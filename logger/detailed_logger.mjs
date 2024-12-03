@@ -33,13 +33,13 @@ class DetailedLogger {
 
   created({ attribute, originalId, createdId, message }) {
     console.log(
-      `✅ ${chalk.green(`${attribute} created`)}! ${chalk.cyan(originalId)} => ${chalk.yellow(createdId)} - ${chalk.magenta(message.slice(0, 20))}...`,
+      `✅ ${chalk.green(`${attribute} created`)} ${chalk.cyan(originalId)} => ${chalk.cyan(createdId)} - ${chalk.magenta(message)}`,
     );
   }
 
   createdSecondary(attribute, id, message = "") {
     console.log(
-      `➕ ${chalk.yellow(`${attribute} created`)}! ${chalk.cyan(id)} => ${chalk.dim(message.slice(0, 20))}...`,
+      `✅ ${chalk.yellow(`${attribute} created`)} ${chalk.cyan(id)} => ${chalk.magenta(message)}`,
     );
   }
 
@@ -48,7 +48,7 @@ class DetailedLogger {
   }
 
   importantInfo(message) {
-    // if (ENABLE_DETAILED_LOGGING === false) return;
+    if (ENABLE_DETAILED_LOGGING === false) return;
     console.log("\n" + chalk.cyan("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
     console.log(chalk.bold.cyan(`  ✨ ${message}`));
     console.log(chalk.cyan("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"));

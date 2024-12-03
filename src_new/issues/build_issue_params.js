@@ -1,7 +1,7 @@
 import DetailedLogger from "../../logger/detailed_logger.mjs";
 import roundEstimate from "../estimates/rounder.mjs";
 import formatPriority from "../priority/formatter.js";
-import formatLabels from "../labels/formatter.js";
+import extractLabelIds from "../labels/extract_label_ids.js";
 import userDistributor from "../users/distributor.js";
 
 const detailedLogger = new DetailedLogger();
@@ -21,7 +21,7 @@ async function buildIssueParams({
   const stateId = teamStatuses.find(
     (state) => state.name === `${importSource} - ${issue.state}`,
   )?.id;
-  const labelIds = formatLabels(issue, teamLabels);
+  const labelIds = extractLabelIds(issue, teamLabels);
   const priority = issue.priority ? formatPriority(issue.priority) : undefined;
   const estimate = issue.estimate
     ? roundEstimate(issue.estimate, scale)
@@ -34,10 +34,8 @@ async function buildIssueParams({
   )?.id;
 
   const issueParams = {
+    cycleId: null,
     teamId: team.id,
-    stateId,
-    dueDate,
-    createdAt,
     title: issue.title,
     description: issue.description,
     labelIds: options.shouldImportLabels ? labelIds : undefined,
@@ -45,8 +43,10 @@ async function buildIssueParams({
     priority: options.shouldImportPriority ? priority : undefined,
     assigneeId,
     subscriberIds,
-    cycleId: null,
     parentId,
+    stateId,
+    dueDate,
+    createdAt,
   };
 
   detailedLogger.importantInfo(

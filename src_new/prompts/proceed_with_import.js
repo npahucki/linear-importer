@@ -13,7 +13,7 @@ async function proceedWithImport({ confirmationMessage }) {
     {
       type: "list",
       name: "userConfirmedProceed",
-      message: "Proceed with import?",
+      message: `${chalk.magenta("Proceed with import?")}`,
       choices: [
         { name: "Yes", value: true },
         { name: "No", value: false },
@@ -31,8 +31,8 @@ async function proceedWithImport({ confirmationMessage }) {
 
   if (!ENABLE_IMPORTING) {
     console.log(chalk.red.bold("\n╔════════════════════════════════════╗"));
-    console.log(chalk.red.bold("║        IMPORTING DISABLED         ║"));
-    console.log(chalk.red.bold("║   Enable importing in .env file   ║"));
+    console.log(chalk.red.bold("║        IMPORTING DISABLED          ║"));
+    console.log(chalk.red.bold("║   Enable importing in .env file    ║"));
     console.log(chalk.red.bold("╚════════════════════════════════════╝\n"));
     process.exit(1);
   }

@@ -1,4 +1,4 @@
-import { uploadFileToLinear } from "../files/import.mjs";
+import { uploadFileToLinear } from "./import.mjs";
 import fs from "fs/promises";
 import path from "path";
 
@@ -29,7 +29,7 @@ async function upload(filePath, issueId) {
     );
   } catch (error) {
     detailedLogger.error("Error uploading file:", error.message);
-    process.exit(1);
+    process.exit(0);
   }
 }
 

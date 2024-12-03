@@ -26,10 +26,10 @@ Built with the [Linear SDK](https://github.com/linear/linear/tree/master/package
 - [Logger](#logger)
 
 #### Other
+
 - [Notes](#notes)
 - [API Rate Limits](#api-rate-limits)
 - [TODO](#todo)
-
 
 ## Setup
 
@@ -45,17 +45,17 @@ Built with the [Linear SDK](https://github.com/linear/linear/tree/master/package
 ### Usage
 
 1. `cd src`
-2. `node import.mjs`
+2. `npm run import`
 
 ![alt text](image.png)
 
 #### ENV Options
 
-- `MAX_REQUESTS_PER_SECOND` = 5
 - `ENABLE_IMPORTING` = true
   - `false` to halt execution before any requests; allows testing CLI
 - `ENABLE_DETAILED_LOGGING` = false
   - `true` to show additional logging output for user mapping and file attachments
+- `REQUEST_DELAY_MS` = 5
 
 ## Details
 
@@ -97,13 +97,11 @@ Built with the [Linear SDK](https://github.com/linear/linear/tree/master/package
 
 Linear Issues will be assigned a label with the corresponding Story Type (See [Labels](#labels))
 
-
 #### Releases
 
 - Pivotal Releases → Linear parent issues with:
   - Label: `pivotal - release`
   - Associated stories as sub-issues
-
 
 #### Priority
 
@@ -122,11 +120,14 @@ Linear Issues will be assigned a label with the corresponding Story Type (See [L
 - Automatically matches Pivotal users to Linear team members by comparing names and emails
   - Prompts for manual matching when automatic matching fails
 - For stories with multiple owners:
+
   - First owner becomes the assignee
   - Other owners become subscribers
 
   ![alt text](image-2.png)
+
 - For stories without owners:
+
   - Story creator becomes the assignee
 
 - User Map data is stored in `log/<team>/user_mapping.json`:
@@ -188,4 +189,8 @@ Linear Issues will be assigned a label with the corresponding Story Type (See [L
 #### API Rate Limits
 
 - Linear sets rate limits on their API usage, which you will probably reach. The Linear team was helpful in increasing my rate limits temporarily. https://developers.linear.app/docs/graphql/working-with-the-graphql-api/rate-limiting.
-- The `MAX_REQUESTS_PER_SECOND` ENV var can be adjusted to throttle request frequency
+- The `REQUEST_DELAY_MS` ENV var can be adjusted to throttle request frequency
+
+## TODO
+
+- ALLOW_FAILURES

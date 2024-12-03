@@ -1,4 +1,4 @@
-import createComment from "../comments/create.mjs";
+import createComment from "../comments/create.js";
 import { REQUEST_DELAY_MS } from "../../config/config.js";
 import DetailedLogger from "../../logger/detailed_logger.mjs";
 
@@ -18,12 +18,6 @@ async function createComments({ issue, newIssue }) {
       issueId: newIssue._issue.id,
       body,
     });
-
-    detailedLogger.createdSecondary(
-      `Created comment`,
-      `Issue ID: ${newIssue._issue.id}`,
-      body,
-    );
 
     await new Promise((resolve) => setTimeout(resolve, REQUEST_DELAY_MS));
   }

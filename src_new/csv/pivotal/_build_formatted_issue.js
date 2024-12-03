@@ -3,9 +3,10 @@ export function buildFormattedIssue(row) {
   const rawPivotalTrackerDataComment = buildRawPivotalTrackerDataComment(row);
   const title = buildTitle(row);
   const dueDate = buildDueDate(row);
+  const ownedBy = joinMultipleColumns(row["Owned By"]);
 
   const params = {
-    release: row["Type"] == "release",
+    isRelease: row["Type"] == "release",
     title,
     dueDate,
     id: row["Id"],
@@ -19,7 +20,7 @@ export function buildFormattedIssue(row) {
     priority: row["Priority"],
     labels: row["Labels"],
     requestedBy: row["Requested By"],
-    ownedBy: row["Owned By"],
+    ownedBy,
     estimate: row["Estimate"],
     comments: [rawPivotalTrackerDataComment, ...(comments || [])],
   };

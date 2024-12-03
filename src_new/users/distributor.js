@@ -1,4 +1,4 @@
-import getUserMapping from "./get_user_mapping.mjs";
+import getUserMapping from "./get_user_mapping.js";
 import DetailedLogger from "../../logger/detailed_logger.mjs";
 
 const detailedLogger = new DetailedLogger();
@@ -19,7 +19,8 @@ async function distributeUsers(issue, teamName) {
   if (issue.ownedBy) {
     const owners = String(issue.ownedBy)
       .split(",")
-      .map((owner) => owner.trim());
+      .map((owner) => owner.trim())
+      .filter((owner) => owner);
 
     for (const owner of owners) {
       const linearId = userMapping[owner]?.linearId;
@@ -36,7 +37,7 @@ async function distributeUsers(issue, teamName) {
     }
 
     if (!assigneeId) {
-      detailedLogger.info(
+      detailedLogger.warning(
         `No Linear user mapping found for any Pivotal users: ${owners.join(", ")}`,
       );
     }
@@ -52,7 +53,7 @@ async function distributeUsers(issue, teamName) {
 
   const data = { assigneeId, subscriberIds: [...new Set(subscriberIds)] };
 
-  detailedLogger.result(`distributeUsers: ${JSON.stringify(data, null, 2)}`);
+  detailedLogger.info(`distributeUsers: ${JSON.stringify(data, null, 2)}`);
 
   return data;
 }
