@@ -23,7 +23,7 @@ class DetailedLogger {
 
   warning(message) {
     if (ENABLE_DETAILED_LOGGING === false) return;
-    console.warn(chalk.yellow(`⚠️ ${message}`));
+    console.warn(chalk.dim.yellow(`⚠️ ${message}`));
   }
 
   result(message) {

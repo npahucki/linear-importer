@@ -43,8 +43,8 @@ async function distributeUsers(issue, teamName) {
     }
   }
 
-  // Fallback: make requester the assignee if no owner found
-  if (!assigneeId) {
+  if (!assigneeId && requestedByUser) {
+    assigneeId = requestedByUser;
     detailedLogger.warning(
       `No owners found. Setting assignee to Requested By user "${issue.requestedBy}" : ${requestedByUser}`,
     );
