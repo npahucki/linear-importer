@@ -9,21 +9,26 @@ async function fetchLabels(teamId) {
     const team = await linearClient.team(teamId);
 
     if (!team) {
-      console.error(`Team with ID ${teamId} not found.`);
-      return;
+      detailedLogger.importantError(`Team with ID ${teamId} not found.`);
+      process.exit(0);
     }
 
-    // Fetch labels for the team
-    const labels = await team.labels();
+    // Fetch all labels using pagination
+    let allLabels = [];
+    let hasNextPage = true;
+    let after = undefined;
 
-    // detailedLogger.result(`Labels: ${JSON.stringify(labels, null, 2)}`);
+    while (hasNextPage) {
+      const response = await team.labels({ first: 100, after });
+      allLabels.push(...response.nodes);
+      hasNextPage = response.pageInfo.hasNextPage;
+      after = response.pageInfo.endCursor;
+    }
 
-    const data = labels.nodes.map((label) => {
-      return {
-        name: label.name,
-        id: label.id,
-      };
-    });
+    const data = allLabels.map((label) => ({
+      name: label.name,
+      id: label.id,
+    }));
 
     detailedLogger.info(`Team Labels: ${JSON.stringify(data, null, 2)}`);
     return data;
