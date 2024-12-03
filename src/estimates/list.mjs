@@ -1,38 +1,84 @@
 import linearClient from "../../config/client.mjs";
-import { ESTIMATION_SCALES } from "./estimation_scales.js";
+import { ISSUE_ESTIMATION_OPTIONS } from "./estimation_scales.js";
+import DetailedLogger from "../../logger/detailed_logger.mjs";
+import chalk from "chalk";
+const detailedLogger = new DetailedLogger();
 
 export function findClosestEstimate(value, scale) {
   if (!scale || !value) return null;
-  
+
   const numericValue = Number(value);
   if (isNaN(numericValue)) return null;
 
   return scale.reduce((closest, current) => {
-    return Math.abs(current - numericValue) < Math.abs(closest - numericValue) ? current : closest;
+    return Math.abs(current - numericValue) < Math.abs(closest - numericValue)
+      ? current
+      : closest;
   });
 }
 
-async function fetchEstimatesForTeam({ teamId }) {
+async function fetchIssueEstimationSettings(teamId) {
   if (!teamId) {
-    throw new Error("teamId is required");
+    detailedLogger.importantError("Team ID not provided");
+    process.exit(1);
   }
 
   try {
     const team = await linearClient.team(teamId);
-    const issueEstimationType = await team.issueEstimationType;
 
-    const estimationScale = ESTIMATION_SCALES[issueEstimationType] || null;
+    const type = team.issueEstimationType;
+    const allowZero = team.issueEstimationAllowZero;
+    const extended = team.issueEstimationExtended;
+
+    // Find correct base values
+    const estimationScaleByType =
+      ISSUE_ESTIMATION_OPTIONS.find((option) => option.value === type)?.scale ||
+      [];
+
+    const choices = ISSUE_ESTIMATION_OPTIONS.map((option) => ({
+      name: `${option.value} (${option.scale.regular.join(", ")}) [Extended: ${option.scale.extended.join(", ")}]`,
+      value: option.value,
+    }));
+
+    // Find scale based using `extended` type
+    const scaleToUse = extended
+      ? estimationScaleByType.extended
+      : estimationScaleByType.regular;
+
+    // Filter out zero if not allowed
+    const scale = (scaleToUse || []).filter(
+      (value) => allowZero || value !== 0,
+    );
+
+    // Create details to be displayed in prompt
+    const details = [
+      `Current Issue estimation settings:`,
+      `  Type: ${chalk.cyan(type)} (${chalk.cyan(scale.join(", "))})`,
+      `  Allow zero estimates: ${chalk.cyan(allowZero)}`,
+      `  Extended estimate scale: ${chalk.cyan(extended)}\n`,
+    ].join("\n");
 
     const data = {
-      type: issueEstimationType,
-      scale: estimationScale,
+      type,
+      allowZero,
+      extended,
+      scale,
+      details,
+      choices,
     };
+
+    // TODO
+    // detailedLogger.success(
+    //   `issueEstimationDetails: ${JSON.stringify(data, null, 2)}`,
+    // );
 
     return data;
   } catch (error) {
-    console.error("Error fetching estimates:", error);
-    throw error;
+    detailedLogger.importantError(
+      `Error fetching issueEstimationDetails: ${error}`,
+    );
+    process.exit(1);
   }
 }
 
-export default fetchEstimatesForTeam;
+export default fetchIssueEstimationSettings;

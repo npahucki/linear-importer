@@ -1,11 +1,23 @@
 import inquirer from "inquirer";
 import teamsList from "./list.mjs";
 
+import DetailedLogger from "../../logger/detailed_logger.mjs";
+
+const detailedLogger = new DetailedLogger();
+
 async function selectTeam() {
-  const teamChoices = teamsList.map((team) => ({
-    name: team.name,
-    value: team
-  }));
+  if (!teamsList.length) {
+    throw new Error("No teams found");
+  }
+
+  const teamChoices = teamsList
+    .map((team) => ({
+      name: team.name,
+      value: team,
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  detailedLogger.info(`${teamChoices.length} teams found`);
 
   const { selectedTeam } = await inquirer.prompt([
     {
@@ -18,9 +30,12 @@ async function selectTeam() {
     },
   ]);
 
+  // const team = buildTeam(selectedTeam);
+  detailedLogger.info(`Selected team: ${JSON.stringify(selectedTeam)}`);
+
   return {
-    teamId: selectedTeam.id,
-    teamName: selectedTeam.name,
+    id: selectedTeam.id,
+    name: selectedTeam.name,
   };
 }
 

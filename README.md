@@ -1,84 +1,69 @@
-# Pivotal Tracker to Linear Converter
+# Linear Importer
 
-A command-line tool that migrates your Pivotal Tracker projects to Linear. Using Pivotal's CSV export feature, this tool converts:
+CLI tool for migrating Pivotal Tracker projects to Linear via CSV export. Converts:
 
 - Pivotal Stories → Linear Issues
-- Pivotal Releases → Linear Parent Issues (with associated stories as sub-issues)
-- Preserves file attachments, comments, labels, statuses, priorities, estimates, assignees, subscribers and dates
+- Pivotal Releases → Linear Parent Issues (with sub-issues)
+- Preserves attachments, comments, labels, statuses, priorities, estimates, assignees, subscribers, dates
 
-Built with the [Linear SDK](https://github.com/linear/linear/tree/master/packages/sdk).
+### For Developers
+
+- The codebase is structured to support additional importers reasonably easily (as of `v2.0.0`) See [Contributing Guide](./CONTRIBUTING.md) or contact me if you intend to add support for other platforms (e.g., Trello)
+
+Built with [Linear SDK](https://github.com/linear/linear/tree/master/packages/sdk)
+
+**Disclaimer**: This is a community-maintained tool and is not officially associated with either Linear or Pivotal Tracker
 
 ## Key Features
 
-- [File Attachments](#file-attachments)
-- [Comments](#comments)
-- [Labels](#labels)
+- [File Attachments](#file-attachments) (optional)
+- [Comments](#comments) (optional)
+- [Labels](#labels) (optional)
+- [Priority](#priority) (optional)
+- [Estimate](#estimate) (optional)
+- [Assignee](#assignee) (Automatically matches Pivotal Users to Linear Member accounts)
+- [Releases](#releases) (Pivotal Releases → Linear parent issues with associated stories as sub-issues)
 - [Statuses](#statuses)
 - [Story Types](#story-types)
-- [Releases](#releases) (Pivotal Releases → Linear parent issues with associated stories as sub-issues)
-- [Priority](#priority)
-- [Estimate](#estimate)
-- [Assignee](#assignee) (Automatically matches Pivotal Users to Linear Member accounts)
 - [Subscribers](#subscribers)
 - [Created Date](#created-date)
 - [Due Date](#due-date)
-- [Safe to retry](#logger) (Skips already imported stories to prevent duplicates)
-- [Logger](#logger)
+- [Safe Retries](#safe-retries)
+- [Logs](#logs)
 
 #### Other
+
 - [Notes](#notes)
+- [ENV Options](#env-options)
 - [API Rate Limits](#api-rate-limits)
 - [TODO](#todo)
-
 
 ## Setup
 
 ### Installation
 
 1. Create a Personal API key in Linear under Settings -> API
-2. Create a `.env` file and and populate `API_KEY`
-3. `yarn install`
-4. Unzip Pivotal Tracker export zip file into `assets`
-5. Add Team Members in Linear
+2. Add Team Members in Linear
+3. Create a `.env` file and and populate `API_KEY`
+4. `yarn install`
+5. Unzip Pivotal Tracker export zip file into `assets` folder
 6. Consider using a burner account before continuing (See [Notes](#notes))
 
 ### Usage
 
-1. `cd src`
-2. `node import.mjs`
+1. `npm run import`
 
 ![alt text](image.png)
-
-#### ENV Options
-
-- `MAX_REQUESTS_PER_SECOND` = 5
-- `ENABLE_IMPORTING` = true
-  - `false` to halt execution before any requests; allows testing CLI
-- `ENABLE_DETAILED_LOGGING` = false
-  - `true` to show additional logging output for user mapping and file attachments
 
 ## Details
 
 #### File Attachments
 
-- File attachments can be optionally imported via the provided prompt
+- `ENABLE_DETAILED_LOGGING` to view debug output
 
 #### Comments
 
-- Comments are imported with original author, timestamp, and content preserved.
-- A Comment titled `Raw Pivotal Tracker Data` will be created for each issue that contains all CSV data for that issue (except Description and Comments, which are populated directly on the Issue)
-
-#### Labels
-
-- The following Labels will be created in the selected Team. This allows each Team to modify labels at their own pace without affecting other Teams, and will avoid any naming conflicts with existing labels.
-
-  - `pivotal - epic`
-  - `pivotal - release`
-  - `pivotal - feature`
-  - `pivotal - bug`
-  - `pivotal - chore`
-
-- Additionally, you will be prompted with the option to import labels created in Pivotal Tracker. These will be added to the imported Linear Issues.
+- Comments are imported with original metadata (author, timestamp) and content preserved. Each issue also includes a `Raw Pivotal Tracker Data` comment containing the complete CSV data for audit purposes.
 
 #### Statuses
 
@@ -89,21 +74,27 @@ Built with the [Linear SDK](https://github.com/linear/linear/tree/master/package
   - `pivotal - planned`
   - `pivotal - started`
 
+#### Labels
+
+- The following Labels will be created in the selected Team. This allows each Team to modify labels at their own pace without affecting other Teams, and will avoid any naming conflicts with existing labels.
+
+  - `pivotal-epic`
+  - `pivotal-release`
+  - `pivotal-feature`
+  - `pivotal-bug`
+  - `pivotal-chore`
+
 #### Story Types
 
-- Configure your import by selecting specific story types via the CLI prompt:
-
-![alt text](image-1.png)
+- Configure your import by selecting specific story types via the CLI prompt
 
 Linear Issues will be assigned a label with the corresponding Story Type (See [Labels](#labels))
-
 
 #### Releases
 
 - Pivotal Releases → Linear parent issues with:
-  - Label: `pivotal - release`
+  - Label: `pivotal-release`
   - Associated stories as sub-issues
-
 
 #### Priority
 
@@ -122,11 +113,14 @@ Linear Issues will be assigned a label with the corresponding Story Type (See [L
 - Automatically matches Pivotal users to Linear team members by comparing names and emails
   - Prompts for manual matching when automatic matching fails
 - For stories with multiple owners:
+
   - First owner becomes the assignee
   - Other owners become subscribers
 
   ![alt text](image-2.png)
+
 - For stories without owners:
+
   - Story creator becomes the assignee
 
 - User Map data is stored in `log/<team>/user_mapping.json`:
@@ -167,25 +161,64 @@ Linear Issues will be assigned a label with the corresponding Story Type (See [L
 - ✅ Due dates from Pivotal are copied exactly to Linear
 - ❌ Stories without due dates in Pivotal will have no due date in Linear
 
-#### Logger
+#### Safe Retries
 
-- Unique Team data is stored in team-specific folders (`log/<team-name>`). Each folder contains:
-  - `output_<timestamp>.txt`: Complete console output for each import attempt
-  - `user_mapping.json` - Maps Pivotal Tracker usernames to Linear user accounts (see [Assignee](#Assignee))
-  - `successful_imports.csv` - Logs successfully imported Pivotal Stories. These will be skipped on subsequent import attempts, preventing duplicates.
+- Skips already imported stories to prevent duplicates
 
-> ⚠️ **WARNING**  
-> Deleting `successful_imports.csv` file will cause the importer to lose track of previously imported stories. Only delete this file if you want to start over.
+#### Logs
+
+- All import data is stored in team-specific folders at `log/<team-name>/`, containing:
+
+  - `output_<timestamp>.txt`
+
+    - Complete console output from each import attempt
+    - Useful for debugging and auditing imports
+    - New file created for each import run
+
+  - `user_mapping.json`
+
+    - Maps Pivotal Tracker usernames to Linear user accounts
+    - Used for automatic user matching in future imports
+    - See [Assignee](#assignee) section for example JSON structure
+
+  - `successful_imports.csv`
+    - Tracks successfully imported Pivotal story IDs
+    - Prevents duplicate imports on subsequent runs
+    - Simple CSV format: one story ID per line
+
+> ⚠️ **Important**  
+> The `successful_imports.csv` file is critical for preventing duplicates. Only delete it if you intend to restart the import process from scratch.
+
+> If you do want to start over completely, move the entire `log/<team-name>` folder to a backup location for history purposes. This is your record of all API activity and mapped users. Or delete it.
 
 ## Other
 
 #### Notes
 
 - Add Team Members in Linear before beginning import to take advantage of Automatic User mapping. However, users can be manually mapped.
-- You will become a subscriber on every Issue that's created with this importer. Adjust your notification preferences accordingly, or consider using a burner account.
+- As the creator of every imported issue (via your API key), you will receive notifications for all created issues. Consider adjusting your notification settings in Linear before starting a large import. You may also consider unsubscribing right away from those issues that you are not interested in.
 - Be mindful of notification preferences for your team members. This can get noisy while importing 😬
+
+#### ENV Options
+
+- `API_KEY` = ""
+- `ENABLE_IMPORTING` = true
+  - `false` to halt execution before any requests; allows testing CLI
+- `ENABLE_DETAILED_LOGGING` = false
+  - `true` to log all output. Enable this while developing or to see detailed messages
+- `REQUEST_DELAY_MS` = 1
+  - Increase if reaching API rate limits
 
 #### API Rate Limits
 
 - Linear sets rate limits on their API usage, which you will probably reach. The Linear team was helpful in increasing my rate limits temporarily. https://developers.linear.app/docs/graphql/working-with-the-graphql-api/rate-limiting.
-- The `MAX_REQUESTS_PER_SECOND` ENV var can be adjusted to throttle request frequency
+- The `REQUEST_DELAY_MS` ENV var can be adjusted to throttle request frequency
+
+## TODO
+
+[Contributing Guide](./CONTRIBUTING.md)
+
+- Importers
+  - Generic CSV
+  - Generic JSON
+  - Trello

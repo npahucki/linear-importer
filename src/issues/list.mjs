@@ -16,16 +16,15 @@ async function fetchIssuesForTeam({ teamId, filters }) {
   if (filteredIssues.nodes.length) {
     filteredIssues.nodes.forEach((issue) => {
       // console.log("FULL issue", issue)
-        const data = {
-          id: issue.id,
-          identifier: issue.identifier,
-          title: issue.title,
-          createdAt: issue.createdAt,
-        }
+      const data = {
+        id: issue.id,
+        identifier: issue.identifier,
+        title: issue.title,
+        createdAt: issue.createdAt,
+      };
 
-        issues.push(data)
-      }
-    );
+      issues.push(data);
+    });
 
     return issues;
   } else {

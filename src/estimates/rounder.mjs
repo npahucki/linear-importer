@@ -1,27 +1,24 @@
-import { ENABLE_DETAILED_LOGGING } from "../../config/config.js";
-import { ESTIMATION_SCALES } from "./estimation_scales.js";
-import chalk from "chalk";
+import DetailedLogger from "../../logger/detailed_logger.mjs";
 
-export function findClosestEstimate(value, estimationScale) {
-  if (!estimationScale || !value) return null;
+const detailedLogger = new DetailedLogger();
 
-  const scale = ESTIMATION_SCALES[estimationScale];
+function roundEstimate(estimate, scale) {
+  if (!estimate) {
+    detailedLogger.importantError("No estimate provided");
+    process.exit(1);
+  }
 
-  if (!scale) return null;
-  const numericValue = Number(value);
+  if (!scale) {
+    detailedLogger.importantError("No scale provided");
+    process.exit(1);
+  }
+
+  const numericValue = Number(estimate);
 
   if (isNaN(numericValue)) return null;
 
-  if (ENABLE_DETAILED_LOGGING) {
-    console.log("value", value);
-    console.log(chalk.magenta("estimationScale"), estimationScale);
-    console.log(chalk.magenta("scale"), scale);
-  }
-
   if (scale.includes(numericValue)) {
-    if (ENABLE_DETAILED_LOGGING) {
-      console.log(chalk.magenta("exact match found:"), numericValue);
-    }
+    detailedLogger.info(`Exact match found: ${numericValue}`);
     return numericValue;
   }
 
@@ -36,9 +33,9 @@ export function findClosestEstimate(value, estimationScale) {
     }
   }
 
-  if (ENABLE_DETAILED_LOGGING) {
-    console.log(chalk.magenta("closest"), closest);
-  }
+  detailedLogger.info(`Closest match found: ${closest}`);
 
   return closest;
 }
+
+export default roundEstimate;

@@ -1,5 +1,6 @@
 _backup
 .DS_Store
 .env
+log
 assets
 node_modules

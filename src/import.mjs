@@ -1,275 +1,139 @@
-import {
-  ENABLE_DETAILED_LOGGING,
-  MAX_REQUESTS_PER_SECOND,
-} from "../config/config.js";
-import parseCSV from "./csv/parse.mjs";
-import chalk from "chalk";
-
+import initializeLogger from "../logger/initialize.js";
+import createStatuses from "./statuses/create.mjs";
+import DetailedLogger from "../logger/detailed_logger.mjs";
+import importLabels from "./prompts/import_labels.js";
+import importComments from "./prompts/import_comments.js";
+import updateIssueEstimationType from "./estimates/update_issue_estimation_type.js";
+import importEstimates from "./estimates/import_estimates.js";
+import importPriority from "./prompts/import_priority.js";
 import selectTeam from "./teams/select.mjs";
-import fetchStatuses from "./statuses/list.mjs";
-
-// import deleteLabels from "./labels/delete.mjs";
-import createLabels from "./labels/create.mjs";
-import fetchLabels from "./labels/list.mjs";
-import fetchIssuesForTeam from "./issues/list.mjs";
-import createIssue from "./issues/create.mjs";
-
-import importPivotalEstimates from "./prompts/import_pivotal_estimates.mjs";
-import importFileAttachments from "./prompts/import_file_attachments.js";
-import importLabelsFromCSV from "./prompts/import_labels_from_csv.js";
-import selectStatusTypes from "./prompts/select_status_types.js";
+import importFiles from "./prompts/import_files.js";
 import proceedWithImport from "./prompts/proceed_with_import.js";
+import selectImportSource from "./prompts/select_import_source.js";
+import pivotalFormatter from "./import_sources/pivotal/formatter.js";
+import createLabels from "./labels/create.js";
+import createUserMapping from "./users/create_user_mapping.js";
+import { PIVOTAL_DEFAULT_LABELS } from "./labels/pivotal/_constants.js";
+import selectDirectory from "./prompts/select_csv_directory.js";
+import createIssues from "./issues/create.js";
 
-// import fetchEstimatesForTeam from "./estimates/list.mjs";
-// import createEstimates from "./estimates/create.mjs";
-// import getTeamMembers from "./teams/members.mjs";
+const detailedLogger = new DetailedLogger();
 
-import { setupLogger } from "./logger/init.mjs";
-import { RELEASE_LABEL_NAME } from "./init.mjs";
-import init from "./init.mjs";
-import readSuccessfulImports from "./logger/read_successful_imports.mjs";
-import logSuccessfulImport from "./logger/log_successful_import.mjs";
+//=============================================================================
+// Select Import Source
+//=============================================================================
+const importSource = await selectImportSource();
 
-const CREATE_ISSUES = true;
-const DELAY = Math.ceil(500 / MAX_REQUESTS_PER_SECOND);
+//=============================================================================
+// Select a Team
+//=============================================================================
+const team = await selectTeam();
 
-const { teamId, teamName } = await selectTeam();
-if (!teamId) {
-  throw new Error("No team selected");
-}
+//=============================================================================
+// Initialize Logger
+//=============================================================================
+initializeLogger({ team });
 
-// Write to log file
-const logger = setupLogger(teamName);
-logger.enable();
+//=============================================================================
+// Select Directory
+//=============================================================================
+const directory = await selectDirectory();
 
-// PROMPTS
-const {
-  releaseStories,
-  pivotalStories,
-  statusTypes,
-  labels,
-  csvFilename,
-  pivotalUsers,
-} = await parseCSV();
+//=============================================================================
+// Build Import Options
+//=============================================================================
+const shouldImportFiles = await importFiles();
+const shouldImportLabels = await importLabels();
+const shouldImportComments = await importComments();
+const shouldImportPriority = await importPriority();
+const shouldImportEstimates = await importEstimates();
+if (shouldImportEstimates) await updateIssueEstimationType({ team });
 
-// Optional Import params
-const { importFiles } = await importFileAttachments();
-const { importLabels } = await importLabelsFromCSV();
-const estimationScale = await importPivotalEstimates({ teamId });
-const { selectedStatusTypes } = await selectStatusTypes(statusTypes);
-const successfulImports = await readSuccessfulImports(teamName);
-const uniquePivotalStories = [
-  ...new Map(pivotalStories.map((story) => [story.id, story])).values(),
-];
+// Options get passed to createIssues
+const options = {
+  shouldImportFiles,
+  shouldImportLabels,
+  shouldImportComments,
+  shouldImportPriority,
+  shouldImportEstimates,
+};
 
-// Logs
-if (ENABLE_DETAILED_LOGGING) {
-  console.log("\nImport Status:");
-  console.log("Successful imports from CSV:", successfulImports.size);
-  console.log(
-    "Sample of successful imports:",
-    Array.from(successfulImports).slice(0, 5),
-  );
-  console.log("\nPivotal Stories:");
-  console.log("Total stories from Pivotal (raw):", pivotalStories.length);
-  console.log(
-    "Total unique stories from Pivotal:",
-    uniquePivotalStories.length,
-  );
-  console.log(
-    "Sample of unique Pivotal story IDs:",
-    uniquePivotalStories.slice(0, 5).map((story) => story.id),
-  );
-}
-
-const newReleaseStories = releaseStories.filter(
-  (story) => !successfulImports.has(story.id),
-);
-
-// Filter pivotal stories based on selectedStatusTypes
-const newPivotalStories = uniquePivotalStories.filter(
-  (story) =>
-    selectedStatusTypes.includes(story.type.toLowerCase()) &&
-    !successfulImports.has(story.id),
-);
-
-if (ENABLE_DETAILED_LOGGING) {
-  console.log("\nFiltering results:");
-  console.log("- Total stories before filtering:", uniquePivotalStories.length);
-  console.log(
-    "- Stories matching selected type(s):",
-    uniquePivotalStories.filter((story) =>
-      selectedStatusTypes.includes(story.type.toLowerCase()),
-    ).length,
-  );
-  console.log(
-    "- Stories remaining after excluding imports:",
-    newPivotalStories.length,
-  );
-}
-
-const { userConfirmedProceed } = await proceedWithImport({
-  releaseStories: newReleaseStories,
-  pivotalStories: newPivotalStories,
-  successfulImportsLength: successfulImports.size,
-  selectedStatusTypes,
+//=============================================================================
+// Format Data for Import Type
+//=============================================================================
+// TODO: Modify to swap different data sources, based on importSource
+const extractedPivotalData = await pivotalFormatter({
+  team,
+  directory,
 });
 
-if (userConfirmedProceed) {
-  if (newReleaseStories.length + newPivotalStories.length === 0) {
-    console.log(chalk.bold.green("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
-    console.log(chalk.bold.green("✨ All stories already imported! ✨"));
-    console.log(chalk.bold.green("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"));
-    process.exit(0);
-  }
+//=============================================================================
+// Create User Mapping
+//=============================================================================
+await createUserMapping({
+  team,
+  extractedUsernames: extractedPivotalData.csvData.aggregatedData.userNames,
+});
 
-  // Creates Team Labels and Workflow Statuses
-  await init({ teamId, teamName, pivotalUsers });
+detailedLogger.info(`Import Source: ${importSource}`);
+detailedLogger.info(`Team: ${JSON.stringify(team, null, 2)}`);
+detailedLogger.info(`Directory: ${directory}`);
+detailedLogger.info(`Options: ${JSON.stringify(options, null, 2)}`);
 
-  // Create Labels from CSV
-  if (importLabels) await createLabels({ teamId, labels });
+//=============================================================================
+// Confirm Proceed
+//=============================================================================
+await proceedWithImport({
+  confirmationMessage: extractedPivotalData.confirmationMessage,
+});
 
-  const teamStatuses = await fetchStatuses({ teamId });
-  const teamLabels = await fetchLabels({ teamId });
+//=============================================================================
+// Create Labels and Statuses
+//=============================================================================
+// Create Workspace statuses using Pivotal statuses
+// TODO: Modify for other import sources
+await createStatuses({ teamId: team.id });
 
-  const processReleaseStories = async () => {
-    if (newReleaseStories?.length === 0) {
-      console.log(
-        chalk.cyan(`No release stories to convert for Team ${teamName}`),
-      );
-    } else {
-      console.log(
-        chalk.cyan(
-          `Converting ${newReleaseStories.length} Release Stories into Linear Cycles for Team ${teamName}`,
-        ),
-      );
+// Create Workspace labels using Pivotal default labels
+await createLabels({ teamId: team.id, labels: PIVOTAL_DEFAULT_LABELS });
 
-      for (const [index, pivotalStory] of newReleaseStories.entries()) {
-        const stateId = teamStatuses.find(
-          (state) => state.name === `pivotal - ${pivotalStory.state}`,
-        )?.id;
-        const pivotalStoryTypeLabelId = teamLabels.find(
-          (label) => label.name === `pivotal - ${pivotalStory.type}`,
-        )?.id;
-        const otherLabelIds = pivotalStory.labels
-          ? pivotalStory.labels
-              .split(",")
-              .map((label) => label.trim())
-              .map(
-                (label) =>
-                  teamLabels.find((teamLabel) => teamLabel.name === label)?.id,
-              )
-              .filter((id) => id)
-          : [];
-        const labelIds = [pivotalStoryTypeLabelId, ...otherLabelIds].filter(
-          Boolean,
-        );
-
-        const importNumber = index + 1;
-        await new Promise((resolve) => setTimeout(resolve, DELAY));
-
-        try {
-          await createIssue({
-            importNumber,
-            teamId,
-            teamName,
-            pivotalStory,
-            stateId,
-            labelIds,
-            csvFilename,
-            importFiles,
-            estimationScale,
-          });
-          await logSuccessfulImport(pivotalStory.id, teamName);
-        } catch (error) {
-          console.error(
-            `Failed to import release story ${pivotalStory.id}:`,
-            error,
-          );
-        }
-      }
-    }
-  };
-
-  // Process Release Stories first
-  if (CREATE_ISSUES) {
-    if (selectedStatusTypes.includes("release")) {
-      await processReleaseStories();
-    }
-  }
-
-  // Add delay to ensure synchronicity
-  await new Promise((resolve) => setTimeout(resolve, DELAY * 2));
-
-  // Process Pivotal Stories
-  const processPivotalStories = async () => {
-    if (newPivotalStories?.length === 0) {
-      console.log("No Pivotal Stories found to import.");
-    } else {
-      console.log(
-        chalk.cyan(
-          `Converting ${newPivotalStories.length} Pivotal Stories into Linear Issues for Team ${teamName}`,
-        ),
-      );
-
-      // Fetch all release issues
-      const releaseIssues = await fetchIssuesForTeam({
-        teamId,
-        filters: { labels: { some: { name: { eq: RELEASE_LABEL_NAME } } } },
-      });
-
-      for (const [index, pivotalStory] of newPivotalStories.entries()) {
-        const parentIssue = releaseIssues?.find((releaseIssue) =>
-          releaseIssue.title.includes(`[${pivotalStory.iteration}]`),
-        );
-        const stateId = teamStatuses.find(
-          (state) => state.name === `pivotal - ${pivotalStory.state}`,
-        )?.id;
-        const pivotalStoryTypeLabelId = teamLabels.find(
-          (label) => label.name === `pivotal - ${pivotalStory.type}`,
-        )?.id;
-        const otherLabelIds = pivotalStory.labels
-          ? pivotalStory.labels
-              .split(",")
-              .map((label) => label.trim())
-              .map(
-                (label) =>
-                  teamLabels.find((teamLabel) => teamLabel.name === label)?.id,
-              )
-              .filter((id) => id)
-          : [];
-        const labelIds = [pivotalStoryTypeLabelId, ...otherLabelIds].filter(
-          Boolean,
-        );
-
-        const importNumber = index + 1;
-        await new Promise((resolve) => setTimeout(resolve, DELAY));
-
-        try {
-          await createIssue({
-            importNumber,
-            teamId,
-            teamName,
-            pivotalStory,
-            stateId,
-            labelIds,
-            csvFilename,
-            importFiles,
-            estimationScale,
-          });
-          await logSuccessfulImport(pivotalStory.id, teamName);
-        } catch (error) {
-          console.error(`Failed to import story ${pivotalStory.id}:`, error);
-        }
-      }
-    }
-  };
-
-  // Process all remaining Pivotal Stories
-  if (CREATE_ISSUES) await processPivotalStories();
+// Create Workspace labels using extracted labels
+if (shouldImportLabels) {
+  await createLabels({
+    teamId: team.id,
+    labels: extractedPivotalData.csvData.aggregatedData.labels,
+  });
 }
 
-// Close Logger
-process.on("exit", () => {
-  logger.close();
+//=============================================================================
+// Create Release Issues
+//=============================================================================
+// Create Release Issues first so that we can assign sub-issues
+const releaseIssues = extractedPivotalData.formattedIssuePayload.filter(
+  (issue) => issue.isRelease,
+);
+await createIssues({
+  team,
+  issuesPayload: releaseIssues,
+  options,
+  importSource,
+  directory,
 });
+
+//=============================================================================
+// Create Issues
+//=============================================================================
+// Create non-release issues after release issues have been created, so that
+// a parentId can be assigned if necessary
+const nonReleaseIssues = extractedPivotalData.formattedIssuePayload.filter(
+  (issue) => !issue.isRelease,
+);
+await createIssues({
+  team,
+  issuesPayload: nonReleaseIssues,
+  options,
+  importSource,
+  directory,
+});
+
+await detailedLogger.importantSuccess("Import complete!");

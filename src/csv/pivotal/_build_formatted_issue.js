@@ -1,9 +1,14 @@
-export function buildParams(row) {
+export function buildFormattedIssue(row) {
   const comments = joinMultipleColumns(row["Comment"]);
-  const additionalPivotalData = buildAdditionalPivotalData(row);
+  const rawPivotalTrackerDataComment = buildRawPivotalTrackerDataComment(row);
+  const title = buildTitle(row);
+  const dueDate = buildDueDate(row);
+  const ownedBy = joinMultipleColumns(row["Owned By"]);
 
   const params = {
-    name: row["Title"],
+    isRelease: row["Type"] == "release",
+    title,
+    dueDate,
     id: row["Id"],
     type: row["Type"],
     createdAt: row["Created at"],
@@ -15,18 +20,33 @@ export function buildParams(row) {
     priority: row["Priority"],
     labels: row["Labels"],
     requestedBy: row["Requested By"],
-    ownedBy: row["Owned By"],
+    ownedBy,
     estimate: row["Estimate"],
-    comments: [...(comments || []), additionalPivotalData],
+    comments: [rawPivotalTrackerDataComment, ...(comments || [])],
   };
-
-  // TODO:
-  // - ESTIMATE
 
   return params;
 }
 
-function buildAdditionalPivotalData(row) {
+function buildDueDate(row) {
+  if (row["Type"] == "release") {
+    return row["Iteration End"];
+  } else {
+    return row["Accepted at"] || row["Iteration End"];
+  }
+}
+
+function buildTitle(row) {
+  if (row["Type"] == "release") {
+    return row["Iteration"]
+      ? `[${row["Iteration"]}] ${row["Title"]}`
+      : row["Title"];
+  } else {
+    return row["Title"];
+  }
+}
+
+function buildRawPivotalTrackerDataComment(row) {
   const header = ["#### Raw Pivotal Tracker Data:", ""];
 
   const dataRows = Object.entries(row)

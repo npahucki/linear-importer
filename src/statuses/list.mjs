@@ -1,10 +1,10 @@
 import linearClient from "../../config/client.mjs";
 
-async function fetchStatuses({ teamId }) {
+async function fetchStatuses(teamId) {
   try {
     // Fetch the team
     const team = await linearClient.team(teamId);
-    
+
     if (!team) {
       console.error(`Team with ID ${teamId} not found.`);
       return;
@@ -22,9 +22,10 @@ async function fetchStatuses({ teamId }) {
     });
 
     return data;
-    
   } catch (error) {
-    console.error(chalk.red(`Error fetching statuses for team ${teamId}:`, error.message));
+    console.error(
+      chalk.red(`Error fetching statuses for team ${teamId}:`, error.message),
+    );
   }
 }
 

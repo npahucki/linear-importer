@@ -1,10 +1,10 @@
 import linearClient from "../../config/client.mjs";
 import chalk from "chalk";
 
-async function createLabels({ teamId, labels }) {  
+async function createLabels({ teamId, labels }) {
   try {
     console.log(chalk.cyan(`🔄 Creating ${labels.length} labels...`));
-    
+
     let successful = 0;
     let failed = 0;
 
@@ -30,12 +30,15 @@ async function createLabels({ teamId, labels }) {
     }
 
     // Show summary at the end
-    console.log(chalk.green(`\nLabels created: ${successful}/${labels.length}`));
+    console.log(chalk.green(`Labels created: ${successful}/${labels.length}`));
     if (failed > 0) {
-      console.log(chalk.yellow(`Failed to create: ${failed}`));
+      console.log(chalk.yellow(`Failed to create: ${failed}\n`));
     }
   } catch (error) {
-    console.error(chalk.redBright("Fatal error in label creation process:"), error.message);
+    console.error(
+      chalk.redBright("Fatal error in label creation process:"),
+      error.message,
+    );
   }
 }
 
