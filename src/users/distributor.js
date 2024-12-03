@@ -45,15 +45,8 @@ async function distributeUsers(issue, teamName) {
 
   // Fallback: make requester the assignee if no owner found
   if (!assigneeId) {
-    detailedLogger.info(
+    detailedLogger.warning(
       `No owners found. Setting assignee to Requested By user "${issue.requestedBy}" : ${requestedByUser}`,
-    );
-  }
-
-  // Final fallback: throw error if no assignee could be set
-  if (!assigneeId) {
-    throw new Error(
-      "No assignee could be determined. Both owner and requester mappings are missing.",
     );
   }
 
