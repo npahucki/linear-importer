@@ -73,7 +73,7 @@ const extractedPivotalData = await pivotalFormatter({
         "state": "in progress",
         "priority": "p1 - High",
         "labels": "login, logout",
-        "requestedBy": "Chad Muska",
+        "requestedBy": "Tony Hawk",
         "ownedBy": ["Bob Evans"],
         "estimate": "5",
         "comments": ["Single comment"]
@@ -86,7 +86,7 @@ const extractedPivotalData = await pivotalFormatter({
         "Alice Johnson"
         "Mike Johnson",
         "Tom Wilson",
-        "Chad Muska",
+        "Tony Hawk",
         "Bob Evans",
       ],
       "labels": [
