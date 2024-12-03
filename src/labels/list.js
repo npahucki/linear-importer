@@ -16,6 +16,8 @@ async function fetchLabels(teamId) {
     // Fetch labels for the team
     const labels = await team.labels();
 
+    // detailedLogger.result(`Labels: ${JSON.stringify(labels, null, 2)}`);
+
     const data = labels.nodes.map((label) => {
       return {
         name: label.name,
@@ -23,7 +25,7 @@ async function fetchLabels(teamId) {
       };
     });
 
-    detailedLogger.info(`Team Labels: ${JSON.stringify(labels, null, 2)}`);
+    detailedLogger.info(`Team Labels: ${JSON.stringify(data, null, 2)}`);
     return data;
   } catch (error) {
     console.error("Error fetching labels:", error.message);

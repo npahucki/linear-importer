@@ -10,9 +10,11 @@ CLI tool for migrating Pivotal Tracker projects to Linear via CSV export. Conver
 
 ### For Developers
 
+- Want to add support for another platform? The codebase is designed for easy extension. See [Contributing Guide](./CONTRIBUTING.md) or open an issue.
+
 - The codebase is structured to support additional importers reasonably easily (as of `v2.0.0`). Contact me if you intend to add support for other platforms (e.g., Trello).
 
-Built with [Linear SDK](https://github.com/linear/linear/tree/master/packages/sdk).
+Built with [Linear SDK](https://github.com/linear/linear/tree/master/packages/sdk)
 
 ## Key Features
 
@@ -28,12 +30,13 @@ Built with [Linear SDK](https://github.com/linear/linear/tree/master/packages/sd
 - [Subscribers](#subscribers)
 - [Created Date](#created-date)
 - [Due Date](#due-date)
-- [Safe to retry](#logger) (Skips already imported stories to prevent duplicates)
-- [Logger](#logger)
+- [Safe to retry](#safe-retries) (Skips already imported stories to prevent duplicates)
+- [Logs](#logs)
 
 #### Other
 
 - [Notes](#notes)
+- [ENV Options](#env-options)
 - [API Rate Limits](#api-rate-limits)
 - [TODO](#todo)
 
@@ -50,19 +53,9 @@ Built with [Linear SDK](https://github.com/linear/linear/tree/master/packages/sd
 
 ### Usage
 
-`npm run import`
+1. `npm run import`
 
 ![alt text](image.png)
-
-#### ENV Options
-
-- `API_KEY` = ""
-- `ENABLE_IMPORTING` = true
-  - `false` to halt execution before any requests; allows testing CLI
-- `ENABLE_DETAILED_LOGGING` = false
-  - `true` to log all output. Enable this while developing or to see detailed messages
-- `REQUEST_DELAY_MS` = 1
-  - increase if reaching API rate limits
 
 ## Details
 
@@ -72,8 +65,16 @@ Built with [Linear SDK](https://github.com/linear/linear/tree/master/packages/sd
 
 #### Comments
 
-- Comments are imported with original author, timestamp, and content preserved.
-- A Comment titled `Raw Pivotal Tracker Data` will be created for each issue that contains all CSV data for that issue (except Description, Comments, and Files, which are all populated independently)
+- Comments are imported with original metadata (author, timestamp) and content preserved. Each issue also includes a `Raw Pivotal Tracker Data` comment containing the complete CSV data for audit purposes.
+
+#### Statuses
+
+- The following Workflow Statuses will be created in the selected Team. This allows each Team to modify statuses at their own pace without affecting other Teams, and will avoid any naming conflicts with existing statuses.
+  - `pivotal - accepted`
+  - `pivotal - unscheduled`
+  - `pivotal - finished`
+  - `pivotal - planned`
+  - `pivotal - started`
 
 #### Labels
 
@@ -85,22 +86,9 @@ Built with [Linear SDK](https://github.com/linear/linear/tree/master/packages/sd
   - `pivotal-bug`
   - `pivotal-chore`
 
-- Additionally, you will be prompted with the option to import labels created in Pivotal Tracker. These will be added to the imported Linear Issues.
-
-#### Statuses
-
-- The following Workflow Statuses will be created in the selected Team. This allows each Team to modify statuses at their own pace without affecting other Teams, and will avoid any naming conflicts with existing statuses.
-  - `pivotal - accepted`
-  - `pivotal - unscheduled`
-  - `pivotal - finished`
-  - `pivotal - planned`
-  - `pivotal - started`
-
 #### Story Types
 
-- Configure your import by selecting specific story types via the CLI prompt:
-
-![alt text](image-1.png)
+- Configure your import by selecting specific story types via the CLI prompt
 
 Linear Issues will be assigned a label with the corresponding Story Type (See [Labels](#labels))
 
@@ -175,15 +163,31 @@ Linear Issues will be assigned a label with the corresponding Story Type (See [L
 - ✅ Due dates from Pivotal are copied exactly to Linear
 - ❌ Stories without due dates in Pivotal will have no due date in Linear
 
-#### Logger
+#### Logs
 
-- Unique Team data is stored in team-specific folders (`log/<team-name>`). Each folder contains:
-  - `output_<timestamp>.txt`: Complete console output for each import attempt
-  - `user_mapping.json` - Maps Pivotal Tracker usernames to Linear user accounts (see [Assignee](#Assignee))
-  - `successful_imports.csv` - Logs successfully imported Pivotal Stories. These will be skipped on subsequent import attempts, preventing duplicates.
+- All import data is stored in team-specific folders at `log/<team-name>/`, containing:
 
-> ⚠️ **WARNING**  
-> Deleting `successful_imports.csv` file will cause the importer to lose track of previously imported stories. Only delete this file if you want to start over.
+  - `output_<timestamp>.txt`
+
+    - Complete console output from each import attempt
+    - Useful for debugging and auditing imports
+    - New file created for each import run
+
+  - `user_mapping.json`
+
+    - Maps Pivotal Tracker usernames to Linear user accounts
+    - Used for automatic user matching in future imports
+    - See [Assignee](#assignee) section for example JSON structure
+
+  - `successful_imports.csv`
+    - Tracks successfully imported Pivotal story IDs
+    - Prevents duplicate imports on subsequent runs
+    - Simple CSV format: one story ID per line
+
+> ⚠️ **Important**  
+> The `successful_imports.csv` file is critical for preventing duplicates. Only delete it if you intend to restart the import process from scratch.
+
+> If you do want to start over completely, move the entire `log/<team-name>` folder to a backup location for history purposes. This is your record of all API activity and mapped users. Or delete it.
 
 ## Other
 
@@ -193,6 +197,16 @@ Linear Issues will be assigned a label with the corresponding Story Type (See [L
 - You will become a subscriber on every Issue that's created with this importer. Adjust your notification preferences accordingly, or consider using a burner account.
 - Be mindful of notification preferences for your team members. This can get noisy while importing 😬
 
+#### ENV Options
+
+- `API_KEY` = ""
+- `ENABLE_IMPORTING` = true
+  - `false` to halt execution before any requests; allows testing CLI
+- `ENABLE_DETAILED_LOGGING` = false
+  - `true` to log all output. Enable this while developing or to see detailed messages
+- `REQUEST_DELAY_MS` = 1
+  - Increase if reaching API rate limits
+
 #### API Rate Limits
 
 - Linear sets rate limits on their API usage, which you will probably reach. The Linear team was helpful in increasing my rate limits temporarily. https://developers.linear.app/docs/graphql/working-with-the-graphql-api/rate-limiting.
@@ -200,4 +214,9 @@ Linear Issues will be assigned a label with the corresponding Story Type (See [L
 
 ## TODO
 
-- ALLOW_FAILURES
+[Contributing Guide](./CONTRIBUTING.md)
+
+- Importers
+  - Generic CSV
+  - Generic JSON
+  - Trello

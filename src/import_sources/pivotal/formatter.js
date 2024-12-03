@@ -24,7 +24,6 @@ async function formatter({ team, directory }) {
   // TODO: move this out of pivotal formatter and make it a global function. probably need to create a dir for each import source to allow for different log files per import source
   const pivotalStoriesThatHaveNotBeenImported = csvData.issues.filter(
     (story) => !successfulImports.has(story.id),
-    // (story) => true,
   );
 
   // Only include stories that match the selected status types in `selectedStatusTypes`

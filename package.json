@@ -5,7 +5,7 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "import": "node src_new/import.mjs"
+    "import": "node src/import.mjs"
   },
   "dependencies": {
     "@linear/sdk": "^30.0.0",
