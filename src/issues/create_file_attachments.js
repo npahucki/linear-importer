@@ -14,7 +14,7 @@ async function createFileAttachments({ issue, newIssue, directory }) {
       originalIssueId: issue.id,
     });
 
-    detailedLogger.result(
+    detailedLogger.info(
       `Found ${attachments.length} attachments for story ${issue.id}`,
     );
 

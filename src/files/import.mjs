@@ -114,7 +114,7 @@ async function uploadFileToLinear(file, issueId) {
     if (ENABLE_DETAILED_LOGGING) {
       console.log(
         chalk.magenta("Attachment response:"),
-        chalk.magenta(attachmentResponse),
+        chalk.magenta(JSON.stringify(attachmentResponse, null, 2)),
       );
     }
 
