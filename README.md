@@ -6,31 +6,29 @@ CLI tool for migrating Pivotal Tracker projects to Linear via CSV export. Conver
 - Pivotal Releases → Linear Parent Issues (with sub-issues)
 - Preserves attachments, comments, labels, statuses, priorities, estimates, assignees, subscribers, dates
 
-**Disclaimer**: This is a community-maintained tool and is not officially associated with either Linear or Pivotal Tracker.
-
 ### For Developers
 
-- Want to add support for another platform? The codebase is designed for easy extension. See [Contributing Guide](./CONTRIBUTING.md) or open an issue.
-
-- The codebase is structured to support additional importers reasonably easily (as of `v2.0.0`). Contact me if you intend to add support for other platforms (e.g., Trello).
+- The codebase is structured to support additional importers reasonably easily (as of `v2.0.0`) See [Contributing Guide](./CONTRIBUTING.md) or contact me if you intend to add support for other platforms (e.g., Trello)
 
 Built with [Linear SDK](https://github.com/linear/linear/tree/master/packages/sdk)
+
+**Disclaimer**: This is a community-maintained tool and is not officially associated with either Linear or Pivotal Tracker
 
 ## Key Features
 
 - [File Attachments](#file-attachments) (optional)
 - [Comments](#comments) (optional)
-- [Assignee](#assignee) (Automatically matches Pivotal Users to Linear Member accounts)
 - [Labels](#labels) (optional)
 - [Priority](#priority) (optional)
 - [Estimate](#estimate) (optional)
+- [Assignee](#assignee) (Automatically matches Pivotal Users to Linear Member accounts)
 - [Releases](#releases) (Pivotal Releases → Linear parent issues with associated stories as sub-issues)
 - [Statuses](#statuses)
 - [Story Types](#story-types)
 - [Subscribers](#subscribers)
 - [Created Date](#created-date)
 - [Due Date](#due-date)
-- [Safe to retry](#safe-retries) (Skips already imported stories to prevent duplicates)
+- [Safe Retries](#safe-retries)
 - [Logs](#logs)
 
 #### Other
@@ -45,10 +43,10 @@ Built with [Linear SDK](https://github.com/linear/linear/tree/master/packages/sd
 ### Installation
 
 1. Create a Personal API key in Linear under Settings -> API
-2. Create a `.env` file and and populate `API_KEY`
-3. `yarn install`
-4. Unzip Pivotal Tracker export zip file into `assets`
-5. Add Team Members in Linear
+2. Add Team Members in Linear
+3. Create a `.env` file and and populate `API_KEY`
+4. `yarn install`
+5. Unzip Pivotal Tracker export zip file into `assets` folder
 6. Consider using a burner account before continuing (See [Notes](#notes))
 
 ### Usage
@@ -163,6 +161,10 @@ Linear Issues will be assigned a label with the corresponding Story Type (See [L
 - ✅ Due dates from Pivotal are copied exactly to Linear
 - ❌ Stories without due dates in Pivotal will have no due date in Linear
 
+#### Safe Retries
+
+- Skips already imported stories to prevent duplicates
+
 #### Logs
 
 - All import data is stored in team-specific folders at `log/<team-name>/`, containing:
@@ -194,7 +196,7 @@ Linear Issues will be assigned a label with the corresponding Story Type (See [L
 #### Notes
 
 - Add Team Members in Linear before beginning import to take advantage of Automatic User mapping. However, users can be manually mapped.
-- You will become a subscriber on every Issue that's created with this importer. Adjust your notification preferences accordingly, or consider using a burner account.
+- As the creator of every imported issue (via your API key), you will receive notifications for all created issues. Consider adjusting your notification settings in Linear before starting a large import. You may also consider unsubscribing right away from those issues that you are not interested in.
 - Be mindful of notification preferences for your team members. This can get noisy while importing 😬
 
 #### ENV Options

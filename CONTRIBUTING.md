@@ -25,7 +25,7 @@ const extractedPivotalData = await pivotalFormatter({
         "isRelease": true,
         "iteration": 1,
         "title": "Issue 1",
-        "id": "123456789",
+        "id": "1",
         "type": "release",
         "dueDate": "",
         "createdAt": "",
@@ -35,8 +35,8 @@ const extractedPivotalData = await pivotalFormatter({
         "state": "unscheduled",
         "priority": "p2 - Medium",
         "labels": "foo, bar",
-        "requestedBy": "Chad Muska",
-        "ownedBy": ["Bob Smith"],
+        "requestedBy": "Samwise Gamgee",
+        "ownedBy": ["Frodo Baggins"],
         "estimate": "3",
         "comments": []
       },
@@ -44,7 +44,7 @@ const extractedPivotalData = await pivotalFormatter({
         "isRelease": false,
         "iteration": 1,
         "title": "Becomes sub-issue of `Issue 1`",
-        "id": "987654321",
+        "id": "2",
         "type": "feature",
         "dueDate": "",
         "createdAt": "",
@@ -53,20 +53,41 @@ const extractedPivotalData = await pivotalFormatter({
         "description": "Enhance the login process for better user experience.",
         "state": "in progress",
         "priority": "p1 - High",
-        "labels": "login, ux",
+        "labels": "ux",
         "requestedBy": "Alice Johnson",
         "ownedBy": ["Mike Johnson", "Tom Wilson"],
         "estimate": "5",
         "comments": ["Initial thoughts", "Need more details", "Final review"]
+      },
+      {
+        "isRelease": false,
+        "iteration": 2,
+        "title": "Is not a sub-issue",
+        "id": "3",
+        "type": "feature",
+        "dueDate": "",
+        "createdAt": "",
+        "startsAt": "",
+        "endsAt": "",
+        "description": "Enhance the login process for better user experience.",
+        "state": "in progress",
+        "priority": "p1 - High",
+        "labels": "login, logout",
+        "requestedBy": "Chad Muska",
+        "ownedBy": ["Bob Evans"],
+        "estimate": "5",
+        "comments": ["Single comment"]
       }
     ],
     "aggregatedData": {
       "userNames": [
-        "Bob Smith",
+        "Samwise Gamgee",
+        "Frodo Baggins",
+        "Alice Johnson"
         "Mike Johnson",
         "Tom Wilson",
         "Chad Muska",
-        "Alice Johnson"
+        "Bob Evans",
       ],
       "labels": [
         {
@@ -78,7 +99,15 @@ const extractedPivotalData = await pivotalFormatter({
           "color": "#6C757D"
         },
         {
+          "name": "ux",
+          "color": "#6C757D"
+        },
+        {
           "name": "login",
+          "color": "#007BFF"
+        }
+        {
+          "name": "logout",
           "color": "#007BFF"
         }
       ]
