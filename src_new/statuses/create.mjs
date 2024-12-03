@@ -58,11 +58,9 @@ async function createStatusForTeam({ teamId }) {
       }
     }
 
-    console.log(
-      chalk.green(`\nStatuses created: ${successCount}/${totalCount}`),
-    );
+    console.log(chalk.green(`Statuses created: ${successCount}/${totalCount}`));
     if (failedCount > 0) {
-      console.log(chalk.yellow(`Failed to create: ${failedCount}`));
+      console.log(chalk.yellow(`Failed to create: ${failedCount}\n`));
     }
   } catch (error) {
     console.error(

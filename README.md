@@ -190,3 +190,7 @@ Linear Issues will be assigned a label with the corresponding Story Type (See [L
 
 - Linear sets rate limits on their API usage, which you will probably reach. The Linear team was helpful in increasing my rate limits temporarily. https://developers.linear.app/docs/graphql/working-with-the-graphql-api/rate-limiting.
 - The `REQUEST_DELAY_MS` ENV var can be adjusted to throttle request frequency
+
+## TODO
+
+- ALLOW_FAILURES

@@ -1,7 +1,10 @@
 import fs from "fs/promises";
 import path from "path";
+import DetailedLogger from "../../logger/detailed_logger.mjs";
 
-async function findAttachmentsInFolder({ csvFilename, pivotalStoryId }) {
+const detailedLogger = new DetailedLogger();
+
+async function findAttachmentsInFolder({ csvFilename, originalIssueId }) {
   try {
     // Remove the .csv extension from the filename
     const folderName = csvFilename.replace(".csv", "-export");
@@ -9,10 +12,13 @@ async function findAttachmentsInFolder({ csvFilename, pivotalStoryId }) {
     // Construct the path to the story's attachment folder
     const attachmentFolderPath = path.join(
       process.cwd(),
-      "csv",
       "assets",
       folderName,
-      pivotalStoryId.toString(),
+      originalIssueId.toString(),
+    );
+
+    detailedLogger.loading(
+      `Looking for attachments in: ${attachmentFolderPath}`,
     );
 
     // Check if the folder exists
@@ -20,6 +26,13 @@ async function findAttachmentsInFolder({ csvFilename, pivotalStoryId }) {
 
     // Read the contents of the folder
     const files = await fs.readdir(attachmentFolderPath);
+
+    if (files.length === 0) {
+      detailedLogger.info(`No attachments found for story ${originalIssueId}`);
+      return;
+    }
+
+    detailedLogger.info(`Found ${files.length} attachments`);
 
     // Filter out any non-file entries and construct full file paths
     const attachments = await Promise.all(

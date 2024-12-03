@@ -1,7 +1,6 @@
 import linearClient from "../../config/client.mjs";
 import chalk from "chalk";
 import { ENABLE_DETAILED_LOGGING } from "../../config/config.js";
-import { exitProcess } from "../../config/config.js";
 
 async function uploadFileToLinear(file, issueId) {
   if (ENABLE_DETAILED_LOGGING) {
@@ -33,7 +32,7 @@ async function uploadFileToLinear(file, issueId) {
         // console.log(chalk.yellow("Created Blob from file object"));
       } catch (e) {
         console.error("Failed to create Blob from file object:", e);
-        exitProcess();
+        process.exit(0);
       }
     } else {
       throw new Error(
@@ -58,6 +57,7 @@ async function uploadFileToLinear(file, issueId) {
 
   if (!uploadPayload.success || !uploadPayload.uploadFile) {
     throw new Error("Failed to request upload URL");
+    process.exit(0);
   }
 
   const uploadUrl = uploadPayload.uploadFile.uploadUrl;
@@ -97,10 +97,8 @@ async function uploadFileToLinear(file, issueId) {
       console.error(
         `Failed to upload file: ${uploadResponse.status} ${uploadResponse.statusText}\nError details: ${errorText}`,
       );
-      exitProcess();
+      process.exit(0);
     }
-
-    console.log(chalk.yellow("File uploaded successfully"));
 
     const attachmentResponse = await linearClient.createAttachment({
       issueId: issueId,
@@ -119,7 +117,7 @@ async function uploadFileToLinear(file, issueId) {
     return assetUrl;
   } catch (e) {
     console.error("Failed to upload file or attach it to the Linear issue", e);
-    exitProcess();
+    process.exit(0);
   }
 }
 

@@ -108,7 +108,7 @@ await createLabels({
 //=============================================================================
 // Create Release Issues first so that we can assign sub-issues
 const releaseIssues = extractedPivotalData.formattedIssuePayload.filter(
-  (issue) => issue.release,
+  (issue) => issue.isRelease,
 );
 await createIssues({
   team,
@@ -124,7 +124,7 @@ await createIssues({
 // Create non-release issues after release issues have been created, so that
 // a parentId can be assigned if necessary
 const nonReleaseIssues = extractedPivotalData.formattedIssuePayload.filter(
-  (issue) => !issue.release,
+  (issue) => !issue.isRelease,
 );
 await createIssues({
   team,

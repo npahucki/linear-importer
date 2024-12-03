@@ -13,7 +13,7 @@ async function proceedWithImport({ confirmationMessage }) {
     {
       type: "list",
       name: "userConfirmedProceed",
-      message: "Proceed with import?",
+      message: `${chalk.magenta("Proceed with import?")}`,
       choices: [
         { name: "Yes", value: true },
         { name: "No", value: false },

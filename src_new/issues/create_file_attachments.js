@@ -11,22 +11,17 @@ async function createFileAttachments({ issue, newIssue, directory }) {
 
     const attachments = await findAttachmentsInFolder({
       csvFilename: directory,
-      pivotalStoryId: issue.id,
+      originalIssueId: issue.id,
     });
 
-    if (attachments.length === 0) {
-      detailedLogger.info(`No attachments found for story ${issue.id}`);
-      return;
-    }
-
-    detailedLogger.info(
+    detailedLogger.result(
       `Found ${attachments.length} attachments for story ${issue.id}`,
     );
 
     for (const attachment of attachments) {
       try {
         await upload(attachment, newIssue._issue.id);
-        detailedLogger.info(`Successfully uploaded: ${attachment}`);
+        detailedLogger.createdSecondary("Attachment", attachment, "success!");
 
         // Add delay between uploads
         await new Promise((resolve) => setTimeout(resolve, REQUEST_DELAY_MS));

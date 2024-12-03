@@ -16,7 +16,7 @@ async function updateIssueEstimationType({ team }) {
     {
       type: "list",
       name: "shouldChangeIssueEstimationType",
-      message: `${details}------------\nEstimates will be rounded to the nearest value. Change it?`,
+      message: `${details}\nEstimates will be rounded to the nearest value. Change it?`,
       choices: [
         { name: "Yes", value: true },
         { name: "No", value: false },

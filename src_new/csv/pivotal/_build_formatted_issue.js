@@ -6,7 +6,7 @@ export function buildFormattedIssue(row) {
   const ownedBy = joinMultipleColumns(row["Owned By"]);
 
   const params = {
-    release: row["Type"] == "release",
+    isRelease: row["Type"] == "release",
     title,
     dueDate,
     id: row["Id"],
