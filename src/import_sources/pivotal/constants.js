@@ -10,6 +10,7 @@ const UNSCHEDULED = "unscheduled";
 const FINISHED = "finished";
 const PLANNED = "planned";
 const STARTED = "started";
+const UNSTARTED = "unstarted";
 
 const PREFIX = "pivotal";
 
@@ -17,6 +18,12 @@ export const STATUS_OPTIONS = [
   {
     value: UNSCHEDULED,
     name: `${PREFIX} - ${UNSCHEDULED}`,
+    color: "#6C757D",
+    type: BACKLOG_TYPE,
+  },
+  {
+    value: UNSTARTED,
+    name: `${PREFIX} - ${UNSTARTED}`,
     color: "#6C757D",
     type: BACKLOG_TYPE,
   },
