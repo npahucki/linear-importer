@@ -1,5 +1,5 @@
 import inquirer from "inquirer";
-import DetailedLogger from "../../logger/detailed_logger.mjs";
+import { detailedLogger } from "../../logger/logger_instance.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs/promises";
@@ -15,7 +15,6 @@ async function listAssetDirectories() {
 }
 
 async function selectDirectory() {
-  const detailedLogger = new DetailedLogger();
   const directories = await listAssetDirectories();
 
   if (directories.length === 0) {

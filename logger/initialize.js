@@ -1,7 +1,6 @@
-import Logger from "./logger.mjs";
-import DetailedLogger from "./detailed_logger.mjs";
+import { detailedLogger } from "./logger_instance.js";
 
-const detailedLogger = new DetailedLogger();
+import Logger from "./logger.js";
 
 function initializeLogger({ team }) {
   detailedLogger.info(`Initialized logger for team: ${team.name}`);

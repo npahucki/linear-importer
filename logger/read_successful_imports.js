@@ -1,8 +1,7 @@
 import fs from "fs/promises";
-import Logger from "./logger.mjs";
-import DetailedLogger from "./detailed_logger.mjs";
+import Logger from "./logger.js";
 
-const detailedLogger = new DetailedLogger();
+import { detailedLogger } from "./logger_instance.js";
 
 const readSuccessfulImports = async (teamName) => {
   if (!teamName) {

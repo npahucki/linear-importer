@@ -1,12 +1,10 @@
-import DetailedLogger from "../../../logger/detailed_logger.mjs";
+import { detailedLogger } from "../../../logger/logger_instance.js";
 import readSuccessfulImports from "../../../logger/read_successful_imports.js";
 
 import parseCSV from "../../csv/parse.js";
 import selectStatusTypes from "./select_status_types.js";
 
 import buildImportSummary from "./build_import_summary.js";
-
-const detailedLogger = new DetailedLogger();
 
 async function formatter({ team, directory }) {
   detailedLogger.importantLoading(`Setting up Pivotal Import...`);

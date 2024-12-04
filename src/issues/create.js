@@ -1,5 +1,5 @@
 import linearClient from "../../config/client.mjs";
-import DetailedLogger from "../../logger/detailed_logger.mjs";
+import { detailedLogger } from "../../logger/logger_instance.js";
 import logSuccessfulImport from "../../logger/log_successful_import.js";
 import fetchLabels from "../labels/list.js";
 import fetchStatuses from "../statuses/list.mjs";
@@ -10,8 +10,6 @@ import createComments from "./create_comments.js";
 import createFileAttachments from "./create_file_attachments.js";
 import { RELEASE_LABEL_NAME } from "../labels/pivotal/_constants.js";
 import fetchIssuesForTeam from "./list.mjs";
-
-const detailedLogger = new DetailedLogger();
 
 async function create({
   team,

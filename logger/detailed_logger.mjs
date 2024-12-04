@@ -39,7 +39,7 @@ class DetailedLogger {
 
   createdSecondary(attribute, id, message = "") {
     console.log(
-      `✅ ${chalk.yellow(`${attribute} created`)} ${chalk.cyan(id)} => ${chalk.magenta(message)}`,
+      `✅ ${chalk.yellow(`${attribute} created`)} ${chalk.cyan(id)} => ${chalk.dim(message)}`,
     );
   }
 

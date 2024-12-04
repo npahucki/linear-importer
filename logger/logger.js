@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import util from "util";
 
-import DetailedLogger from "./detailed_logger.mjs";
+import { detailedLogger } from "./logger_instance.js";
 
 class Logger {
   static getTeamLogPath(teamName, filename) {
@@ -21,7 +21,6 @@ class Logger {
     this.ensureDirectoryExistence(this.logFilePath);
     this.logFile = fs.createWriteStream(this.logFilePath, { flags: "a" });
 
-    const detailedLogger = new DetailedLogger();
     detailedLogger.info(`Created logfile: ${logFilePath}`);
 
     this.originalConsoleLog = console.log;

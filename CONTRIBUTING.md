@@ -5,7 +5,7 @@
 - `importSource` logic begins here. This is the value we'll use to swap between importers
 
 ```js
-// src/import.mjs
+// src/import.js
 const extractedPivotalData = await pivotalFormatter({
   team,
   directory,

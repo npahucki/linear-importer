@@ -1,6 +1,6 @@
+import { detailedLogger } from "../logger/logger_instance.js";
 import initializeLogger from "../logger/initialize.js";
 import createStatuses from "./statuses/create.mjs";
-import DetailedLogger from "../logger/detailed_logger.mjs";
 import importLabels from "./prompts/import_labels.js";
 import importComments from "./prompts/import_comments.js";
 import updateIssueEstimationType from "./estimates/update_issue_estimation_type.js";
@@ -16,8 +16,6 @@ import createUserMapping from "./users/create_user_mapping.js";
 import { PIVOTAL_DEFAULT_LABELS } from "./labels/pivotal/_constants.js";
 import selectDirectory from "./prompts/select_csv_directory.js";
 import createIssues from "./issues/create.js";
-
-const detailedLogger = new DetailedLogger();
 
 //=============================================================================
 // Select Import Source

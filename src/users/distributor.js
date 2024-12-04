@@ -1,7 +1,5 @@
 import getUserMapping from "./get_user_mapping.js";
-import DetailedLogger from "../../logger/detailed_logger.mjs";
-
-const detailedLogger = new DetailedLogger();
+import { detailedLogger } from "../../logger/logger_instance.js";
 
 async function distributeUsers(issue, teamName) {
   const userMapping = await getUserMapping(teamName);

@@ -1,10 +1,8 @@
-import { uploadFileToLinear } from "./import.mjs";
+import { uploadFileToLinear } from "./import.js";
 import fs from "fs/promises";
 import path from "path";
 
-import DetailedLogger from "../../logger/detailed_logger.mjs";
-
-const detailedLogger = new DetailedLogger();
+import { detailedLogger } from "../../logger/logger_instance.js";
 
 async function upload(filePath, issueId) {
   try {

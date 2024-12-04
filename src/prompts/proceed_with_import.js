@@ -1,10 +1,7 @@
 import inquirer from "inquirer";
-
-import DetailedLogger from "../../logger/detailed_logger.mjs";
+import { detailedLogger } from "../../logger/logger_instance.js";
 import { ENABLE_IMPORTING } from "../../config/config.js";
 import chalk from "chalk";
-
-const detailedLogger = new DetailedLogger();
 
 async function proceedWithImport({ confirmationMessage }) {
   detailedLogger.importantSummary(confirmationMessage);

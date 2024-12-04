@@ -1,13 +1,12 @@
 import inquirer from "inquirer";
 
 import linearClient from "../../config/client.mjs";
-import DetailedLogger from "../../logger/detailed_logger.mjs";
 
 import fetchIssueEstimationSettings from "./list.mjs";
 import { ISSUE_ESTIMATION_OPTIONS } from "./estimation_scales.js";
 import chalk from "chalk";
 
-const detailedLogger = new DetailedLogger();
+import { detailedLogger } from "../../logger/logger_instance.js";
 
 async function updateIssueEstimationType({ team }) {
   const { details, choices } = await fetchIssueEstimationSettings(team.id);

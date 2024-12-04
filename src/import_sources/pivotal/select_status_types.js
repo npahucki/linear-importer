@@ -1,10 +1,6 @@
 import inquirer from "inquirer";
-
-import DetailedLogger from "../../../logger/detailed_logger.mjs";
-
+import { detailedLogger } from "../../../logger/logger_instance.js";
 import { STATUS_OPTIONS } from "./constants.js";
-
-const detailedLogger = new DetailedLogger();
 
 async function selectStatusTypes() {
   const { selectedStatusTypes } = await inquirer.prompt([

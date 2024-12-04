@@ -1,8 +1,6 @@
 import inquirer from "inquirer";
 
-import DetailedLogger from "../../logger/detailed_logger.mjs";
-
-const detailedLogger = new DetailedLogger();
+import { detailedLogger } from "../../logger/logger_instance.js";
 
 async function importEstimates() {
   const { shouldImportEstimates } = await inquirer.prompt([

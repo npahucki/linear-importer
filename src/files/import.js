@@ -1,9 +1,7 @@
 import linearClient from "../../config/client.mjs";
 import chalk from "chalk";
 import { ENABLE_DETAILED_LOGGING } from "../../config/config.js";
-import DetailedLogger from "../../logger/detailed_logger.mjs";
-
-const detailedLogger = new DetailedLogger();
+import { detailedLogger } from "../../logger/logger_instance.js";
 
 async function uploadFileToLinear(file, issueId) {
   if (ENABLE_DETAILED_LOGGING) {

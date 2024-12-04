@@ -1,8 +1,6 @@
 import createComment from "../comments/create.js";
 import { REQUEST_DELAY_MS } from "../../config/config.js";
-import DetailedLogger from "../../logger/detailed_logger.mjs";
-
-const detailedLogger = new DetailedLogger();
+import { detailedLogger } from "../../logger/logger_instance.js";
 
 async function createComments({ issue, newIssue }) {
   detailedLogger.loading(`Finding comments for story ${issue.id}`);
