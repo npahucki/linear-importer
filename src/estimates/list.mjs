@@ -1,6 +1,5 @@
 import linearClient from "../../config/client.mjs";
 import { ISSUE_ESTIMATION_OPTIONS } from "./estimation_scales.js";
-import DetailedLogger from "../../logger/detailed_logger.mjs";
 import chalk from "chalk";
 
 import { detailedLogger } from "../../logger/logger_instance.js";
