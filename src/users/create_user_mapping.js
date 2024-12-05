@@ -109,7 +109,7 @@ async function createUserMapping({ team, extractedUsernames }) {
       );
       console.log(
         chalk.gray(
-          `Match confidence: ${Math.round(suggestedMatch.score * 100)}%`,
+          `Match confidence: ${Math.round(suggestedMatch.score * 100)}%\n`,
         ),
       );
     }
@@ -185,15 +185,16 @@ async function createUserMapping({ team, extractedUsernames }) {
     detailedLogger.result(`User mapping saved to ${mappingPath}`);
   }
 
-  detailedLogger.summary(
-    "User mapping summary:\n" +
-      "-----------------------------------\n" +
-      Object.entries(userMapping)
-        .map(
-          ([username, details]) =>
-            `   ${chalk.green(username)} → ${details.linearName} (${details.linearEmail})`,
-        )
-        .join("\n"),
+  console.log("\n" + chalk.cyan("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
+  console.log(chalk.bold.cyan(`  📊 User mapping summary`));
+  console.log(chalk.cyan("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"));
+  console.log(
+    Object.entries(userMapping)
+      .map(
+        ([username, details]) =>
+          `   ${chalk.green(username)} → ${chalk.cyan(details.linearName)} (${chalk.dim.cyan(details.linearEmail)})`,
+      )
+      .join("\n"),
   );
 
   detailedLogger.importantSuccess("✅ Setup complete!");
@@ -203,6 +204,7 @@ async function createUserMapping({ team, extractedUsernames }) {
 async function findBestUserMatch(pivotalName, linearMembers) {
   // Convert pivotal name to lowercase and clean it
   const normalizedPivotalName = pivotalName.toLowerCase().trim();
+  const pivotalParts = normalizedPivotalName.split(/[\s_-]+/);
 
   let bestMatch = {
     linearMember: null,
@@ -210,54 +212,84 @@ async function findBestUserMatch(pivotalName, linearMembers) {
   };
 
   for (const member of linearMembers) {
-    let highestScore = 0;
+    let totalScore = 0;
+    let maxPossibleScore = 0;
 
-    // Check against all available fields
-    const fieldsToCheck = [
-      { value: member.displayName, weight: 1.0 },
-      { value: member.name, weight: 1.0 },
-      { value: member.email?.split("@")[0], weight: 0.8 }, // Username part of email
-      { value: member.initials, weight: 0.3 },
-    ];
+    // Parse member's full name into parts
+    const memberNameParts = member.name
+      .toLowerCase()
+      .trim()
+      .split(/[\s_-]+/);
 
-    for (const field of fieldsToCheck) {
-      if (field.value) {
-        const normalizedField = field.value.toLowerCase().trim();
+    // Add special handling for name parts matching
+    for (const pivotalPart of pivotalParts) {
+      for (const memberPart of memberNameParts) {
+        const isLastPart =
+          pivotalPart === pivotalParts[pivotalParts.length - 1];
+        const weight = isLastPart ? 1.2 : 0.8;
+        maxPossibleScore += weight;
 
-        // Exact match gives highest score
-        if (normalizedField === normalizedPivotalName) {
-          highestScore = Math.max(highestScore, 1.0 * field.weight);
-          continue;
-        }
-
-        // Check if pivotal name contains or is contained in the field
         if (
-          normalizedField.includes(normalizedPivotalName) ||
-          normalizedPivotalName.includes(normalizedField)
+          memberPart.includes(pivotalPart) ||
+          pivotalPart.includes(memberPart)
         ) {
-          highestScore = Math.max(highestScore, 0.9 * field.weight);
-          continue;
+          totalScore += 0.9 * weight;
         }
 
-        // Calculate similarity score
         const similarityScore =
-          calculateSimilarity(normalizedPivotalName, normalizedField) *
-          field.weight;
-        highestScore = Math.max(highestScore, similarityScore);
+          calculateSimilarity(pivotalPart, memberPart) * weight;
+        totalScore += similarityScore;
       }
     }
 
-    if (highestScore > bestMatch.score) {
+    // Normalize the score to be between 0 and 1
+    const normalizedScore =
+      maxPossibleScore > 0 ? totalScore / maxPossibleScore : 0;
+
+    if (normalizedScore > bestMatch.score) {
       bestMatch = {
         linearMember: member,
-        score: highestScore,
+        score: normalizedScore,
       };
     }
   }
 
-  // Return both the member and the score if above threshold
   return bestMatch.score > 0.4 ? bestMatch : null;
 }
+
+// Helper function to check for common name variations
+// function areNameVariations(name1, name2) {
+//   const variations = {
+//     alex: ["alexander", "aleksander", "oleksandr", "aleksandr"],
+//     mike: ["michael", "mikhail"],
+//     bob: ["robert"],
+//     bill: ["william"],
+//     dave: ["david"],
+//     dan: ["daniel"],
+//     nick: ["nicholas", "nicolas", "nico"],
+//     chris: ["christopher"],
+//     tony: ["anthony"],
+//     jim: ["james"],
+//     joe: ["joseph"],
+//     steve: ["steven", "stephen"],
+//   };
+
+//   name1 = name1.toLowerCase();
+//   name2 = name2.toLowerCase();
+
+//   // Check direct variations
+//   for (const [base, vars] of Object.entries(variations)) {
+//     if (
+//       (name1 === base && vars.includes(name2)) ||
+//       (name2 === base && vars.includes(name1)) ||
+//       (vars.includes(name1) && vars.includes(name2))
+//     ) {
+//       return true;
+//     }
+//   }
+
+//   return false;
+// }
 
 function calculateSimilarity(str1, str2) {
   // Simple Levenshtein distance-based similarity
