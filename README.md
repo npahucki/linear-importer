@@ -8,8 +8,8 @@ CLI tool for migrating Pivotal Tracker projects to Linear via CSV export. Conver
 
 ### For Developers
 
-- This is currently only set up for Pivotal Tracker
-- The codebase is structured to support building additional importers reasonably easily (as of `v2.0.0`) See [Contributing Guide](./CONTRIBUTING.md), open a PR, or contact me if you intend to add support for other platforms (e.g., Trello)
+- This importer is currently only set up for a Pivotal Tracker. However you could alter your own CSV to adhere to the accepted format. See [Generic CSV](./CONTRIBUTING.md#generic-csv) for more information
+- The codebase is structured to support building additional importers reasonably easily (as of `v2.0.0`). See [Contributing Guide](./CONTRIBUTING.md), open a PR, or contact me if you intend to add support for other platforms (e.g., Trello)
 
 Built with [Linear SDK](https://github.com/linear/linear/tree/master/packages/sdk)
 
