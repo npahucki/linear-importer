@@ -4,6 +4,7 @@ import fs from "fs/promises";
 import path from "path";
 import inquirer from "inquirer";
 import { detailedLogger } from "../../logger/logger_instance.js";
+
 /**
  * Creates a mapping file that links external usernames to Linear users
  *
@@ -81,88 +82,86 @@ async function createUserMapping({ team, extractedUsernames }) {
     isNewMapping = true;
   }
 
-  // Create user mapping
   const userMapping = shouldRemap ? {} : { ...existingMapping };
-  const unmatchedUsers = [];
   let hasNewMappings = false;
 
-  // First pass: automatic matching for users not in existing mapping
+  // Process all users with manual confirmation
   for (const pivotalUser of extractedUsernames) {
-    // Skip if user already has a mapping
-    if (userMapping[pivotalUser]) {
+    if (!shouldRemap && userMapping[pivotalUser]) {
       continue;
     }
 
     hasNewMappings = true;
-    const matchedMember = await findBestUserMatch(
+    const suggestedMatch = await findBestUserMatch(
       pivotalUser,
       teamMembers.nodes,
     );
-    if (matchedMember) {
-      userMapping[pivotalUser] = {
-        linearId: matchedMember.id,
-        linearName: matchedMember.name,
-        linearEmail: matchedMember.email,
-      };
-    } else {
-      unmatchedUsers.push(pivotalUser);
+
+    // Show the suggested match and ask for confirmation
+    if (suggestedMatch) {
+      console.log(
+        chalk.yellow(`\nSuggested match for ${chalk.green(pivotalUser)}:`),
+      );
+      console.log(
+        chalk.cyan(
+          `${suggestedMatch.linearMember.name} (${suggestedMatch.linearMember.email})`,
+        ),
+      );
+      console.log(
+        chalk.gray(
+          `Match confidence: ${Math.round(suggestedMatch.score * 100)}%`,
+        ),
+      );
     }
-  }
 
-  // Prompt for manual matching if there are unmatched users
-  if (unmatchedUsers.length > 0) {
-    console.log(
-      chalk.yellow(
-        "\n⚠️ The following usernames could not be automatically matched:",
-      ),
-    );
-    console.log(chalk.green(unmatchedUsers.join("\n")));
-
-    const { shouldManuallyMatch } = await inquirer.prompt([
+    const { confirmMatch } = await inquirer.prompt([
       {
         type: "list",
-        name: "shouldManuallyMatch",
-        message: "Would you like to manually match these users?",
+        name: "confirmMatch",
+        message: `How would you like to handle mapping for ${chalk.green(pivotalUser)}?`,
         choices: [
-          { name: "Yes", value: true },
-          { name: "No", value: false },
+          ...(suggestedMatch
+            ? [
+                {
+                  name: "Accept suggested match",
+                  value: "accept",
+                },
+              ]
+            : []),
+          {
+            name: "Choose different user",
+            value: "manual",
+          },
+          {
+            name: "Skip this user",
+            value: "skip",
+          },
         ],
-        default: true,
       },
     ]);
 
-    if (shouldManuallyMatch) {
-      for (const unmatchedUser of unmatchedUsers) {
-        const manualMatch = await promptForManualMatch(
-          unmatchedUser,
-          teamMembers.nodes,
-        );
+    let selectedMember;
+    if (confirmMatch === "accept") {
+      selectedMember = suggestedMatch.linearMember;
+    } else if (confirmMatch === "manual") {
+      selectedMember = await promptForManualMatch(
+        pivotalUser,
+        teamMembers.nodes,
+      );
+    }
 
-        userMapping[unmatchedUser] = manualMatch
-          ? {
-              linearId: manualMatch.id,
-              linearName: manualMatch.name,
-              linearEmail: manualMatch.email,
-            }
-          : {
-              linearId: null,
-              linearName: null,
-              linearEmail: null,
-              note: "No matching Linear user found (manual skip)",
-            };
-      }
-    } else {
-      detailedLogger.info("Skipping manual matching for unmatched users");
-      // Add unmatched users to mapping with null values without prompting
-      unmatchedUsers.forEach((unmatchedUser) => {
-        userMapping[unmatchedUser] = {
+    userMapping[pivotalUser] = selectedMember
+      ? {
+          linearId: selectedMember.id,
+          linearName: selectedMember.name,
+          linearEmail: selectedMember.email,
+        }
+      : {
           linearId: null,
           linearName: null,
           linearEmail: null,
-          note: "No matching Linear user found (automatic skip)",
+          note: "No matching Linear user found (manual skip)",
         };
-      });
-    }
   }
 
   // Save mapping if it's new, was remapped, or has new additions
@@ -180,10 +179,22 @@ async function createUserMapping({ team, extractedUsernames }) {
       ),
     );
     detailedLogger.importantInfo(
-      `User mapping: ${JSON.stringify(userMapping, null, 2)}`,
+      `New user mapping saved: ${JSON.stringify(userMapping, null, 2)}`,
     );
+
     detailedLogger.result(`User mapping saved to ${mappingPath}`);
   }
+
+  detailedLogger.summary(
+    "User mapping summary:\n" +
+      "-----------------------------------\n" +
+      Object.entries(userMapping)
+        .map(
+          ([username, details]) =>
+            `   ${chalk.green(username)} → ${details.linearName} (${details.linearEmail})`,
+        )
+        .join("\n"),
+  );
 
   detailedLogger.importantSuccess("✅ Setup complete!");
   return userMapping;
@@ -244,8 +255,8 @@ async function findBestUserMatch(pivotalName, linearMembers) {
     }
   }
 
-  // Require a minimum score of 0.4 for a match
-  return bestMatch.score > 0.4 ? bestMatch.linearMember : null;
+  // Return both the member and the score if above threshold
+  return bestMatch.score > 0.4 ? bestMatch : null;
 }
 
 function calculateSimilarity(str1, str2) {
@@ -289,7 +300,7 @@ async function promptForManualMatch(pivotalUser, linearMembers) {
     {
       type: "list",
       name: "selectedMember",
-      message: `Choose Linear team member for ${chalk.green(pivotalUser)}":`,
+      message: `Choose Linear team member for ${chalk.green(pivotalUser)}:`,
       choices: choices,
       pageSize: choices.length, // Show all choices at once
     },
