@@ -7,9 +7,7 @@ import path from "path";
 
 import { buildFormattedIssue } from "./pivotal/_build_formatted_issue.js";
 
-import DetailedLogger from "../../logger/detailed_logger.mjs";
-
-const detailedLogger = new DetailedLogger();
+import { detailedLogger } from "../../logger/logger_instance.js";
 
 // Function to read and parse CSV
 function readCSV(filePath) {

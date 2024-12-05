@@ -1,7 +1,6 @@
 import linearClient from "../../config/client.mjs";
-import DetailedLogger from "../../logger/detailed_logger.mjs";
 
-const detailedLogger = new DetailedLogger();
+import { detailedLogger } from "../../logger/logger_instance.js";
 
 async function createComment({ issueId, body }) {
   try {

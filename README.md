@@ -8,7 +8,8 @@ CLI tool for migrating Pivotal Tracker projects to Linear via CSV export. Conver
 
 ### For Developers
 
-- The codebase is structured to support additional importers reasonably easily (as of `v2.0.0`) See [Contributing Guide](./CONTRIBUTING.md) or contact me if you intend to add support for other platforms (e.g., Trello)
+- This importer is currently only set up for a Pivotal Tracker. However you could alter your own CSV to adhere to the accepted format. See [Generic CSV](./CONTRIBUTING.md#generic-csv) for more information
+- The codebase is structured to support building additional importers reasonably easily (as of `v2.0.0`). See [Contributing Guide](./CONTRIBUTING.md), open a PR, or contact me if you intend to add support for other platforms (e.g., Trello)
 
 Built with [Linear SDK](https://github.com/linear/linear/tree/master/packages/sdk)
 
@@ -63,11 +64,11 @@ Built with [Linear SDK](https://github.com/linear/linear/tree/master/packages/sd
 
 #### Comments
 
-- Comments are imported with original metadata (author, timestamp) and content preserved. Each issue also includes a `Raw Pivotal Tracker Data` comment containing the complete CSV data for audit purposes.
+- Comments are imported with original metadata (author, timestamp) and content preserved. Each issue also includes a `Raw Pivotal Tracker Data` comment containing the complete CSV data
 
 #### Statuses
 
-- The following Workflow Statuses will be created in the selected Team. This allows each Team to modify statuses at their own pace without affecting other Teams, and will avoid any naming conflicts with existing statuses.
+- The following Workflow Statuses will be created in the selected Team. This allows each Team to modify statuses at their own pace without affecting other Teams, and will avoid any naming conflicts with existing statuses
   - `pivotal - accepted`
   - `pivotal - unscheduled`
   - `pivotal - finished`
@@ -76,7 +77,7 @@ Built with [Linear SDK](https://github.com/linear/linear/tree/master/packages/sd
 
 #### Labels
 
-- The following Labels will be created in the selected Team. This allows each Team to modify labels at their own pace without affecting other Teams, and will avoid any naming conflicts with existing labels.
+- The following Labels will be created in the selected Team. This allows each Team to modify labels at their own pace without affecting other Teams, and will avoid any naming conflicts with existing labels
 
   - `pivotal-epic`
   - `pivotal-release`
@@ -120,28 +121,8 @@ Linear Issues will be assigned a label with the corresponding Story Type (See [L
   ![alt text](image-2.png)
 
 - For stories without owners:
-
   - Story creator becomes the assignee
-
-- User Map data is stored in `log/<team>/user_mapping.json`:
-  ```json
-  {
-    "generated": "2024-01-01T00:00:00.000Z",
-    "mapping": {
-      "johndoe42": {
-        "linearId": "a1b2c3d4-e5f6-4321-9876-543210fedcba",
-        "linearName": "John Doe",
-        "linearEmail": "john.doe@acme.com"
-      },
-      "robotcoder99": {
-        "linearId": null,
-        "linearName": null,
-        "linearEmail": null,
-        "note": "No matching Linear user found (manual skip)"
-      }
-    }
-  }
-  ```
+  - User Map data is stored in `log/<team>/user_mapping.json` (See [Logs](#logs)):
 
 #### Subscribers
 
@@ -179,7 +160,24 @@ Linear Issues will be assigned a label with the corresponding Story Type (See [L
 
     - Maps Pivotal Tracker usernames to Linear user accounts
     - Used for automatic user matching in future imports
-    - See [Assignee](#assignee) section for example JSON structure
+      ```json
+      {
+        "generated": "2024-01-01T00:00:00.000Z",
+        "mapping": {
+          "johndoe42": {
+            "linearId": "a1b2c3d4-e5f6-4321-9876-543210fedcba",
+            "linearName": "John Doe",
+            "linearEmail": "john.doe@acme.com"
+          },
+          "robotcoder99": {
+            "linearId": null,
+            "linearName": null,
+            "linearEmail": null,
+            "note": "No matching Linear user found (manual skip)"
+          }
+        }
+      }
+      ```
 
   - `successful_imports.csv`
     - Tracks successfully imported Pivotal story IDs

@@ -1,8 +1,7 @@
 import inquirer from "inquirer";
-import DetailedLogger from "../../logger/detailed_logger.mjs";
+import { detailedLogger } from "../../logger/logger_instance.js";
 
 async function importComments() {
-  const detailedLogger = new DetailedLogger();
   const { shouldImportComments } = await inquirer.prompt([
     {
       type: "list",

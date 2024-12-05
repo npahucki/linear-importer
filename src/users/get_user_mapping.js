@@ -1,10 +1,6 @@
 import { promises as fs } from "fs";
-
-import DetailedLogger from "../../logger/detailed_logger.mjs";
-
+import { detailedLogger } from "../../logger/logger_instance.js";
 import path from "path";
-
-const detailedLogger = new DetailedLogger();
 
 async function getUserMapping(teamName) {
   try {

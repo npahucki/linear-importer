@@ -1,8 +1,8 @@
 import linearClient from "../../config/client.mjs";
 import { ISSUE_ESTIMATION_OPTIONS } from "./estimation_scales.js";
-import DetailedLogger from "../../logger/detailed_logger.mjs";
 import chalk from "chalk";
-const detailedLogger = new DetailedLogger();
+
+import { detailedLogger } from "../../logger/logger_instance.js";
 
 export function findClosestEstimate(value, scale) {
   if (!scale || !value) return null;

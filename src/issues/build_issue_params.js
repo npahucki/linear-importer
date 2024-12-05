@@ -1,10 +1,8 @@
-import DetailedLogger from "../../logger/detailed_logger.mjs";
-import roundEstimate from "../estimates/rounder.mjs";
+import { detailedLogger } from "../../logger/logger_instance.js";
+import roundEstimate from "../estimates/rounder.js";
 import formatPriority from "../priority/formatter.js";
 import extractLabelIds from "../labels/extract_label_ids.js";
 import userDistributor from "../users/distributor.js";
-
-const detailedLogger = new DetailedLogger();
 
 const formatDate = (date) => (date ? new Date(date).toISOString() : undefined);
 

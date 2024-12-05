@@ -1,6 +1,4 @@
-import DetailedLogger from "../../logger/detailed_logger.mjs";
-
-const detailedLogger = new DetailedLogger();
+import { detailedLogger } from "../../logger/logger_instance.js";
 
 function formatPriority(priority) {
   const pivotalPriorities = {

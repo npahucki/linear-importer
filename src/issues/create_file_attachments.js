@@ -1,9 +1,7 @@
 import findAttachmentsInFolder from "../files/find_attachments_in_folder.js";
-import upload from "../files/upload.mjs";
-import DetailedLogger from "../../logger/detailed_logger.mjs";
+import upload from "../files/upload.js";
+import { detailedLogger } from "../../logger/logger_instance.js";
 import { REQUEST_DELAY_MS } from "../../config/config.js";
-
-const detailedLogger = new DetailedLogger();
 
 async function createFileAttachments({ issue, newIssue, directory }) {
   try {
