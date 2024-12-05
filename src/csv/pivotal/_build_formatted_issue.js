@@ -39,7 +39,7 @@ function buildDueDate(row) {
 function buildTitle(row) {
   if (row["Type"] == "release") {
     return row["Iteration"]
-      ? `[${row["Iteration"]}] ${row["Title"]}`
+      ? `[Release ${row["Iteration"]}] ${row["Title"]}`
       : row["Title"];
   } else {
     return row["Title"];

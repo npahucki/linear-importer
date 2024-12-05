@@ -1,6 +1,6 @@
 import { detailedLogger } from "../../logger/logger_instance.js";
 
-function extractLabelIds(issue, teamLabels, importSource) {
+function extractLabelIds(issue, teamLabels, shouldImportLabels, importSource) {
   // Create a Map for O(1) label lookups
   const labelMap = new Map(teamLabels.map((label) => [label.name, label.id]));
 
@@ -14,22 +14,18 @@ function extractLabelIds(issue, teamLabels, importSource) {
       `No label found from 'Type' column for ${issue.type}, ${issue.type.length}`,
     );
 
-    console.log(
-      "issue.type.trim()",
-      issue.type.trim(),
-      issue.type.trim().length,
-    );
-
     process.exit(0);
   }
 
-  // Process other labels more efficiently
-  const otherLabelIds = issue.labels
-    ? issue.labels.split(",").reduce((ids, label) => {
-        const id = labelMap.get(label.trim());
-        if (id) ids.push(id);
-        return ids;
-      }, [])
+  // Process other labels if included options
+  const otherLabelIds = shouldImportLabels
+    ? issue.labels
+      ? issue.labels.split(",").reduce((ids, label) => {
+          const id = labelMap.get(label.trim());
+          if (id) ids.push(id);
+          return ids;
+        }, [])
+      : []
     : [];
 
   return [typeColumnLabelId, ...otherLabelIds].filter(Boolean);
