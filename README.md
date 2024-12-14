@@ -1,6 +1,6 @@
 # Linear Importer
 
-CLI tool for migrating Pivotal Tracker projects to Linear via CSV export. Converts:
+CLI tool for migrating a Pivotal Tracker CSV export into Linear
 
 - Pivotal Stories → Linear Issues
 - Pivotal Releases → Linear Parent Issues (with sub-issues)
@@ -8,8 +8,8 @@ CLI tool for migrating Pivotal Tracker projects to Linear via CSV export. Conver
 
 ### For Developers
 
-- This importer is currently only set up for a Pivotal Tracker. However you could alter your own CSV to adhere to the accepted format. See [Generic CSV](./CONTRIBUTING.md#generic-csv) for more information
-- The codebase is structured to support building additional importers reasonably easily (as of `v2.0.0`). See [Contributing Guide](./CONTRIBUTING.md), open a PR, or contact me if you intend to add support for other platforms (e.g., Trello)
+- Currently built for for Pivotal Tracker. However, you could alter your own CSV to adhere to the accepted format. See [Generic CSV](./CONTRIBUTING.md#generic-csv)
+- See [Contributing Guide](./CONTRIBUTING.md) for instructions on adding support for other platforms (e.g., Trello)
 
 Built with [Linear SDK](https://github.com/linear/linear/tree/master/packages/sdk)
 
@@ -43,12 +43,11 @@ Built with [Linear SDK](https://github.com/linear/linear/tree/master/packages/sd
 
 ### Installation
 
+1. Create a Team and add Members in Linear
 1. Create a Personal API key in Linear under Settings -> API
-2. Add Team Members in Linear
 3. Create a `.env` file and and populate `API_KEY`
 4. `yarn install`
 5. Unzip Pivotal Tracker export zip file into `assets` folder
-6. Consider using a burner account before continuing (See [Notes](#notes))
 
 ### Usage
 
