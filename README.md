@@ -92,7 +92,7 @@ Requires Node version: 20.0.0 or higher
 
 Linear Issues will be assigned a label with the corresponding Story Type (See [Labels](#labels))
 
-**NOTE**: Rejected stories are not imported, make sure any rejected stories you want to import have been set to 'Unstarted' in Pivotal Tracker *before* you do the Pivotal export.
+**NOTE**: Rejected and Delivered stories are not imported, make sure any stories you want to import have been set to 'Unstarted' or "Finished" in Pivotal Tracker *before* you do the Pivotal export.
 
 #### Releases
 
